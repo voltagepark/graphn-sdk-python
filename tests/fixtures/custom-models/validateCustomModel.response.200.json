@@ -1,0 +1,8 @@
+{
+  "valid": true,
+  "architecture": "LlamaForCausalLM",
+  "estimated_gpu_count": 1,
+  "estimated_gpu_memory_gb": 16.5,
+  "estimated_gpu_hours_per_month": 720.0,
+  "warnings": []
+}

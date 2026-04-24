@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "id": "cm_01HZ8X3WAYQVT7G3KJ9P5R2NEC",
+      "name": "my-llama",
+      "workspace_id": "ws_acme",
+      "status": "ready",
+      "weight_source": "huggingface",
+      "huggingface_model_id": "meta-llama/Llama-3-8B",
+      "gpu_count": 1,
+      "capabilities": ["tool_calling"],
+      "min_replicas": 0,
+      "max_replicas": 1,
+      "cooldown_seconds": 600,
+      "gpu_memory_utilization": 0.9,
+      "created_at": "2026-04-24T16:32:01Z",
+      "updated_at": "2026-04-24T16:45:12Z"
+    },
+    {
+      "id": "cm_01HZ8YBWQX7MJP4VTKR3F5N9DC",
+      "name": "qwen-coder",
+      "workspace_id": "ws_acme",
+      "status": "deploying",
+      "weight_source": "huggingface",
+      "huggingface_model_id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "gpu_count": 1,
+      "capabilities": ["tool_calling"],
+      "min_replicas": 0,
+      "max_replicas": 2,
+      "cooldown_seconds": 900,
+      "gpu_memory_utilization": 0.9,
+      "created_at": "2026-04-24T17:10:33Z",
+      "updated_at": "2026-04-24T17:10:33Z"
+    }
+  ],
+  "total": 2,
+  "continue_token": null
+}

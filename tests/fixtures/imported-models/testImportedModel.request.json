@@ -1,0 +1,5 @@
+{
+  "endpoint": "https://api.openai.com/v1",
+  "api_key_secret_id": "sec_01HZ7NQ8VBM3PCY5K9R2WX1FED",
+  "model": "gpt-4o-mini"
+}

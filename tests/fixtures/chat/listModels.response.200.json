@@ -1,0 +1,7 @@
+{
+  "object": "list",
+  "data": [
+    {"id": "my-llama", "object": "model", "created": 1745510000, "owned_by": "graphn"},
+    {"id": "qwen-coder", "object": "model", "created": 1745510123, "owned_by": "graphn"}
+  ]
+}

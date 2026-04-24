@@ -1,0 +1,7 @@
+{
+  "model": "my-llama",
+  "messages": [
+    {"role": "user", "content": "Say hi in three words."}
+  ],
+  "stream": true
+}

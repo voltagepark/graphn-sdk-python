@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-9HZGz4RxQwT2MK7vP3sB",
+  "object": "chat.completion",
+  "created": 1745510400,
+  "model": "my-llama",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The capital of France is Paris."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 23,
+    "completion_tokens": 8,
+    "total_tokens": 31
+  }
+}

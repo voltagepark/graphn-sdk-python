@@ -1,0 +1,19 @@
+{
+  "architectures": [
+    {
+      "name": "LlamaForCausalLM",
+      "capabilities": ["tool_calling"],
+      "quantizations": ["fp16", "bf16", "int8"]
+    },
+    {
+      "name": "Qwen2ForCausalLM",
+      "capabilities": ["tool_calling"],
+      "quantizations": ["fp16", "bf16"]
+    },
+    {
+      "name": "MistralForCausalLM",
+      "capabilities": ["tool_calling"],
+      "quantizations": ["fp16", "bf16"]
+    }
+  ]
+}

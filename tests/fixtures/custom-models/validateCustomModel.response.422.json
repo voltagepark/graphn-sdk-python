@@ -1,0 +1,4 @@
+{
+  "code": "VALIDATION_ERROR",
+  "message": "model architecture UnsupportedForCausalLM is not supported by the inference engine"
+}
