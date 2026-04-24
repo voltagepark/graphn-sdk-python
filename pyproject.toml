@@ -7,7 +7,7 @@ name = "graphn"
 version = "0.1.0"
 description = "Official Python SDK for the Graphn API: custom-model lifecycle, secrets, and OpenAI-compatible inference."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [{ name = "Voltage Park", email = "support@graphn.ai" }]
 keywords = ["graphn", "voltagepark", "llm", "inference", "custom-models", "openai"]
@@ -18,7 +18,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -57,7 +56,7 @@ include = ["src/graphn", "README.md", "LICENSE", "pyproject.toml"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 src = ["src", "tests"]
 extend-exclude = ["src/graphn/_generated"]
 
@@ -90,6 +89,6 @@ filterwarnings = [
 ]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 strict = true
 exclude = ["src/graphn/_generated/", "tests/"]

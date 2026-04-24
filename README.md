@@ -17,7 +17,7 @@ etc.) for free.
 pip install graphn
 ```
 
-Requires Python 3.9+.
+Requires Python 3.10+.
 
 ## Quickstart
 

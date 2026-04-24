@@ -16,10 +16,9 @@ how to fetch the next page given a ``continue_token``.
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Awaitable, Iterator, Mapping
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator, Mapping
 from typing import (
     Any,
-    Callable,
     Generic,
     TypeVar,
 )
