@@ -5,7 +5,7 @@
 #   1. --spec <path-or-url>            explicit override
 #   2. $GRAPHN_OPENAPI_SPEC env var    explicit override
 #   3. ../takao/svc/graphn-cp/api/openapi.yaml    sibling repo checkout
-#   4. https://api.graphn.ai/openapi.yaml         live production spec
+#   4. https://cp.graphn.ai/openapi.yaml          live production spec
 #
 # Designed to be re-runnable. Wipes and replaces src/graphn/_generated/
 # every invocation. Hand-written modules under src/graphn/ are never
@@ -16,7 +16,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GENERATED_DIR="${REPO_ROOT}/src/graphn/_generated"
 DEFAULT_SIBLING="${REPO_ROOT}/../takao/svc/graphn-cp/api/openapi.yaml"
-LIVE_URL="https://api.graphn.ai/openapi.yaml"
+LIVE_URL="https://cp.graphn.ai/openapi.yaml"
 
 spec=""
 keep_intermediate=0

@@ -6,7 +6,7 @@ inference (chat completions, model listing, text-to-speech) — all
 behind a single typed client.
 
 The SDK is generated from the public OpenAPI 3.1 spec served at
-`https://api.graphn.ai/openapi.yaml`. Inference calls delegate to the
+`https://cp.graphn.ai/openapi.yaml`. Inference calls delegate to the
 official [`openai`](https://github.com/openai/openai-python) Python SDK
 so you get full feature parity (tools, streaming, structured outputs,
 etc.) for free.
@@ -76,8 +76,8 @@ asyncio.run(main())
 | --------------- | ------------------------------------ | ------------------------------------------------------- |
 | `api_key`       | `GRAPHN_API_KEY` env var             | Bearer token starting with `gn_`. Required.             |
 | `workspace_id`  | `GRAPHN_WORKSPACE_ID` env var        | Injected into control-plane paths and `X-Workspace-Id`. |
-| `base_url`      | `https://api.graphn.ai`              | Control-plane host.                                     |
-| `inference_url` | `https://inference.graphn.ai`        | Inference host (passed to the underlying OpenAI client).|
+| `base_url`      | `https://cp.graphn.ai`               | Control-plane host.                                     |
+| `inference_url` | `https://model.graphn.ai`            | Inference host (passed to the underlying OpenAI client).|
 | `timeout`       | `60.0` seconds                       | Per-request HTTPX timeout.                              |
 | `max_retries`   | `2`                                  | Retries on connect / 5xx / 429.                         |
 
@@ -87,7 +87,7 @@ The OpenAPI spec is the source of truth. To generate a client in
 another language, point your favorite generator at:
 
 ```
-https://api.graphn.ai/openapi.yaml
+https://cp.graphn.ai/openapi.yaml
 ```
 
 We test compatibility with `openapi-generator` 6.0+, `openapi-python-client`

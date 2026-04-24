@@ -39,8 +39,8 @@ def test_resolves_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_default_base_urls() -> None:
     client = Client(api_key="gn_x", workspace_id="ws_y")
     try:
-        assert client.base_url == "https://api.graphn.ai"
-        assert client.inference_url == "https://inference.graphn.ai"
+        assert client.base_url == "https://cp.graphn.ai"
+        assert client.inference_url == "https://model.graphn.ai"
     finally:
         client.close()
 

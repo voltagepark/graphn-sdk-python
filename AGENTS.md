@@ -2,7 +2,7 @@
 
 This is the official Python SDK for the Graphn API. It is published to
 PyPI as the `graphn` package and is generated from the OpenAPI 3.1
-spec hosted at `https://api.graphn.ai/openapi.yaml` (source of truth
+spec hosted at `https://cp.graphn.ai/openapi.yaml` (source of truth
 lives in `voltagepark/takao` at `svc/graphn-cp/api/openapi.yaml`).
 
 ## Layout

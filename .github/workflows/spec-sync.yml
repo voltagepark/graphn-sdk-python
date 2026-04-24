@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       spec_url:
-        description: "Override spec URL (defaults to https://api.graphn.ai/openapi.yaml)"
+        description: "Override spec URL (defaults to https://cp.graphn.ai/openapi.yaml)"
         required: false
-        default: "https://api.graphn.ai/openapi.yaml"
+        default: "https://cp.graphn.ai/openapi.yaml"
 
 permissions:
   contents: write
@@ -35,7 +35,7 @@ jobs:
 
       - name: Regenerate _generated/
         env:
-          GRAPHN_OPENAPI_SPEC: ${{ inputs.spec_url || 'https://api.graphn.ai/openapi.yaml' }}
+          GRAPHN_OPENAPI_SPEC: ${{ inputs.spec_url || 'https://cp.graphn.ai/openapi.yaml' }}
         run: ./scripts/regenerate.sh --spec "${GRAPHN_OPENAPI_SPEC}"
 
       - name: Run tests against regenerated client
@@ -53,7 +53,7 @@ jobs:
           body: |
             Automated nightly spec sync.
 
-            - Regenerated `src/graphn/_generated/` from `${{ inputs.spec_url || 'https://api.graphn.ai/openapi.yaml' }}`.
+            - Regenerated `src/graphn/_generated/` from `${{ inputs.spec_url || 'https://cp.graphn.ai/openapi.yaml' }}`.
             - All tests passed against the regenerated client.
 
             Review the diff for any breaking field renames before merging.

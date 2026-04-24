@@ -15,7 +15,7 @@ default header so the model-gateway can authorize the workspace.
 from __future__ import annotations
 
 import os
-from collections.abc import Mapping
+from typing import Mapping
 
 from graphn._transport import (
     AsyncTransport,
@@ -23,8 +23,8 @@ from graphn._transport import (
     _TransportConfig,
 )
 
-DEFAULT_BASE_URL = "https://api.graphn.ai"
-DEFAULT_INFERENCE_URL = "https://inference.graphn.ai"
+DEFAULT_BASE_URL = "https://cp.graphn.ai"
+DEFAULT_INFERENCE_URL = "https://model.graphn.ai"
 DEFAULT_TIMEOUT_SECONDS = 60.0
 DEFAULT_MAX_RETRIES = 2
 
@@ -63,10 +63,10 @@ class Client:
         ``GRAPHN_WORKSPACE_ID`` environment variable.
     base_url:
         Control-plane base URL. Defaults to production
-        (``https://api.graphn.ai``).
+        (``https://cp.graphn.ai``).
     inference_url:
         Inference base URL passed to the underlying OpenAI client.
-        Defaults to ``https://inference.graphn.ai``.
+        Defaults to ``https://model.graphn.ai``.
     timeout:
         Per-request timeout in seconds.
     max_retries:
