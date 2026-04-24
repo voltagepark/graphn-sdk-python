@@ -1,0 +1,62 @@
+name: spec-sync
+
+on:
+  schedule:
+    # Daily at 09:00 UTC. Spec changes from voltagepark/takao land
+    # within ~24h of merge.
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+    inputs:
+      spec_url:
+        description: "Override spec URL (defaults to https://api.graphn.ai/openapi.yaml)"
+        required: false
+        default: "https://api.graphn.ai/openapi.yaml"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install regen tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Regenerate _generated/
+        env:
+          GRAPHN_OPENAPI_SPEC: ${{ inputs.spec_url || 'https://api.graphn.ai/openapi.yaml' }}
+        run: ./scripts/regenerate.sh --spec "${GRAPHN_OPENAPI_SPEC}"
+
+      - name: Run tests against regenerated client
+        run: pytest -ra
+
+      - name: Open PR if anything changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: src/graphn/_generated
+          branch: spec-sync/auto
+          delete-branch: true
+          title: "chore(spec): sync generated client from upstream openapi.yaml"
+          commit-message: "chore(spec): regenerate _generated/ from upstream openapi.yaml"
+          body: |
+            Automated nightly spec sync.
+
+            - Regenerated `src/graphn/_generated/` from `${{ inputs.spec_url || 'https://api.graphn.ai/openapi.yaml' }}`.
+            - All tests passed against the regenerated client.
+
+            Review the diff for any breaking field renames before merging.
+          labels: |
+            spec-sync
+            automated

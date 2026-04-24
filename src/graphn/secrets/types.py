@@ -1,7 +1,9 @@
 """Public types for workspace secrets.
 
-Replaced by re-exports from ``graphn._generated`` after the
-``sdk-generate`` task runs.
+Mirrors the OpenAPI ``Secret`` schema. The plaintext value is never
+returned by the API — list / get responses include only
+``value_preview`` (the first few characters), so the SDK type stays in
+sync.
 """
 
 from __future__ import annotations
@@ -12,12 +14,15 @@ from pydantic import BaseModel, ConfigDict
 
 
 class Secret(BaseModel):
-    """Stub secret representation matching the OpenAPI ``Secret`` schema."""
+    """Workspace secret record."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="allow", frozen=True)
 
     id: str
+    workspace_id: str
     name: str
-    description: str | None = None
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    value_preview: str
+    created_at: datetime
+    updated_at: datetime
+    provider_id: str | None = None
+    field_name: str | None = None
