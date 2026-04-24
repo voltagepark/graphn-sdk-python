@@ -49,7 +49,6 @@ def _build_create_body(
     display_name: str | None,
     s3_url: str | None,
     s3_role_arn: str | None,
-    model_size_gb: int | None,
     hf_token_secret_id: str | None,
     gpu_count: int | None,
     max_model_len: int | None,
@@ -70,8 +69,6 @@ def _build_create_body(
         body["s3_url"] = s3_url
     if s3_role_arn is not None:
         body["s3_role_arn"] = s3_role_arn
-    if model_size_gb is not None:
-        body["model_size_gb"] = model_size_gb
     if hf_token_secret_id is not None:
         body["hf_token_secret_id"] = hf_token_secret_id
     if gpu_count is not None:
@@ -101,7 +98,6 @@ def _build_validate_body(
     hf_token_secret_id: str | None,
     quantization: Quantization | None,
     gpu_memory_utilization: float | None,
-    model_size_gb: int | None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {"huggingface_model_id": huggingface_model_id}
     if hf_token_secret_id is not None:
@@ -110,8 +106,6 @@ def _build_validate_body(
         body["quantization"] = quantization
     if gpu_memory_utilization is not None:
         body["gpu_memory_utilization"] = gpu_memory_utilization
-    if model_size_gb is not None:
-        body["model_size_gb"] = model_size_gb
     return body
 
 
@@ -139,7 +133,6 @@ class CustomModels:
         display_name: str | None = None,
         s3_url: str | None = None,
         s3_role_arn: str | None = None,
-        model_size_gb: int | None = None,
         hf_token_secret_id: str | None = None,
         gpu_count: int | None = None,
         max_model_len: int | None = None,
@@ -159,7 +152,6 @@ class CustomModels:
             display_name=display_name,
             s3_url=s3_url,
             s3_role_arn=s3_role_arn,
-            model_size_gb=model_size_gb,
             hf_token_secret_id=hf_token_secret_id,
             gpu_count=gpu_count,
             max_model_len=max_model_len,
@@ -245,14 +237,12 @@ class CustomModels:
         hf_token_secret_id: str | None = None,
         quantization: Quantization | None = None,
         gpu_memory_utilization: float | None = None,
-        model_size_gb: int | None = None,
     ) -> ValidateModelResponse:
         body = _build_validate_body(
             huggingface_model_id=huggingface_model_id,
             hf_token_secret_id=hf_token_secret_id,
             quantization=quantization,
             gpu_memory_utilization=gpu_memory_utilization,
-            model_size_gb=model_size_gb,
         )
         data = self._transport.request(
             "POST",
@@ -320,7 +310,6 @@ class AsyncCustomModels:
         display_name: str | None = None,
         s3_url: str | None = None,
         s3_role_arn: str | None = None,
-        model_size_gb: int | None = None,
         hf_token_secret_id: str | None = None,
         gpu_count: int | None = None,
         max_model_len: int | None = None,
@@ -340,7 +329,6 @@ class AsyncCustomModels:
             display_name=display_name,
             s3_url=s3_url,
             s3_role_arn=s3_role_arn,
-            model_size_gb=model_size_gb,
             hf_token_secret_id=hf_token_secret_id,
             gpu_count=gpu_count,
             max_model_len=max_model_len,
@@ -428,14 +416,12 @@ class AsyncCustomModels:
         hf_token_secret_id: str | None = None,
         quantization: Quantization | None = None,
         gpu_memory_utilization: float | None = None,
-        model_size_gb: int | None = None,
     ) -> ValidateModelResponse:
         body = _build_validate_body(
             huggingface_model_id=huggingface_model_id,
             hf_token_secret_id=hf_token_secret_id,
             quantization=quantization,
             gpu_memory_utilization=gpu_memory_utilization,
-            model_size_gb=model_size_gb,
         )
         data = await self._transport.request(
             "POST",

@@ -15,7 +15,7 @@ default header so the model-gateway can authorize the workspace.
 from __future__ import annotations
 
 import os
-from typing import Mapping
+from collections.abc import Mapping
 
 from graphn._transport import (
     AsyncTransport,

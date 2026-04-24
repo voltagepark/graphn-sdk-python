@@ -28,7 +28,6 @@ class CustomModelCreate:
             llama/Llama-3-8B-Instruct.
         s3_url (str | Unset): Required when `weight_source` is `s3_presigned` or `s3_assume_role`.
         s3_role_arn (str | Unset): Required when `weight_source` is `s3_assume_role`.
-        model_size_gb (int | Unset): Model size in GB. Required for S3 sources; auto-detected for HuggingFace.
         hf_token_secret_id (str | Unset): ID of a workspace secret holding a HuggingFace access token.
             Required for gated HuggingFace models.
         gpu_count (int | Unset):  Default: 1.
@@ -47,7 +46,6 @@ class CustomModelCreate:
     huggingface_model_id: str | Unset = UNSET
     s3_url: str | Unset = UNSET
     s3_role_arn: str | Unset = UNSET
-    model_size_gb: int | Unset = UNSET
     hf_token_secret_id: str | Unset = UNSET
     gpu_count: int | Unset = 1
     max_model_len: int | Unset = UNSET
@@ -72,8 +70,6 @@ class CustomModelCreate:
         s3_url = self.s3_url
 
         s3_role_arn = self.s3_role_arn
-
-        model_size_gb = self.model_size_gb
 
         hf_token_secret_id = self.hf_token_secret_id
 
@@ -117,8 +113,6 @@ class CustomModelCreate:
             field_dict["s3_url"] = s3_url
         if s3_role_arn is not UNSET:
             field_dict["s3_role_arn"] = s3_role_arn
-        if model_size_gb is not UNSET:
-            field_dict["model_size_gb"] = model_size_gb
         if hf_token_secret_id is not UNSET:
             field_dict["hf_token_secret_id"] = hf_token_secret_id
         if gpu_count is not UNSET:
@@ -160,8 +154,6 @@ class CustomModelCreate:
 
         s3_role_arn = d.pop("s3_role_arn", UNSET)
 
-        model_size_gb = d.pop("model_size_gb", UNSET)
-
         hf_token_secret_id = d.pop("hf_token_secret_id", UNSET)
 
         gpu_count = d.pop("gpu_count", UNSET)
@@ -199,7 +191,6 @@ class CustomModelCreate:
             huggingface_model_id=huggingface_model_id,
             s3_url=s3_url,
             s3_role_arn=s3_role_arn,
-            model_size_gb=model_size_gb,
             hf_token_secret_id=hf_token_secret_id,
             gpu_count=gpu_count,
             max_model_len=max_model_len,
