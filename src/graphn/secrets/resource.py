@@ -92,9 +92,7 @@ class Secrets:
         return Secret.model_validate(data)
 
     def delete(self, secret_id: str) -> None:
-        self._transport.request(
-            "DELETE", self._transport.cp_path("secrets", secret_id)
-        )
+        self._transport.request("DELETE", self._transport.cp_path("secrets", secret_id))
 
 
 class AsyncSecrets:
@@ -151,6 +149,4 @@ class AsyncSecrets:
         return Secret.model_validate(data)
 
     async def delete(self, secret_id: str) -> None:
-        await self._transport.request(
-            "DELETE", self._transport.cp_path("secrets", secret_id)
-        )
+        await self._transport.request("DELETE", self._transport.cp_path("secrets", secret_id))

@@ -40,9 +40,7 @@ def test_create_sends_value(client: Client, respx_mock: respx.MockRouter) -> Non
     assert secret.value_preview == "hf_xx"
 
 
-def test_list_uses_count_field(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_list_uses_count_field(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("secrets")).mock(
         return_value=httpx.Response(
             200,
@@ -55,9 +53,7 @@ def test_list_uses_count_field(
     assert page.has_more is False
 
 
-def test_update_only_sends_value(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_update_only_sends_value(client: Client, respx_mock: respx.MockRouter) -> None:
     route = respx_mock.put(cp_url("secrets/sec_01")).mock(
         return_value=httpx.Response(200, json=_secret_payload(value_preview="ne"))
     )
@@ -68,27 +64,19 @@ def test_update_only_sends_value(
     assert secret.value_preview == "ne"
 
 
-def test_delete_returns_none(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
-    route = respx_mock.delete(cp_url("secrets/sec_01")).mock(
-        return_value=httpx.Response(204)
-    )
+def test_delete_returns_none(client: Client, respx_mock: respx.MockRouter) -> None:
+    route = respx_mock.delete(cp_url("secrets/sec_01")).mock(return_value=httpx.Response(204))
 
     assert client.secrets.delete("sec_01") is None
     assert route.called
 
 
 @pytest.mark.asyncio
-async def test_async_secret_crud(
-    async_client: AsyncClient, respx_mock: respx.MockRouter
-) -> None:
+async def test_async_secret_crud(async_client: AsyncClient, respx_mock: respx.MockRouter) -> None:
     respx_mock.post(cp_url("secrets")).mock(
         return_value=httpx.Response(201, json=_secret_payload())
     )
-    respx_mock.delete(cp_url("secrets/sec_01")).mock(
-        return_value=httpx.Response(204)
-    )
+    respx_mock.delete(cp_url("secrets/sec_01")).mock(return_value=httpx.Response(204))
 
     secret = await async_client.secrets.create(name="hf-token", value="hf_xx")
     assert secret.id == "sec_01"

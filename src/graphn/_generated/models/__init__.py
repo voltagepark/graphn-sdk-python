@@ -1,6 +1,5 @@
 """Contains all the data models used in inputs/outputs"""
 
-from .architecture_info import ArchitectureInfo
 from .capability import Capability
 from .chat_completion_request import ChatCompletionRequest
 from .chat_completion_request_response_format import ChatCompletionRequestResponseFormat
@@ -39,7 +38,6 @@ from .secret import Secret
 from .secret_create import SecretCreate
 from .secret_list import SecretList
 from .secret_update import SecretUpdate
-from .supported_architectures import SupportedArchitectures
 from .test_connection_request import TestConnectionRequest
 from .test_connection_response import TestConnectionResponse
 from .test_connection_response_usage import TestConnectionResponseUsage
@@ -51,7 +49,6 @@ from .validate_model_response import ValidateModelResponse
 from .weight_source import WeightSource
 
 __all__ = (
-    "ArchitectureInfo",
     "Capability",
     "ChatCompletionRequest",
     "ChatCompletionRequestResponseFormat",
@@ -88,7 +85,6 @@ __all__ = (
     "SecretCreate",
     "SecretList",
     "SecretUpdate",
-    "SupportedArchitectures",
     "TestConnectionRequest",
     "TestConnectionResponse",
     "TestConnectionResponseUsage",

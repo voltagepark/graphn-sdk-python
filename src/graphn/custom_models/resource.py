@@ -30,7 +30,6 @@ from graphn.custom_models.types import (
     CustomModelStatus,
     GpuHoursResponse,
     Quantization,
-    SupportedArchitectures,
     ValidateModelResponse,
     WeightSource,
 )
@@ -189,15 +188,11 @@ class CustomModels:
         return SyncPage(first=first, fetch_next=fetch)
 
     def get(self, model_id: str) -> CustomModel:
-        data = self._transport.request(
-            "GET", self._transport.cp_path("custom-models", model_id)
-        )
+        data = self._transport.request("GET", self._transport.cp_path("custom-models", model_id))
         return CustomModel.model_validate(data)
 
     def delete(self, model_id: str) -> None:
-        self._transport.request(
-            "DELETE", self._transport.cp_path("custom-models", model_id)
-        )
+        self._transport.request("DELETE", self._transport.cp_path("custom-models", model_id))
 
     def refresh(self, model_id: str) -> CustomModel:
         data = self._transport.request(
@@ -218,17 +213,8 @@ class CustomModels:
         return GpuHoursResponse.model_validate(data)
 
     def access(self) -> CustomModelAccess:
-        data = self._transport.request(
-            "GET", self._transport.cp_path("custom-models", "access")
-        )
+        data = self._transport.request("GET", self._transport.cp_path("custom-models", "access"))
         return CustomModelAccess.model_validate(data)
-
-    def supported_architectures(self) -> SupportedArchitectures:
-        data = self._transport.request(
-            "GET",
-            self._transport.cp_path("custom-models", "supported-architectures"),
-        )
-        return SupportedArchitectures.model_validate(data)
 
     def validate(
         self,
@@ -280,8 +266,7 @@ class CustomModels:
             if model.status in _TERMINAL_STATUSES:
                 if model.status == "failed":
                     raise APIError(
-                        model.error_message
-                        or f"custom model {model_id} failed without details",
+                        model.error_message or f"custom model {model_id} failed without details",
                         status_code=0,
                         code="custom_model_deployment_failed",
                         details={"model_id": model_id},
@@ -374,9 +359,7 @@ class AsyncCustomModels:
         return CustomModel.model_validate(data)
 
     async def delete(self, model_id: str) -> None:
-        await self._transport.request(
-            "DELETE", self._transport.cp_path("custom-models", model_id)
-        )
+        await self._transport.request("DELETE", self._transport.cp_path("custom-models", model_id))
 
     async def refresh(self, model_id: str) -> CustomModel:
         data = await self._transport.request(
@@ -401,13 +384,6 @@ class AsyncCustomModels:
             "GET", self._transport.cp_path("custom-models", "access")
         )
         return CustomModelAccess.model_validate(data)
-
-    async def supported_architectures(self) -> SupportedArchitectures:
-        data = await self._transport.request(
-            "GET",
-            self._transport.cp_path("custom-models", "supported-architectures"),
-        )
-        return SupportedArchitectures.model_validate(data)
 
     async def validate(
         self,
@@ -444,8 +420,7 @@ class AsyncCustomModels:
             if model.status in _TERMINAL_STATUSES:
                 if model.status == "failed":
                     raise APIError(
-                        model.error_message
-                        or f"custom model {model_id} failed without details",
+                        model.error_message or f"custom model {model_id} failed without details",
                         status_code=0,
                         code="custom_model_deployment_failed",
                         details={"model_id": model_id},

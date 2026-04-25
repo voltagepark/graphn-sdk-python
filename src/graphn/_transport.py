@@ -56,9 +56,7 @@ def _sleep_for_retry(attempt: int, retry_after: str | None) -> float:
     return min(8.0, 0.5 * (2**attempt))
 
 
-def _build_error(
-    response: httpx.Response, *, request_id: str | None
-) -> APIError:
+def _build_error(response: httpx.Response, *, request_id: str | None) -> APIError:
     body: Any
     try:
         body = response.json()
@@ -161,9 +159,7 @@ class SyncTransport:
         headers: Mapping[str, str] | None = None,
         idempotency_key: str | None = None,
     ) -> Any:
-        request_id = (
-            (headers or {}).get("X-Request-Id") if headers else None
-        ) or uuid.uuid4().hex
+        request_id = ((headers or {}).get("X-Request-Id") if headers else None) or uuid.uuid4().hex
         merged_headers: dict[str, str] = {"X-Request-Id": request_id}
         if idempotency_key:
             merged_headers["Idempotency-Key"] = idempotency_key
@@ -187,13 +183,8 @@ class SyncTransport:
                 time.sleep(_sleep_for_retry(attempt, None))
                 continue
 
-            if (
-                response.status_code in _DEFAULT_RETRY_STATUSES
-                and attempt < self._cfg.max_retries
-            ):
-                time.sleep(
-                    _sleep_for_retry(attempt, response.headers.get("Retry-After"))
-                )
+            if response.status_code in _DEFAULT_RETRY_STATUSES and attempt < self._cfg.max_retries:
+                time.sleep(_sleep_for_retry(attempt, response.headers.get("Retry-After")))
                 continue
 
             return _decode(response, request_id)
@@ -234,9 +225,7 @@ class AsyncTransport:
         headers: Mapping[str, str] | None = None,
         idempotency_key: str | None = None,
     ) -> Any:
-        request_id = (
-            (headers or {}).get("X-Request-Id") if headers else None
-        ) or uuid.uuid4().hex
+        request_id = ((headers or {}).get("X-Request-Id") if headers else None) or uuid.uuid4().hex
         merged_headers: dict[str, str] = {"X-Request-Id": request_id}
         if idempotency_key:
             merged_headers["Idempotency-Key"] = idempotency_key
@@ -260,13 +249,8 @@ class AsyncTransport:
                 await asyncio.sleep(_sleep_for_retry(attempt, None))
                 continue
 
-            if (
-                response.status_code in _DEFAULT_RETRY_STATUSES
-                and attempt < self._cfg.max_retries
-            ):
-                await asyncio.sleep(
-                    _sleep_for_retry(attempt, response.headers.get("Retry-After"))
-                )
+            if response.status_code in _DEFAULT_RETRY_STATUSES and attempt < self._cfg.max_retries:
+                await asyncio.sleep(_sleep_for_retry(attempt, response.headers.get("Retry-After")))
                 continue
 
             return _decode(response, request_id)

@@ -16,9 +16,7 @@ def test_raw_page_accepts_count_field() -> None:
 
 
 def test_raw_page_accepts_total_field() -> None:
-    page = RawPage.from_response(
-        {"items": [{"a": 1}, {"a": 2}], "total": 2}, lambda x: x
-    )
+    page = RawPage.from_response({"items": [{"a": 1}, {"a": 2}], "total": 2}, lambda x: x)
     assert page.count == 2
     assert page.continue_token is None
 
