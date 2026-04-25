@@ -19,10 +19,11 @@ The lifecycle past `create` is identical to a HuggingFace import:
 wait until ready, run chat completions, optionally clean up. The
 weight source only matters at import time.
 
-Note: --hf-model-id is required for S3 imports too. It becomes
-vLLM's --served-model-name on the deployed model, so without it
-the model has no stable name to address. Use the upstream
-org/model-name your weights are based on.
+Note: --hf-model-id is required for S3 imports too. It is the
+canonical identifier the inference endpoint advertises and the
+value you pass in `model` for chat completions, so without it
+the deployed model has no stable name to address. Use the
+upstream org/model-name your weights are based on.
 """
 
 from __future__ import annotations
@@ -46,8 +47,9 @@ def main() -> None:
         required=True,
         help=(
             "Canonical model identifier in 'org/model-name' form (e.g. "
-            "Qwen/Qwen3-0.6B). Required: becomes vLLM's "
-            "--served-model-name for the deployed model."
+            "Qwen/Qwen3-0.6B). Required: this is the name the inference "
+            "endpoint advertises and the value you pass in `model` for "
+            "chat completions."
         ),
     )
     parser.add_argument(

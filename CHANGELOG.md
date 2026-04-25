@@ -10,10 +10,11 @@ This project follows [Semantic Versioning](https://semver.org/).
 - `client.custom_models.create` now raises `graphn.ValidationError`
   client-side when `weight_source` is `s3_presigned` or
   `s3_assume_role` and `huggingface_model_id` is missing or blank.
-  The backend uses `huggingface_model_id` as the canonical
-  identifier and as vLLM's `--served-model-name`; without it the
-  deployed model could not be addressed for inference. This mirrors
-  the "Model ID" requirement in the web UI's S3 import flow.
+  Graphn uses `huggingface_model_id` as the canonical model
+  identifier — it's the name the inference endpoint advertises and
+  the value you pass in `model` for chat completions — so without
+  it the deployed model can't be addressed for inference. This
+  mirrors the "Model ID" requirement in the web UI's S3 import flow.
 
 ## [0.1.2] — 2026-04-25
 

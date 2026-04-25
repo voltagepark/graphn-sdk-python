@@ -243,7 +243,7 @@ async def test_async_create_and_list(
 def test_create_s3_requires_huggingface_model_id(
     client: Client, respx_mock: respx.MockRouter, weight_source: str
 ) -> None:
-    """S3 imports must include huggingface_model_id (used as served-model-name).
+    """S3 imports must include huggingface_model_id (the canonical model id).
 
     The validation is client-side and must happen before any HTTP request, so
     no route is registered.

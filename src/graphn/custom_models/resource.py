@@ -40,8 +40,9 @@ _DEFAULT_POLL_INTERVAL_SECONDS = 5.0
 _DEFAULT_WAIT_TIMEOUT_SECONDS = 1800.0  # 30 minutes
 
 # Weight sources that require ``huggingface_model_id`` to be set, because the
-# backend uses it as the canonical identifier (vLLM ``--served-model-name``)
-# and AF cannot infer it from the S3 archive contents.
+# backend uses it as the canonical model identifier the inference endpoint
+# advertises (and the ``model`` value clients pass to chat completions). It
+# can't be inferred from the S3 archive contents.
 _S3_WEIGHT_SOURCES: frozenset[WeightSource] = frozenset(
     {"s3_presigned", "s3_assume_role"}
 )
@@ -70,9 +71,10 @@ def _build_create_body(
         raise ValidationError(
             (
                 "huggingface_model_id is required when weight_source is "
-                f"{weight_source!r}; it is used as the served-model-name "
-                "(e.g. 'Qwen/Qwen3-0.6B'), mirroring the 'Model ID' field "
-                "in the web UI."
+                f"{weight_source!r}; it is the canonical model identifier "
+                "the inference endpoint advertises and the value you pass "
+                "in `model` for chat completions (e.g. 'Qwen/Qwen3-0.6B'), "
+                "mirroring the 'Model ID' field in the web UI."
             ),
             status_code=422,
             code="missing_huggingface_model_id",
