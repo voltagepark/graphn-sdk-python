@@ -4,18 +4,25 @@ Usage:
     # Presigned URL (default)
     GRAPHN_API_KEY=gn_... GRAPHN_WORKSPACE_ID=ws_... \
         python examples/import_from_s3.py \
-            --s3-url 'https://my-bucket.s3.amazonaws.com/llama/?X-Amz-...'
+            --hf-model-id Qwen/Qwen3-0.6B \
+            --s3-url 'https://my-bucket.s3.amazonaws.com/qwen3-0.6b.tar.gz?X-Amz-...'
 
     # Assume-role
     GRAPHN_API_KEY=gn_... GRAPHN_WORKSPACE_ID=ws_... \
         python examples/import_from_s3.py \
+            --hf-model-id meta-llama/Llama-3.1-8B-Instruct \
             --weight-source s3_assume_role \
-            --s3-url s3://my-bucket/llama/ \
+            --s3-url s3://my-bucket/llama-3.1-8b.tar.gz \
             --s3-role-arn arn:aws:iam::123456789012:role/GraphnImport
 
 The lifecycle past `create` is identical to a HuggingFace import:
 wait until ready, run chat completions, optionally clean up. The
 weight source only matters at import time.
+
+Note: --hf-model-id is required for S3 imports too. It becomes
+vLLM's --served-model-name on the deployed model, so without it
+the model has no stable name to address. Use the upstream
+org/model-name your weights are based on.
 """
 
 from __future__ import annotations
@@ -35,12 +42,21 @@ def main() -> None:
         help="How Graphn should authenticate to S3 (default: s3_presigned).",
     )
     parser.add_argument(
+        "--hf-model-id",
+        required=True,
+        help=(
+            "Canonical model identifier in 'org/model-name' form (e.g. "
+            "Qwen/Qwen3-0.6B). Required: becomes vLLM's "
+            "--served-model-name for the deployed model."
+        ),
+    )
+    parser.add_argument(
         "--s3-url",
         required=True,
         help=(
             "Presigned HTTPS URL (s3_presigned) or s3:// URI (s3_assume_role) "
-            "pointing at the model directory. Must contain the standard HF "
-            "layout (config.json, tokenizer*, weights)."
+            "pointing at a SINGLE .tar.gz archive whose top level is the "
+            "model directory (config.json, tokenizer*, weights)."
         ),
     )
     parser.add_argument(
@@ -70,6 +86,7 @@ def main() -> None:
         model = c.custom_models.create(
             name=name,
             weight_source=args.weight_source,
+            huggingface_model_id=args.hf_model_id,
             s3_url=args.s3_url,
             s3_role_arn=args.s3_role_arn,
         )
