@@ -67,7 +67,9 @@ def test_chat_completions_propagates_error_responses(
         )
 
 
-def test_models_list_uses_inference_host(client: Client, respx_mock: respx.MockRouter) -> None:
+def test_models_list_uses_inference_host(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
     respx_mock.get(inference_url_for("v1/models")).mock(
         return_value=httpx.Response(
             200,
@@ -102,3 +104,178 @@ async def test_async_chat_completions(
         messages=[{"role": "user", "content": "hello"}],
     )
     assert resp.choices[0].message.content == "hi back!"
+
+
+_COLD_START_BODY = {
+    "error": {
+        "message": (
+            "Model is scaled to zero and is now warming up. "
+            "Try again in 1-2 minutes."
+        ),
+        "type": "service_unavailable",
+    }
+}
+
+
+def test_chat_auto_wakes_cold_custom_model_and_retries(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    """First chat call hits a cold-start 503; SDK should call wake()
+    on the control plane, then retry the chat call until it succeeds."""
+
+    from tests.conftest import cp_url
+
+    chat_route = respx_mock.post(inference_url_for("v1/chat/completions")).mock(
+        side_effect=[
+            httpx.Response(503, json=_COLD_START_BODY),
+            httpx.Response(200, json=_CHAT_RESPONSE),
+        ]
+    )
+    wake_route = respx_mock.post(
+        cp_url("custom-models/cm_deadbeef/wake")
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "id": "cm_deadbeef",
+                "name": "my-cm",
+                "workspace_id": "ws_test",
+                "status": "ready",
+                "weight_source": "huggingface",
+                "gpu_count": 1,
+                "capabilities": [],
+                "min_replicas": 0,
+                "max_replicas": 1,
+                "cooldown_seconds": 600,
+                "gpu_memory_utilization": 0.9,
+                "created_at": "2026-04-25T00:00:00Z",
+                "updated_at": "2026-04-25T00:00:00Z",
+            },
+        )
+    )
+
+    resp = client.chat.completions.create(
+        model="custom:cm_deadbeef",
+        messages=[{"role": "user", "content": "hello"}],
+        wake_timeout=0.2,
+    )
+
+    assert wake_route.called
+    assert chat_route.call_count == 2
+    assert resp.choices[0].message.content == "hi back!"
+
+
+def test_chat_does_not_wake_for_built_in_models(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    """A 503 from a built-in model id must not trigger a wake call."""
+
+    from openai import InternalServerError
+
+    from tests.conftest import cp_url
+
+    respx_mock.post(inference_url_for("v1/chat/completions")).mock(
+        return_value=httpx.Response(503, json=_COLD_START_BODY)
+    )
+    wake_route = respx_mock.post(cp_url("custom-models/cm_xxx/wake")).mock(
+        return_value=httpx.Response(200, json={})
+    )
+
+    with pytest.raises(InternalServerError):
+        client.chat.completions.create(
+            model="my-llama",
+            messages=[{"role": "user", "content": "hello"}],
+        )
+
+    assert not wake_route.called
+
+
+def test_chat_auto_wake_can_be_disabled(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    from openai import InternalServerError
+
+    from tests.conftest import cp_url
+
+    respx_mock.post(inference_url_for("v1/chat/completions")).mock(
+        return_value=httpx.Response(503, json=_COLD_START_BODY)
+    )
+    wake_route = respx_mock.post(cp_url("custom-models/cm_x/wake")).mock(
+        return_value=httpx.Response(200, json={})
+    )
+
+    with pytest.raises(InternalServerError):
+        client.chat.completions.create(
+            model="custom:cm_x",
+            messages=[{"role": "user", "content": "hello"}],
+            auto_wake=False,
+        )
+
+    assert not wake_route.called
+
+
+@pytest.mark.asyncio
+async def test_async_chat_auto_wakes_cold_custom_model(
+    async_client: AsyncClient, respx_mock: respx.MockRouter
+) -> None:
+    from tests.conftest import cp_url
+
+    chat_route = respx_mock.post(inference_url_for("v1/chat/completions")).mock(
+        side_effect=[
+            httpx.Response(503, json=_COLD_START_BODY),
+            httpx.Response(200, json=_CHAT_RESPONSE),
+        ]
+    )
+    wake_route = respx_mock.post(
+        cp_url("custom-models/cm_aabbccdd/wake")
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "id": "cm_aabbccdd",
+                "name": "my-cm",
+                "workspace_id": "ws_test",
+                "status": "ready",
+                "weight_source": "huggingface",
+                "gpu_count": 1,
+                "capabilities": [],
+                "min_replicas": 0,
+                "max_replicas": 1,
+                "cooldown_seconds": 600,
+                "gpu_memory_utilization": 0.9,
+                "created_at": "2026-04-25T00:00:00Z",
+                "updated_at": "2026-04-25T00:00:00Z",
+            },
+        )
+    )
+
+    resp = await async_client.chat.completions.create(
+        model="custom:cm_aabbccdd",
+        messages=[{"role": "user", "content": "hello"}],
+        wake_timeout=0.2,
+    )
+
+    assert wake_route.called
+    assert chat_route.call_count == 2
+    assert resp.choices[0].message.content == "hi back!"
+
+
+def test_qualified_name_property_returns_custom_prefix() -> None:
+    from graphn import CustomModel
+
+    m = CustomModel(
+        id="cm_abc123",
+        name="my-llama",
+        workspace_id="ws_test",
+        status="ready",
+        weight_source="huggingface",
+        gpu_count=1,
+        capabilities=[],
+        min_replicas=0,
+        max_replicas=1,
+        cooldown_seconds=600,
+        gpu_memory_utilization=0.9,
+        created_at="2026-04-25T00:00:00Z",
+        updated_at="2026-04-25T00:00:00Z",
+    )
+    assert m.qualified_name == "custom:cm_abc123"
