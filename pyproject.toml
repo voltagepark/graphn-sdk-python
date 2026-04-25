@@ -9,7 +9,7 @@ description = "Official Python SDK for the Graphn API: custom-model lifecycle, s
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-authors = [{ name = "Voltage Park", email = "support@graphn.ai" }]
+authors = [{ name = "Voltage Park" }]
 keywords = ["graphn", "voltagepark", "llm", "inference", "custom-models", "openai"]
 classifiers = [
     "Development Status :: 3 - Alpha",
