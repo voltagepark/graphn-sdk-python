@@ -21,16 +21,48 @@ No `git tag`, no `git push --tags`, no Actions clicks.
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-04-25
+
+Patch release. Tightens the S3 import flow with a client-side guard,
+documents the requirement on the project page, and scrubs the
+serving-engine implementation detail from customer-facing wording. No
+new operations.
+
 ### Changed
 
 - `client.custom_models.create` now raises `graphn.ValidationError`
-  client-side when `weight_source` is `s3_presigned` or
-  `s3_assume_role` and `huggingface_model_id` is missing or blank.
-  Graphn uses `huggingface_model_id` as the canonical model
-  identifier — it's the name the inference endpoint advertises and
-  the value you pass in `model` for chat completions — so without
-  it the deployed model can't be addressed for inference. This
-  mirrors the "Model ID" requirement in the web UI's S3 import flow.
+  (code `missing_huggingface_model_id`) client-side when
+  `weight_source` is `s3_presigned` or `s3_assume_role` and
+  `huggingface_model_id` is missing or blank. Graphn uses
+  `huggingface_model_id` as the canonical model identifier — it's
+  the name the inference endpoint advertises and the value you pass
+  in `model` for chat completions — so without it the deployed model
+  can't be addressed for inference (the request 404s with "model
+  does not exist"). This mirrors the "Model ID" requirement the web
+  UI's S3 import form has always enforced. The control plane now
+  returns 422 for the same shape (voltagepark/takao#1997), so this
+  catches the mistake one round-trip earlier.
+
+  Existing callers passing `huggingface_model_id` for S3 are
+  unaffected. Callers that omitted it were already producing
+  unreachable models; they now get a clear error at create time
+  instead.
+
+- README's **"Importing from S3"** section now leads with a callout
+  explaining that `huggingface_model_id` is required for S3 imports
+  too, with both `s3_presigned` and `s3_assume_role` recipes
+  including the field. The PyPI long description (project page on
+  pypi.org) reflects this; v0.1.2's README had the S3 sections but
+  omitted the requirement.
+
+- Customer-facing wording no longer mentions the serving engine
+  (`vLLM`) or its flags (`--served-model-name`). README, the S3
+  example's docstring + `--hf-model-id` help, the
+  `_S3_WEIGHT_SOURCES` comment, and the `ValidationError` message
+  all use engine-agnostic phrasing now ("canonical model identifier
+  the inference endpoint advertises"). The error code and the
+  asserted "huggingface_model_id is required" substring are
+  unchanged, so test code that pattern-matches on either is safe.
 
 ## [0.1.2] — 2026-04-25
 
