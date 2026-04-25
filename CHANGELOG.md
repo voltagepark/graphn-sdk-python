@@ -11,6 +11,14 @@ Initial public release. Targets the v0.1.0 hand-authored OpenAPI spec
 served from `cp.graphn.ai` (control plane) and `model.graphn.ai`
 (inference / OpenAI-compatible gateway).
 
+**Scope is intentionally narrow:** v0.1.0 covers custom-model import
+and inference end-to-end. The broader Graphn platform — agents,
+knowledge bases, workflows, evals, datasets, guardrails, full BYO
+inference CRUD, billing/usage, workspace administration — is **not
+yet exposed** through this SDK and will be added in subsequent
+minor releases. See the README's "Scope" section for the exact
+boundary.
+
 ### Added
 
 - Sync (`graphn.Client`) and async (`graphn.AsyncClient`) entrypoints,
