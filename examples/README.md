@@ -5,9 +5,10 @@ SDK against a real Graphn workspace. Each one is meant to be
 copied + pasted into your editor and modified — they're not part of
 the SDK's test suite.
 
-> **v0.1.0 covers custom-model import + OpenAI-compatible inference
-> only.** Agents, knowledge bases, workflows, evals, datasets, and
-> guardrails are not yet exposed through this SDK — see the main
+> **v0.1.x covers custom-model import (HuggingFace + S3) and
+> OpenAI-compatible inference only.** Agents, knowledge bases,
+> workflows, evals, datasets, and guardrails are not yet exposed
+> through this SDK — see the main
 > [README scope section](../README.md#scope) for the full list of
 > what's in / out.
 
@@ -27,7 +28,8 @@ python examples/import_and_chat.py
 
 | Example | What it shows |
 |---|---|
-| [`import_and_chat.py`](import_and_chat.py) | Full lifecycle: validate → create → wait → chat → delete. The "hello world" of the SDK. |
+| [`import_and_chat.py`](import_and_chat.py) | Full lifecycle from HuggingFace: validate → create → wait → chat → delete. The "hello world" of the SDK. |
+| [`import_from_s3.py`](import_from_s3.py) | Import weights from S3 — presigned URL or assume-role flavor — then chat. |
 | [`streaming.py`](streaming.py) | Streaming chat completions (server-sent events). |
 | [`async_client.py`](async_client.py) | Async equivalent of `import_and_chat.py` using `graphn.AsyncClient`. |
 | [`openai_compat.py`](openai_compat.py) | Calling Graphn from the official `openai` Python SDK directly, for migrating existing code. |

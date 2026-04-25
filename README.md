@@ -6,12 +6,13 @@
 [![Tests](https://github.com/voltagepark/graphn-sdk-python/actions/workflows/test.yml/badge.svg)](https://github.com/voltagepark/graphn-sdk-python/actions/workflows/test.yml)
 
 The official Python SDK for [Graphn](https://graphn.ai). Import any
-HuggingFace LLM into your workspace, get an OpenAI-compatible
-inference endpoint, and call it from Python in a handful of lines —
-without standing up a single GPU yourself.
+LLM — from HuggingFace or your own S3 bucket — into your workspace,
+get an OpenAI-compatible inference endpoint, and call it from Python
+in a handful of lines, without standing up a single GPU yourself.
 
-> **v0.1.0 scope** — This release covers **custom-model import and
-> inference** end-to-end. A lot of the broader Graphn platform
+> **v0.1.x scope** — This release line covers **custom-model import
+> (HuggingFace + S3) and OpenAI-compatible inference** end-to-end.
+> A lot of the broader Graphn platform
 > (agents, knowledge bases, workflows, evals, datasets, guardrails,
 > billing, full BYO-inference CRUD, etc.) is **not yet exposed**
 > through this SDK. Those surfaces will be added in subsequent
@@ -68,11 +69,11 @@ Get an API key from the [Graphn dashboard](https://graphn.ai).
 
 ## Scope
 
-### What's in the box (v0.1.0)
+### What's in the box (v0.1.x)
 
 | Module | What it does |
 |---|---|
-| `client.custom_models` | Import HF models, list, get, refresh, wake, delete, `wait_until_ready`, validate |
+| `client.custom_models` | Import models from HuggingFace, S3 presigned URLs, or S3 + IAM role; list, get, refresh, wake, delete, `wait_until_ready`, validate |
 | `client.secrets` | CRUD for workspace secrets (HuggingFace tokens, etc) |
 | `client.chat.completions` | OpenAI-compatible chat completions, streaming + non-streaming, **with auto-wake on cold start** |
 | `client.models` | List models served by the gateway |
@@ -85,7 +86,7 @@ Both `graphn.Client` and `graphn.AsyncClient` exist with identical APIs.
 
 The Graphn platform is broader than what's exposed here. The
 following surfaces exist on the platform but do **not** have SDK
-coverage in v0.1.0 — file an issue on the
+coverage in v0.1.x — file an issue on the
 [SDK repo](https://github.com/voltagepark/graphn-sdk-python/issues)
 to vote on what you need next:
 
@@ -132,6 +133,50 @@ with graphn.Client() as c:
     )
     print(resp.choices[0].message.content)
 ```
+
+## Importing from S3
+
+If your weights aren't on HuggingFace — fine-tunes, internal models,
+licensed checkpoints — import them straight from S3. Two flavors:
+
+**Presigned URL** (no AWS credentials shared with Graphn):
+
+```python
+model = c.custom_models.create(
+    name="my-finetune",
+    weight_source="s3_presigned",
+    s3_url="https://my-bucket.s3.amazonaws.com/llama-3.1-8b/?X-Amz-Algorithm=...",
+    gpu_count=1,
+)
+```
+
+Generate the URL with `aws s3 presign s3://my-bucket/llama-3.1-8b/`
+or the AWS SDK; Graphn pulls weights through the URL on import. The
+URL only needs to be live for the import window, not for the model's
+lifetime.
+
+**IAM role assumption** (for buckets you control, longer-lived
+credentials):
+
+```python
+model = c.custom_models.create(
+    name="my-finetune",
+    weight_source="s3_assume_role",
+    s3_url="s3://my-bucket/llama-3.1-8b/",
+    s3_role_arn="arn:aws:iam::123456789012:role/GraphnImport",
+    gpu_count=1,
+)
+```
+
+The role's trust policy must allow Graphn's importer principal to
+`sts:AssumeRole`; ask support for the principal ARN to put in your
+trust policy. Graphn re-assumes on every import / refresh, so
+rotating credentials underneath is safe.
+
+Everything past the create call — `wait_until_ready`, chat completions,
+auto-wake, `qualified_name` addressing — is identical regardless of
+weight source. See [`examples/import_from_s3.py`](examples/import_from_s3.py)
+for an end-to-end runnable script.
 
 ## Streaming
 
@@ -227,7 +272,8 @@ and a stable URL contract.
 
 See [`examples/`](examples/) for runnable end-to-end scripts:
 
-- [`examples/import_and_chat.py`](examples/import_and_chat.py) — full lifecycle
+- [`examples/import_and_chat.py`](examples/import_and_chat.py) — full lifecycle (HuggingFace)
+- [`examples/import_from_s3.py`](examples/import_from_s3.py) — S3 presigned + assume-role import
 - [`examples/streaming.py`](examples/streaming.py) — streaming chat
 - [`examples/async_client.py`](examples/async_client.py) — async usage
 - [`examples/openai_compat.py`](examples/openai_compat.py) — drop-in from `openai`
