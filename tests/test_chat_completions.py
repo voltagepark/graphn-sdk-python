@@ -67,9 +67,7 @@ def test_chat_completions_propagates_error_responses(
         )
 
 
-def test_models_list_uses_inference_host(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_models_list_uses_inference_host(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(inference_url_for("v1/models")).mock(
         return_value=httpx.Response(
             200,

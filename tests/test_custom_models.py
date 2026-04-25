@@ -39,9 +39,7 @@ def _model_payload(**overrides: object) -> dict[str, object]:
     return base
 
 
-def test_create_sends_workspace_path_and_body(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_create_sends_workspace_path_and_body(client: Client, respx_mock: respx.MockRouter) -> None:
     route = respx_mock.post(cp_url("custom-models")).mock(
         return_value=httpx.Response(201, json=_model_payload())
     )
@@ -70,9 +68,7 @@ def test_create_sends_workspace_path_and_body(
     assert model.status == "pending"
 
 
-def test_create_attaches_idempotency_key(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_create_attaches_idempotency_key(client: Client, respx_mock: respx.MockRouter) -> None:
     route = respx_mock.post(cp_url("custom-models")).mock(
         return_value=httpx.Response(201, json=_model_payload())
     )
@@ -86,9 +82,7 @@ def test_create_attaches_idempotency_key(
     assert route.calls.last.request.headers["Idempotency-Key"] == "abc-123"
 
 
-def test_get_returns_typed_model(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_get_returns_typed_model(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("custom-models/cm_01")).mock(
         return_value=httpx.Response(200, json=_model_payload(status="ready"))
     )
@@ -97,9 +91,7 @@ def test_get_returns_typed_model(
     assert model.status == "ready"
 
 
-def test_get_404_maps_to_not_found(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_get_404_maps_to_not_found(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("custom-models/missing")).mock(
         return_value=httpx.Response(
             404,
@@ -113,9 +105,7 @@ def test_get_404_maps_to_not_found(
     assert exc_info.value.message == "no such model"
 
 
-def test_validate_400_raises_validation_error(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_validate_400_raises_validation_error(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.post(cp_url("custom-models/validate")).mock(
         return_value=httpx.Response(
             422,
@@ -142,9 +132,7 @@ def test_wait_until_ready_polls_until_ready(
         ]
     )
 
-    model = client.custom_models.wait_until_ready(
-        "cm_01", timeout=60, poll_interval=0.1
-    )
+    model = client.custom_models.wait_until_ready("cm_01", timeout=60, poll_interval=0.1)
 
     assert model.status == "ready"
     assert route.call_count == 3
@@ -173,9 +161,7 @@ def test_wait_until_ready_times_out(
 ) -> None:
     monkeypatch.setattr("graphn.custom_models.resource.time.sleep", lambda _: None)
     times = iter([0.0, 0.0, 100.0])
-    monkeypatch.setattr(
-        "graphn.custom_models.resource.time.monotonic", lambda: next(times)
-    )
+    monkeypatch.setattr("graphn.custom_models.resource.time.monotonic", lambda: next(times))
     respx_mock.post(cp_url("custom-models/cm_01/refresh")).mock(
         return_value=httpx.Response(200, json=_model_payload(status="deploying"))
     )
@@ -184,9 +170,7 @@ def test_wait_until_ready_times_out(
         client.custom_models.wait_until_ready("cm_01", timeout=1, poll_interval=0.1)
 
 
-def test_list_auto_paginates(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_list_auto_paginates(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("custom-models")).mock(
         side_effect=[
             httpx.Response(

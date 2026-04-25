@@ -86,23 +86,6 @@ class GpuHoursResponse(BaseModel):
     gpu_hours: float
 
 
-class ArchitectureInfo(BaseModel):
-    """Single supported HuggingFace architecture."""
-
-    model_config = ConfigDict(extra="allow", frozen=True)
-
-    name: str
-    capabilities: list[Capability]
-
-
-class SupportedArchitectures(BaseModel):
-    """Result of ``listSupportedArchitectures``."""
-
-    model_config = ConfigDict(extra="allow", frozen=True)
-
-    architectures: list[ArchitectureInfo]
-
-
 class ValidateModelResponse(BaseModel):
     """Result of ``validateCustomModel``."""
 

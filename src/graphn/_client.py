@@ -38,8 +38,7 @@ def _resolve(value: str | None, env_var: str, *, name: str, required: bool = Tru
     resolved = value if value is not None else os.environ.get(env_var)
     if required and not resolved:
         raise ValueError(
-            f"{name} must be provided explicitly or via the {env_var} "
-            "environment variable."
+            f"{name} must be provided explicitly or via the {env_var} environment variable."
         )
     return resolved
 

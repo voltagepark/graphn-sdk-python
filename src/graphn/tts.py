@@ -85,9 +85,7 @@ class TTS:
     def _http(self) -> httpx.Client:
         if self._client is None:
             cfg = self._transport.cfg
-            self._client = httpx.Client(
-                base_url=cfg.inference_url, timeout=cfg.timeout
-            )
+            self._client = httpx.Client(base_url=cfg.inference_url, timeout=cfg.timeout)
         return self._client
 
     def synthesize(
@@ -147,9 +145,7 @@ class AsyncTTS:
     def _http(self) -> httpx.AsyncClient:
         if self._client is None:
             cfg = self._transport.cfg
-            self._client = httpx.AsyncClient(
-                base_url=cfg.inference_url, timeout=cfg.timeout
-            )
+            self._client = httpx.AsyncClient(base_url=cfg.inference_url, timeout=cfg.timeout)
         return self._client
 
     async def synthesize(
