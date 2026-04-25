@@ -5,6 +5,16 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- `client.custom_models.create` now raises `graphn.ValidationError`
+  client-side when `weight_source` is `s3_presigned` or
+  `s3_assume_role` and `huggingface_model_id` is missing or blank.
+  The backend uses `huggingface_model_id` as the canonical
+  identifier and as vLLM's `--served-model-name`; without it the
+  deployed model could not be addressed for inference. This mirrors
+  the "Model ID" requirement in the web UI's S3 import flow.
+
 ## [0.1.2] — 2026-04-25
 
 Documentation-only patch release. No API or behavior changes — S3

@@ -137,7 +137,20 @@ with graphn.Client() as c:
 ## Importing from S3
 
 If your weights aren't on HuggingFace — fine-tunes, internal models,
-licensed checkpoints — import them straight from S3. Two flavors:
+licensed checkpoints — import them straight from S3. Two flavors,
+both of which still require `huggingface_model_id` (see callout
+below).
+
+> **`huggingface_model_id` is required for S3 imports too.** It's
+> the canonical identifier for the model: Graphn passes it through
+> to vLLM as `--served-model-name`, so it's the name the deployed
+> model advertises and the name you address it by under the hood.
+> Use the upstream `org/model-name` your weights are based on (e.g.
+> `Qwen/Qwen3-0.6B`, `meta-llama/Llama-3.1-8B-Instruct`). This is
+> the same "Model ID" field the web UI requires for S3 imports.
+> Omitting it raises `graphn.ValidationError` client-side; passing
+> it but having a mismatched archive will surface as a deploy
+> failure on the model record.
 
 **Presigned URL** (no AWS credentials shared with Graphn):
 
@@ -145,14 +158,18 @@ licensed checkpoints — import them straight from S3. Two flavors:
 model = c.custom_models.create(
     name="my-finetune",
     weight_source="s3_presigned",
-    s3_url="https://my-bucket.s3.amazonaws.com/llama-3.1-8b/?X-Amz-Algorithm=...",
+    huggingface_model_id="meta-llama/Llama-3.1-8B-Instruct",
+    s3_url="https://my-bucket.s3.amazonaws.com/llama-3.1-8b.tar.gz?X-Amz-Algorithm=...",
     gpu_count=1,
 )
 ```
 
-Generate the URL with `aws s3 presign s3://my-bucket/llama-3.1-8b/`
-or the AWS SDK; Graphn pulls weights through the URL on import. The
-URL only needs to be live for the import window, not for the model's
+Package the weights as a single `.tar.gz` archive whose top level
+is the model directory (the same layout `huggingface-cli download`
+produces). Generate the URL with `aws s3 presign s3://my-bucket/llama-3.1-8b.tar.gz`
+or the AWS SDK; Graphn pulls weights through the URL on import.
+The URL only needs to be live for the import window (allow at
+least a few minutes for the download), not for the model's
 lifetime.
 
 **IAM role assumption** (for buckets you control, longer-lived
@@ -162,7 +179,8 @@ credentials):
 model = c.custom_models.create(
     name="my-finetune",
     weight_source="s3_assume_role",
-    s3_url="s3://my-bucket/llama-3.1-8b/",
+    huggingface_model_id="meta-llama/Llama-3.1-8B-Instruct",
+    s3_url="s3://my-bucket/llama-3.1-8b.tar.gz",
     s3_role_arn="arn:aws:iam::123456789012:role/GraphnImport",
     gpu_count=1,
 )

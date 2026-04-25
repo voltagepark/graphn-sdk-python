@@ -39,7 +39,9 @@ def _model_payload(**overrides: object) -> dict[str, object]:
     return base
 
 
-def test_create_sends_workspace_path_and_body(client: Client, respx_mock: respx.MockRouter) -> None:
+def test_create_sends_workspace_path_and_body(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
     route = respx_mock.post(cp_url("custom-models")).mock(
         return_value=httpx.Response(201, json=_model_payload())
     )
@@ -68,7 +70,9 @@ def test_create_sends_workspace_path_and_body(client: Client, respx_mock: respx.
     assert model.status == "pending"
 
 
-def test_create_attaches_idempotency_key(client: Client, respx_mock: respx.MockRouter) -> None:
+def test_create_attaches_idempotency_key(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
     route = respx_mock.post(cp_url("custom-models")).mock(
         return_value=httpx.Response(201, json=_model_payload())
     )
@@ -82,7 +86,9 @@ def test_create_attaches_idempotency_key(client: Client, respx_mock: respx.MockR
     assert route.calls.last.request.headers["Idempotency-Key"] == "abc-123"
 
 
-def test_get_returns_typed_model(client: Client, respx_mock: respx.MockRouter) -> None:
+def test_get_returns_typed_model(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
     respx_mock.get(cp_url("custom-models/cm_01")).mock(
         return_value=httpx.Response(200, json=_model_payload(status="ready"))
     )
@@ -91,7 +97,9 @@ def test_get_returns_typed_model(client: Client, respx_mock: respx.MockRouter) -
     assert model.status == "ready"
 
 
-def test_get_404_maps_to_not_found(client: Client, respx_mock: respx.MockRouter) -> None:
+def test_get_404_maps_to_not_found(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
     respx_mock.get(cp_url("custom-models/missing")).mock(
         return_value=httpx.Response(
             404,
@@ -105,7 +113,9 @@ def test_get_404_maps_to_not_found(client: Client, respx_mock: respx.MockRouter)
     assert exc_info.value.message == "no such model"
 
 
-def test_validate_400_raises_validation_error(client: Client, respx_mock: respx.MockRouter) -> None:
+def test_validate_400_raises_validation_error(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
     respx_mock.post(cp_url("custom-models/validate")).mock(
         return_value=httpx.Response(
             422,
@@ -132,7 +142,9 @@ def test_wait_until_ready_polls_until_ready(
         ]
     )
 
-    model = client.custom_models.wait_until_ready("cm_01", timeout=60, poll_interval=0.1)
+    model = client.custom_models.wait_until_ready(
+        "cm_01", timeout=60, poll_interval=0.1
+    )
 
     assert model.status == "ready"
     assert route.call_count == 3
@@ -161,7 +173,9 @@ def test_wait_until_ready_times_out(
 ) -> None:
     monkeypatch.setattr("graphn.custom_models.resource.time.sleep", lambda _: None)
     times = iter([0.0, 0.0, 100.0])
-    monkeypatch.setattr("graphn.custom_models.resource.time.monotonic", lambda: next(times))
+    monkeypatch.setattr(
+        "graphn.custom_models.resource.time.monotonic", lambda: next(times)
+    )
     respx_mock.post(cp_url("custom-models/cm_01/refresh")).mock(
         return_value=httpx.Response(200, json=_model_payload(status="deploying"))
     )
@@ -170,7 +184,9 @@ def test_wait_until_ready_times_out(
         client.custom_models.wait_until_ready("cm_01", timeout=1, poll_interval=0.1)
 
 
-def test_list_auto_paginates(client: Client, respx_mock: respx.MockRouter) -> None:
+def test_list_auto_paginates(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
     respx_mock.get(cp_url("custom-models")).mock(
         side_effect=[
             httpx.Response(
@@ -221,3 +237,99 @@ async def test_async_create_and_list(
     async for m in page:
         collected.append(m.id)
     assert collected == ["cm_a"]
+
+
+@pytest.mark.parametrize("weight_source", ["s3_presigned", "s3_assume_role"])
+def test_create_s3_requires_huggingface_model_id(
+    client: Client, respx_mock: respx.MockRouter, weight_source: str
+) -> None:
+    """S3 imports must include huggingface_model_id (used as served-model-name).
+
+    The validation is client-side and must happen before any HTTP request, so
+    no route is registered.
+    """
+    with pytest.raises(ValidationError) as exc_info:
+        client.custom_models.create(
+            name="my-s3-model",
+            weight_source=weight_source,  # type: ignore[arg-type]
+            s3_url="https://example.com/model.tar.gz",
+        )
+    assert exc_info.value.code == "missing_huggingface_model_id"
+    assert "huggingface_model_id is required" in exc_info.value.message
+    assert exc_info.value.details == {"weight_source": weight_source}
+    assert respx_mock.calls.call_count == 0
+
+
+def test_create_s3_with_blank_huggingface_model_id_is_rejected(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    with pytest.raises(ValidationError):
+        client.custom_models.create(
+            name="my-s3-model",
+            weight_source="s3_presigned",
+            huggingface_model_id="   ",
+            s3_url="https://example.com/model.tar.gz",
+        )
+    assert respx_mock.calls.call_count == 0
+
+
+def test_create_s3_with_huggingface_model_id_is_accepted(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    route = respx_mock.post(cp_url("custom-models")).mock(
+        return_value=httpx.Response(
+            201,
+            json=_model_payload(
+                weight_source="s3_presigned",
+                huggingface_model_id="Qwen/Qwen3-0.6B",
+            ),
+        )
+    )
+
+    model = client.custom_models.create(
+        name="my-s3-model",
+        weight_source="s3_presigned",
+        huggingface_model_id="Qwen/Qwen3-0.6B",
+        s3_url="https://example.com/model.tar.gz",
+    )
+    assert route.called
+    sent = json.loads(route.calls.last.request.content)
+    assert sent["weight_source"] == "s3_presigned"
+    assert sent["huggingface_model_id"] == "Qwen/Qwen3-0.6B"
+    assert sent["s3_url"] == "https://example.com/model.tar.gz"
+    assert model.id == "cm_01"
+
+
+def test_create_huggingface_does_not_require_huggingface_model_id_client_side(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    """HuggingFace imports without huggingface_model_id should still hit the
+    server (which will return its own 422); the client must not pre-empt it.
+    """
+    route = respx_mock.post(cp_url("custom-models")).mock(
+        return_value=httpx.Response(
+            422,
+            json={"code": "validation_error", "message": "missing field"},
+        )
+    )
+
+    with pytest.raises(ValidationError) as exc_info:
+        client.custom_models.create(
+            name="my-hf-model", weight_source="huggingface"
+        )
+    assert route.called
+    assert exc_info.value.code == "validation_error"
+
+
+@pytest.mark.asyncio
+async def test_async_create_s3_requires_huggingface_model_id(
+    async_client: AsyncClient, respx_mock: respx.MockRouter
+) -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        await async_client.custom_models.create(
+            name="my-s3-model",
+            weight_source="s3_assume_role",
+            s3_role_arn="arn:aws:iam::123:role/example",
+        )
+    assert exc_info.value.code == "missing_huggingface_model_id"
+    assert respx_mock.calls.call_count == 0
