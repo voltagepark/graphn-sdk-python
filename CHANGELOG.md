@@ -5,6 +5,26 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-04-25
+
+Documentation-only patch release. No API or behavior changes — S3
+import has worked since v0.1.0; this release just makes that
+discoverable.
+
+### Added
+
+- README now documents both S3 weight sources end-to-end:
+  `s3_presigned` (no AWS credentials shared with Graphn) and
+  `s3_assume_role` (longer-lived, IAM-role-based). Includes a
+  dedicated **"Importing from S3"** section with copy-pasteable
+  recipes.
+- New runnable example
+  [`examples/import_from_s3.py`](examples/import_from_s3.py)
+  covering both S3 flavors via `--weight-source`.
+- Tagline updated to mention S3 alongside HuggingFace; the
+  `client.custom_models` row in the scope table now lists all three
+  sources.
+
 ## [0.1.1] — 2026-04-25
 
 Documentation-only patch release. No API or behavior changes.
