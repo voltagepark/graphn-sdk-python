@@ -142,15 +142,15 @@ both of which still require `huggingface_model_id` (see callout
 below).
 
 > **`huggingface_model_id` is required for S3 imports too.** It's
-> the canonical identifier for the model: Graphn passes it through
-> to vLLM as `--served-model-name`, so it's the name the deployed
-> model advertises and the name you address it by under the hood.
-> Use the upstream `org/model-name` your weights are based on (e.g.
-> `Qwen/Qwen3-0.6B`, `meta-llama/Llama-3.1-8B-Instruct`). This is
-> the same "Model ID" field the web UI requires for S3 imports.
-> Omitting it raises `graphn.ValidationError` client-side; passing
-> it but having a mismatched archive will surface as a deploy
-> failure on the model record.
+> the canonical identifier for the model — the name the inference
+> endpoint advertises and the value you pass in `model` for chat
+> completions. Use the upstream `org/model-name` your weights are
+> based on (e.g. `Qwen/Qwen3-0.6B`,
+> `meta-llama/Llama-3.1-8B-Instruct`). This is the same "Model ID"
+> field the web UI requires for S3 imports. Omitting it raises
+> `graphn.ValidationError` client-side; passing it but having a
+> mismatched archive will surface as a deploy failure on the model
+> record.
 
 **Presigned URL** (no AWS credentials shared with Graphn):
 
