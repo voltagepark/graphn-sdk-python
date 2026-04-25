@@ -69,25 +69,6 @@ class CustomModel(BaseModel):
     estimated_memory_gb: float | None = None
     architectures: list[str] | None = None
 
-    @property
-    def qualified_name(self) -> str:
-        """Inference-host model identifier for this custom model.
-
-        The Graphn model gateway addresses custom models as
-        ``custom:<cm_id>`` (the bare ``name`` and bare ``cm_...`` id
-        both 404). Use this property when calling
-        :meth:`graphn.Client.chat.completions.create`::
-
-            model = client.custom_models.create(...)
-            client.custom_models.wait_until_ready(model.id)
-            resp = client.chat.completions.create(
-                model=model.qualified_name,
-                messages=[...],
-            )
-        """
-
-        return f"custom:{self.id}"
-
 
 class CustomModelAccess(BaseModel):
     """Workspace allowlist check result."""

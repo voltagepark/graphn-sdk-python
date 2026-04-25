@@ -255,10 +255,11 @@ def main() -> int:
             _ok("models.list", f"{len(ids)} models — first few: {ids[:5]}")
 
         _hdr("Step 7: chat.completions.create (non-streaming)")
-        chat_model_id = fetched.qualified_name
+        chat_model_id = fetched.id
         _info(
-            f"using model={chat_model_id!r} via the SDK's qualified_name; "
-            "auto_wake will spin the model up if it's scaled to zero"
+            f"using model={chat_model_id!r} (the SDK adds the gateway's "
+            "'custom:' routing prefix internally); auto_wake will spin "
+            "the model up if it's scaled to zero"
         )
 
         chat_started = time.monotonic()
