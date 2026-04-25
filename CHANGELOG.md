@@ -3,6 +3,22 @@
 All notable changes to the `graphn` Python SDK are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## How to release
+
+One PR. In the same PR:
+
+1. Bump `[project].version` in `pyproject.toml` to `X.Y.Z`.
+2. Replace `## [Unreleased]` below with `## [X.Y.Z] — YYYY-MM-DD` and
+   add a fresh empty `## [Unreleased]` above it.
+
+Merge to `main`. The `auto-tag` job in `.github/workflows/release.yml`
+reads the new `pyproject` version, validates that this CHANGELOG has the
+matching `## [X.Y.Z]` section, creates `vX.Y.Z`, and pushing the tag
+re-fires the workflow's `build` + `publish` jobs which ship to PyPI via
+trusted publishing. `pip install graphn==X.Y.Z` works ~1 minute later.
+
+No `git tag`, no `git push --tags`, no Actions clicks.
+
 ## [Unreleased]
 
 ### Changed
