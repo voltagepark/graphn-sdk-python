@@ -5,15 +5,20 @@ name: release
 #   1. Automatic — push to `main` that changes `pyproject.toml`. The
 #      `auto-tag` job below reads `[project].version`, validates that
 #      CHANGELOG has a matching `## [X.Y.Z]` section, and creates +
-#      pushes `vX.Y.Z`. The tag-push then re-fires this workflow under
-#      the `push.tags` trigger to actually build and publish.
+#      pushes `vX.Y.Z`. `build` and `publish` then run in the **same
+#      workflow run** as `auto-tag` (not via a tag-push re-trigger),
+#      because pushes made by the default `GITHUB_TOKEN` are
+#      deliberately suppressed by GitHub from firing other workflows
+#      (anti-recursion). Relying on the tag-push trigger meant the
+#      auto-tagged release silently never published; see v0.1.3.
 #
-#   2. Manual — push a `vX.Y.Z` tag yourself (`git tag vX.Y.Z &&
-#      git push origin vX.Y.Z`). Skips the auto-tag job entirely.
+#   2. Manual — push a `vX.Y.Z` tag yourself from your own creds
+#      (`git tag vX.Y.Z && git push origin vX.Y.Z`). Skips `auto-tag`
+#      entirely; `build` + `publish` run on the tag-push event.
 #
-# Net effect: the normal release flow is one PR (version bump + CHANGELOG
-# promotion) → merge → PyPI in ~1 minute. No second command, no console
-# clicks.
+# Net effect: the normal release flow is one PR (version bump +
+# CHANGELOG promotion) → merge → PyPI in ~1 minute. No second command,
+# no console clicks.
 on:
   push:
     branches:
@@ -33,6 +38,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # needed to push the tag
+    outputs:
+      # Empty when no new tag was created (e.g. pyproject edit that
+      # didn't bump the version, or tag already exists). When set, it
+      # is the bare version number `X.Y.Z` (no `v` prefix).
+      version: ${{ steps.tag.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,39 +57,58 @@ jobs:
             echo "::error::pyproject [project].version must be X.Y.Z, got: $VERSION"
             exit 1
           fi
-          echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "pyproject declares v${VERSION}"
 
       - name: Create vX.Y.Z tag if missing
+        id: tag
         env:
           VERSION: ${{ steps.pkg.outputs.version }}
         run: |
           set -euo pipefail
-          if git rev-parse "$VERSION" >/dev/null 2>&1; then
-            echo "Tag $VERSION already exists; nothing to do (likely a non-version-bump edit to pyproject.toml)."
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists; nothing to do (likely a non-version-bump edit to pyproject.toml)."
+            echo "version=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           # Guard the most common foot-gun: bumping pyproject without
           # promoting [Unreleased] in CHANGELOG. Refuse to ship in that
           # state — better to fail the workflow than publish a wheel
           # with no release notes.
-          if ! grep -qE "^## \[${VERSION#v}\]" CHANGELOG.md; then
-            echo "::error::CHANGELOG.md is missing a '## [${VERSION#v}]' section. Add it to the same PR as the version bump."
+          if ! grep -qE "^## \[${VERSION}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md is missing a '## [${VERSION}]' section. Add it to the same PR as the version bump."
             exit 1
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$VERSION" -m "Release $VERSION"
-          git push origin "$VERSION"
-          echo "Created and pushed $VERSION; build + publish will run on the tag-push event."
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "v${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Created and pushed v${VERSION}; build + publish will run in this same workflow run."
 
   build:
-    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    needs: auto-tag
+    # Run if either:
+    #   - a tag-push event landed here directly (manual release path), OR
+    #   - the auto-tag job in this run created a fresh tag (auto path).
+    # Skipped on pyproject pushes that didn't create a tag (no version
+    # bump, or tag already existed).
+    if: |
+      always() && (
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+        || (needs.auto-tag.result == 'success' && needs.auto-tag.outputs.version != '')
+      )
     runs-on: ubuntu-latest
     outputs:
       package-version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # On the auto path we want the freshly-created tag's contents
+          # (which == the head of main we just merged), not whatever
+          # main was when the workflow started. On the manual path we
+          # want the tag's contents directly.
+          ref: ${{ needs.auto-tag.outputs.version != '' && format('refs/tags/v{0}', needs.auto-tag.outputs.version) || github.ref }}
 
       - uses: actions/setup-python@v5
         with:
@@ -92,14 +121,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install build hatchling
 
-      - name: Verify tag matches package version
+      - name: Verify checkout matches package version
         id: version
+        env:
+          AUTO_VERSION: ${{ needs.auto-tag.outputs.version }}
         run: |
-          tag="${GITHUB_REF_NAME#v}"
+          set -euo pipefail
           pkg=$(python -c "import tomllib, pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
-          if [ "$tag" != "$pkg" ]; then
-              echo "Tag ${tag} does not match pyproject.toml version ${pkg}" >&2
-              exit 1
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            expected="${GITHUB_REF_NAME#v}"
+          else
+            expected="${AUTO_VERSION}"
+          fi
+          if [ "$expected" != "$pkg" ]; then
+            echo "::error::Expected version ${expected} but pyproject.toml has ${pkg}"
+            exit 1
           fi
           echo "version=${pkg}" >> "$GITHUB_OUTPUT"
 
