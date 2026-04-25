@@ -5,6 +5,34 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-04-25
+
+Documentation-only patch release. No API or behavior changes.
+
+### Fixed
+
+- `Documentation` URL on PyPI now points to the actual API explorer
+  at <https://graphn.ai/api>; the previous v0.1.0 link
+  (`docs.graphn.ai`) was a placeholder for a subdomain that was never
+  set up.
+
+### Added
+
+- `Changelog` link added to the PyPI sidebar (points at
+  `CHANGELOG.md` on GitHub).
+- README now opens with an explicit **Scope** callout listing the
+  surfaces v0.1.x covers (custom-model import + OpenAI-compatible
+  inference) and the surfaces it does **not** yet cover (agents,
+  knowledge bases, workflows, evals, datasets, guardrails, full BYO
+  inference CRUD, billing/usage, workspace admin).
+- New `examples/` directory with runnable scripts:
+  - `import_and_chat.py` — full lifecycle demo
+  - `streaming.py` — streaming chat completions
+  - `async_client.py` — `AsyncClient` usage
+  - `openai_compat.py` — using the official `openai` SDK directly
+- New `docs/cold-starts.md` guide explaining KServe scale-to-zero
+  behavior, 503 detection, and the SDK's `auto_wake` knobs.
+
 ## [0.1.0] — 2026-04-25
 
 Initial public release. Targets the v0.1.0 hand-authored OpenAPI spec

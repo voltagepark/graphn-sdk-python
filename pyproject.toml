@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "graphn"
-version = "0.1.0"
+version = "0.1.1"
 description = "Official Python SDK for the Graphn API: custom-model lifecycle, secrets, and OpenAI-compatible inference."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -44,9 +44,10 @@ dev = [
 
 [project.urls]
 Homepage = "https://graphn.ai"
-Documentation = "https://docs.graphn.ai/api"
+Documentation = "https://graphn.ai/api"
 Source = "https://github.com/voltagepark/graphn-sdk-python"
 Issues = "https://github.com/voltagepark/graphn-sdk-python/issues"
+Changelog = "https://github.com/voltagepark/graphn-sdk-python/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/graphn"]
