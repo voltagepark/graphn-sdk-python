@@ -155,7 +155,7 @@ def test_chat_auto_wakes_cold_custom_model_and_retries(
     )
 
     resp = client.chat.completions.create(
-        model="custom:cm_deadbeef",
+        model="cm_deadbeef",
         messages=[{"role": "user", "content": "hello"}],
         wake_timeout=0.2,
     )
@@ -163,6 +163,12 @@ def test_chat_auto_wakes_cold_custom_model_and_retries(
     assert wake_route.called
     assert chat_route.call_count == 2
     assert resp.choices[0].message.content == "hi back!"
+    sent = json.loads(chat_route.calls[0].request.content)
+    assert sent["model"] == "custom:cm_deadbeef", (
+        "SDK should prepend the 'custom:' routing prefix to bare cm_ ids "
+        "before delegating to the OpenAI client; customers should never "
+        "have to type the prefix themselves."
+    )
 
 
 def test_chat_does_not_wake_for_built_in_models(
@@ -250,7 +256,7 @@ async def test_async_chat_auto_wakes_cold_custom_model(
     )
 
     resp = await async_client.chat.completions.create(
-        model="custom:cm_aabbccdd",
+        model="cm_aabbccdd",
         messages=[{"role": "user", "content": "hello"}],
         wake_timeout=0.2,
     )
@@ -260,22 +266,43 @@ async def test_async_chat_auto_wakes_cold_custom_model(
     assert resp.choices[0].message.content == "hi back!"
 
 
-def test_qualified_name_property_returns_custom_prefix() -> None:
-    from graphn import CustomModel
+@pytest.mark.parametrize(
+    ("input_model", "expected_wire"),
+    [
+        # Bare custom-model id: SDK adds the routing prefix.
+        ("cm_abc123", "custom:cm_abc123"),
+        # Already-prefixed: idempotent passthrough so old code still works.
+        ("custom:cm_abc123", "custom:cm_abc123"),
+        # First-party catalog id (HuggingFace-style with a slash):
+        # never matches the cm_ shape, so unchanged.
+        ("meta-llama/Llama-3.1-8B-Instruct", "meta-llama/Llama-3.1-8B-Instruct"),
+        # Hosted single-token models (no slash, not cm_): unchanged.
+        ("whisper-large-v3", "whisper-large-v3"),
+        # Bare-id-shaped string that isn't actually our id format
+        # (uppercase): pass through, let the gateway 404 with a clear
+        # error rather than silently rewrite.
+        ("cm_NOTHEX", "cm_NOTHEX"),
+    ],
+)
+def test_chat_normalizes_model_param_for_each_namespace(
+    client: Client,
+    respx_mock: respx.MockRouter,
+    input_model: str,
+    expected_wire: str,
+) -> None:
+    """SDK rewrites bare cm_<hex> ids to ``custom:cm_...`` and leaves
+    everything else alone, so customers can pass ``model=model.id``
+    without knowing about the routing prefix."""
 
-    m = CustomModel(
-        id="cm_abc123",
-        name="my-llama",
-        workspace_id="ws_test",
-        status="ready",
-        weight_source="huggingface",
-        gpu_count=1,
-        capabilities=[],
-        min_replicas=0,
-        max_replicas=1,
-        cooldown_seconds=600,
-        gpu_memory_utilization=0.9,
-        created_at="2026-04-25T00:00:00Z",
-        updated_at="2026-04-25T00:00:00Z",
+    route = respx_mock.post(inference_url_for("v1/chat/completions")).mock(
+        return_value=httpx.Response(200, json=_CHAT_RESPONSE)
     )
-    assert m.qualified_name == "custom:cm_abc123"
+
+    client.chat.completions.create(
+        model=input_model,
+        messages=[{"role": "user", "content": "hi"}],
+    )
+
+    assert route.called
+    sent = json.loads(route.calls.last.request.content)
+    assert sent["model"] == expected_wire

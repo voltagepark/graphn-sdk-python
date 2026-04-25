@@ -8,21 +8,33 @@ workspace API key and ``X-Workspace-Id`` as a default header so the
 model gateway can route the request to the right workspace.
 
 In addition to plain delegation we add a thin ``Completions`` /
-``AsyncCompletions`` wrapper with one feature the upstream client
-cannot know about: **auto-wake on cold start**. Custom models default
-to ``min_replicas=0`` and scale to zero after a cooldown. The first
-chat request after a scale-to-zero returns ``503`` with a body like::
+``AsyncCompletions`` wrapper with two features the upstream client
+cannot know about:
 
-    {"error": {"message": "Model is scaled to zero and is now warming
-    up. Try again in 1-2 minutes.", ...}}
+1. **Bare custom-model id acceptance.** Customers pass
+   ``model=model.id`` (e.g. ``"cm_abc123"``) and the wrapper
+   prepends the gateway's ``"custom:"`` routing namespace before
+   delegating. First-party model ids (``meta-llama/...``) and
+   already-prefixed strings (``"custom:cm_..."``) are passed through
+   unchanged. The gateway protocol still uses the prefixed form on
+   the wire — this just keeps customer code from having to know
+   about the prefix.
 
-When the request targets a custom model (``model="custom:cm_..."``)
-we recognize that error, call ``POST /custom-models/{cm_id}/wake``
-once, and then retry the chat call with exponential backoff until
-the gateway starts serving or the warm-up budget is exhausted. This
-is on by default; customers who want raw behavior can pass
-``auto_wake=False`` or use ``client.chat.openai_client.chat.completions.create``
-directly.
+2. **Auto-wake on cold start.** Custom models default to
+   ``min_replicas=0`` and scale to zero after a cooldown. The first
+   chat request after a scale-to-zero returns ``503`` with a body
+   like::
+
+       {"error": {"message": "Model is scaled to zero and is now
+       warming up. Try again in 1-2 minutes.", ...}}
+
+   When the request targets a custom model we recognize that error,
+   call ``POST /custom-models/{cm_id}/wake`` once, and then retry
+   the chat call with exponential backoff until the gateway starts
+   serving or the warm-up budget is exhausted. On by default;
+   customers who want raw behavior can pass ``auto_wake=False`` or
+   use ``client.chat.openai_client.chat.completions.create``
+   directly.
 """
 
 from __future__ import annotations
@@ -78,12 +90,42 @@ def _build_async_openai(transport: AsyncTransport) -> AsyncOpenAI:
     )
 
 
+def _normalize_model_param(model: Any) -> Any:
+    """Add the ``"custom:"`` routing prefix to bare custom-model ids.
+
+    The Graphn model gateway routes inference under two namespaces —
+    first-party catalog (``meta-llama/Llama-3.1-8B-Instruct`` etc.)
+    and per-workspace custom (``custom:cm_...``). The prefix is a
+    wire-level routing detail customers shouldn't have to type, so
+    accept any of:
+
+    * Bare custom id: ``"cm_abc123"`` -> ``"custom:cm_abc123"``.
+    * Pre-prefixed: ``"custom:cm_abc123"`` -> unchanged.
+    * First-party id: ``"meta-llama/Llama-3.1-8B-Instruct"`` -> unchanged.
+    * Anything that isn't a string (None, an int, etc.): unchanged
+      — the OpenAI delegate will produce the same TypeError it
+      would produce without us.
+
+    Intentionally permissive: any string that doesn't match the
+    bare-cm shape is passed through, so old code that already types
+    the prefixed form keeps working without change.
+    """
+
+    if not isinstance(model, str):
+        return model
+    if _CUSTOM_ID_RE.match(model):
+        return _CUSTOM_MODEL_PREFIX + model
+    return model
+
+
 def _extract_custom_model_id(model: Any) -> str | None:
     """Return the ``cm_...`` id if ``model`` targets a custom model.
 
-    Accepts the canonical ``"custom:cm_..."`` form. Returns ``None``
-    for built-in / imported models or any other shape, which short
-    circuits the auto-wake logic.
+    Used by the auto-wake path to find the right control-plane
+    resource to wake. Callers pass the post-normalization value, so
+    by the time we see it the bare ``"cm_..."`` case is already
+    prefixed. Returns ``None`` for built-in / imported models or any
+    other shape, which short-circuits the auto-wake logic.
     """
 
     if not isinstance(model, str):
@@ -132,6 +174,8 @@ class Completions:
         wake_timeout: float = DEFAULT_WAKE_TIMEOUT_SECONDS,
         **kwargs: Any,
     ) -> Any:
+        if "model" in kwargs:
+            kwargs["model"] = _normalize_model_param(kwargs["model"])
         try:
             return self._openai.chat.completions.create(*args, **kwargs)
         except Exception as exc:
@@ -204,6 +248,8 @@ class AsyncCompletions:
         wake_timeout: float = DEFAULT_WAKE_TIMEOUT_SECONDS,
         **kwargs: Any,
     ) -> Any:
+        if "model" in kwargs:
+            kwargs["model"] = _normalize_model_param(kwargs["model"])
         try:
             return await self._openai.chat.completions.create(*args, **kwargs)
         except Exception as exc:
@@ -252,11 +298,12 @@ class Chat:
     """Synchronous ``client.chat`` namespace.
 
     Mirrors ``openai.OpenAI.chat`` so ``client.chat.completions.create(...)``
-    works identically. For custom models (``model="custom:cm_..."``)
-    we transparently wake the model and retry on cold-start 503s.
-    Customers can also reach the underlying OpenAI client via
-    :attr:`openai_client` if they need a feature exposed by OpenAI but
-    not surfaced here (for example, embeddings).
+    works identically. For custom models (``model="cm_..."``) we
+    transparently route to the gateway's custom-model namespace and
+    wake the model on cold-start 503s. Customers can also reach the
+    underlying OpenAI client via :attr:`openai_client` if they need a
+    feature exposed by OpenAI but not surfaced here (for example,
+    embeddings).
     """
 
     def __init__(self, transport: SyncTransport) -> None:

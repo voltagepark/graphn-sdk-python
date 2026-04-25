@@ -21,6 +21,51 @@ No `git tag`, no `git push --tags`, no Actions clicks.
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-04-25
+
+Patch release. Unifies how customers address custom models: pass
+`model.id` everywhere, including in chat completions. The SDK adds
+the gateway's `custom:` routing prefix internally, so the wire
+protocol is unchanged and the inference path is byte-identical to
+the prefixed form. No backend changes; no new operations.
+
+### Changed
+
+- `client.chat.completions.create(model=...)` (sync and async) now
+  accepts a bare custom-model id (`cm_<hex>`) and prepends the
+  gateway's `custom:` routing prefix internally before delegating to
+  the OpenAI client. Already-prefixed strings (`custom:cm_...`) and
+  first-party catalog ids (`meta-llama/...`, `Qwen/...`) are passed
+  through unchanged. Auto-wake on cold-start works against the
+  normalized id, so passing `model=model.id` works end-to-end on
+  custom models that were scaled to zero.
+
+  Migration: replace `model=model.qualified_name` with
+  `model=model.id` in chat calls. The previous prefixed-string form
+  still works, so this is opt-in — old code keeps running.
+
+### Removed
+
+- `CustomModel.qualified_name` property. It returned `f"custom:{id}"`
+  and existed solely so customers could feed a custom-model id to
+  `chat.completions.create`. Now that `chat.completions.create`
+  accepts the bare id directly, the property is redundant. Anyone
+  using it gets `AttributeError`; the one-line fix is
+  `model.id` (for chat addressing) or, if you specifically need the
+  wire-level prefixed form, `f"custom:{model.id}"`.
+
+  We're shipping this as a patch despite removing a property: the
+  property has only existed since 0.1.0, was undocumented outside
+  one example block, and the SDK is pre-1.0. If this causes you
+  pain, file an issue and we'll restore it as a deprecated alias.
+
+### Docs
+
+- README, `docs/cold-starts.md`, and all examples now use
+  `model=model.id` consistently. The "drop-in for `openai`" example
+  keeps the explicit `custom:cm_...` form, with a note explaining
+  that the prefix is the cost of bypassing `graphn.Client`.
+
 ## [0.1.3] — 2026-04-25
 
 Patch release. Tightens the S3 import flow with a client-side guard,

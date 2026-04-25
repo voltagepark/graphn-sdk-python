@@ -6,7 +6,7 @@ first custom model returned by the gateway.
 
 Usage:
     GRAPHN_API_KEY=gn_... GRAPHN_WORKSPACE_ID=ws_... \
-        python examples/streaming.py --model custom:cm_xxx
+        python examples/streaming.py --model cm_xxx
 """
 
 from __future__ import annotations
@@ -22,9 +22,10 @@ def main() -> None:
     parser.add_argument(
         "--model",
         help=(
-            "Model identifier as the gateway expects it "
-            "(e.g. 'custom:cm_abc123'). Defaults to the first custom "
-            "model in your workspace."
+            "Model identifier (e.g. 'cm_abc123' for a custom model, "
+            "or 'meta-llama/Llama-3.1-8B-Instruct' for a first-party "
+            "model). Defaults to the first custom model in your "
+            "workspace."
         ),
     )
     parser.add_argument(
@@ -38,7 +39,7 @@ def main() -> None:
         model_id = args.model
         if model_id is None:
             for m in c.custom_models.list(limit=1):
-                model_id = m.qualified_name
+                model_id = m.id
                 break
             if model_id is None:
                 print("no custom models in this workspace; pass --model", file=sys.stderr)

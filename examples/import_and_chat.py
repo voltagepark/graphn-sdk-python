@@ -61,7 +61,7 @@ def main() -> None:
 
         print("\nchatting (auto_wake handles cold start, may take a few min) ...")
         resp = c.chat.completions.create(
-            model=model.qualified_name,
+            model=model.id,
             messages=[{"role": "user", "content": args.prompt}],
             max_tokens=120,
             temperature=0.0,

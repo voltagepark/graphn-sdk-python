@@ -40,7 +40,7 @@ async def run(hf_model: str, prompt: str, keep: bool) -> None:
 
         print("\nchatting ...", flush=True)
         resp = await c.chat.completions.create(
-            model=model.qualified_name,
+            model=model.id,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=120,
             wake_timeout=600,

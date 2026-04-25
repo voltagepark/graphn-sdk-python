@@ -31,14 +31,15 @@ with graphn.Client() as c:
     c.custom_models.wait_until_ready(model.id)
 
     resp = c.chat.completions.create(
-        model=model.qualified_name,
+        model=model.id,
         messages=[{"role": "user", "content": "Hello!"}],
     )
     print(resp.choices[0].message.content)
 ```
 
 That's it. Cold-start, retry, OpenAI-compatible serialization, and
-the `custom:<id>` addressing convention are all handled for you.
+the gateway's routing prefix are all handled for you — pass the
+bare `model.id` everywhere.
 
 ## Install
 
@@ -127,7 +128,7 @@ with graphn.Client() as c:
     # 3. Chat. The first call will cold-start the model — the SDK
     #    transparently calls wake() and retries until it serves.
     resp = c.chat.completions.create(
-        model=model.qualified_name,   # "custom:cm_..."
+        model=model.id,
         messages=[{"role": "user", "content": "Tell me a joke."}],
         wake_timeout=600,             # max time to wait for cold start
     )
@@ -192,7 +193,7 @@ trust policy. Graphn re-assumes on every import / refresh, so
 rotating credentials underneath is safe.
 
 Everything past the create call — `wait_until_ready`, chat completions,
-auto-wake, `qualified_name` addressing — is identical regardless of
+auto-wake, addressing by `model.id` — is identical regardless of
 weight source. See [`examples/import_from_s3.py`](examples/import_from_s3.py)
 for an end-to-end runnable script.
 
@@ -200,7 +201,7 @@ for an end-to-end runnable script.
 
 ```python
 stream = c.chat.completions.create(
-    model=model.qualified_name,
+    model=model.id,
     messages=[{"role": "user", "content": "Count to ten."}],
     stream=True,
 )
@@ -222,7 +223,7 @@ async def main() -> None:
             print(m.id, m.name, m.status)
 
         resp = await c.chat.completions.create(
-            model="custom:cm_abc123",
+            model="cm_abc123",
             messages=[{"role": "user", "content": "Hi!"}],
         )
         print(resp.choices[0].message.content)
@@ -277,14 +278,15 @@ client = OpenAI(
     default_headers={"X-Workspace-Id": "ws_..."},
 )
 resp = client.chat.completions.create(
-    model="custom:cm_...",
+    model="custom:cm_...",  # raw openai client => you type the prefix
     messages=[{"role": "user", "content": "Hello!"}],
 )
 ```
 
 The reason to use `graphn.Client` instead is everything around the
-chat call: lifecycle management, secrets, auto-wake, typed responses,
-and a stable URL contract.
+chat call: lifecycle management, secrets, auto-wake, bare-`cm_`
+addressing without the wire prefix, typed responses, and a stable
+URL contract.
 
 ## More examples
 

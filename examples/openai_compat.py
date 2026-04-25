@@ -17,8 +17,10 @@ Tradeoffs vs. graphn.Client:
     - You lose the lifecycle layer (custom_models, secrets, etc.).
     - You lose auto-wake — first request after scale-to-zero is
       your problem, not the SDK's.
-    - Model addressing is your problem too: pass `custom:cm_<id>`
-      explicitly, not the bare model name.
+    - You have to type the gateway's wire-level routing prefix
+      yourself: `custom:cm_<id>` for custom models. graphn.Client
+      hides this and lets you pass the bare `cm_...` id; the raw
+      openai client does not.
 
 Usage:
     GRAPHN_API_KEY=gn_... GRAPHN_WORKSPACE_ID=ws_... \

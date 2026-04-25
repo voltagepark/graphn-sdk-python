@@ -50,7 +50,7 @@ back. But "come back" is a lot of bookkeeping for the caller.
 
 ## What auto-wake does
 
-When you call `client.chat.completions.create(model="custom:cm_...", ...)`
+When you call `client.chat.completions.create(model="cm_...", ...)`
 and the gateway returns one of those cold-start 503s, the SDK
 transparently:
 
@@ -71,7 +71,7 @@ import graphn
 
 with graphn.Client() as c:
     resp = c.chat.completions.create(
-        model=model.qualified_name,
+        model=model.id,
         messages=[{"role": "user", "content": "hi"}],
         wake_timeout=600,  # give it up to 10 min of warm-up
     )
@@ -99,8 +99,9 @@ c.chat.completions.create(model=..., messages=[...], auto_wake=False)
 
 By design, auto-wake only triggers for **custom models**. Specifically:
 
-- The model id must be of the form `custom:cm_<hex>` (the canonical
-  form returned by `CustomModel.qualified_name`).
+- The model id must be a custom-model id of the form `cm_<hex>` (or
+  the equivalent prefixed form `custom:cm_<hex>`; the SDK accepts
+  either and addresses the gateway with the prefixed form internally).
 - The error must be a 502/503/504 with a body that contains one of:
   `"scaled to zero"`, `"warming up"`, `"not ready"`, or
   `"no available replicas"`.
