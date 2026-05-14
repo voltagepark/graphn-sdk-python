@@ -21,6 +21,31 @@ No `git tag`, no `git push --tags`, no Actions clicks.
 
 ## [Unreleased]
 
+## [0.1.5] — 2026-05-14
+
+Patch release. Widens the upper bound on the `openai` runtime
+dependency so this SDK installs cleanly alongside projects that have
+already upgraded to `openai>=2`. No behavior changes; no spec
+changes.
+
+### Changed
+
+- `openai` dependency bound from `<2` to `<3`. The SDK only uses
+  `chat.completions.create` and `models` (plus the `OpenAI` /
+  `AsyncOpenAI` clients and the `AuthenticationError` /
+  `InternalServerError` exception classes), all of which are
+  unchanged across the 1.x → 2.x boundary. The single `openai` 2.0.0
+  breaking change is in the Responses API
+  (`ResponseFunctionToolCallOutputItem.output` /
+  `ResponseCustomToolCallOutput.output` now accept array forms in
+  addition to strings), which this SDK does not touch. The full
+  test suite (`pytest -ra`, 43 tests) passes against `openai==2.36.0`
+  with no source changes.
+
+  Customers pinned to `openai<2` keep working unchanged. Customers
+  on `openai>=2` can now install `graphn` without resolver
+  conflicts.
+
 ## [0.1.4] — 2026-04-25
 
 Patch release. Unifies how customers address custom models: pass
