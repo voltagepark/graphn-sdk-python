@@ -13,16 +13,30 @@ on:
         default: "https://cp.graphn.ai/openapi.yaml"
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+
+# Auth model: this workflow uses a fine-grained PAT (`secrets.GH_PAT`)
+# instead of `GITHUB_TOKEN` so the bot can open pull requests. The
+# voltagepark org policy ("Allow GitHub Actions to create and approve
+# pull requests" = off) means `GITHUB_TOKEN` cannot create PRs no
+# matter what the per-repo toggle says, and we don't want to weaken
+# that policy org-wide for this single workflow. The PAT is
+# fine-grained, scoped to this repo only, and only needs:
+#   - Contents: Read and write   (push the spec-sync/auto branch)
+#   - Pull requests: Read and write   (create / update the PR)
+# Both `actions/checkout` and `peter-evans/create-pull-request` are
+# given the PAT explicitly so the push and the create-PR call land
+# under the same identity.
 
 jobs:
   regenerate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GH_PAT }}
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -42,9 +56,9 @@ jobs:
         run: pytest -ra
 
       - name: Open PR if anything changed
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           add-paths: src/graphn/_generated
           branch: spec-sync/auto
           delete-branch: true
