@@ -19,15 +19,26 @@ class CustomModelCreate:
     Attributes:
         name (str): URL-safe model name; use this when calling `chat.completions`
             once the model is `ready`. Must be unique within the workspace.
+        huggingface_model_id (str): Canonical model identifier (`org/model-name`). **Required
+            for every `weight_source`**: this is the name the inference
+            endpoint advertises and the value clients pass in `model`
+            for chat completions, so without it the deployed model has
+            no stable name to address via inference. For `huggingface`
+            it also drives the download; for the S3 sources it mirrors
+            the "Model ID" field in the web UI's S3 import flow.
+             Example: meta-llama/Llama-3-8B-Instruct.
         display_name (str | Unset): Human-friendly name for UI display. Defaults to `name`.
         weight_source (WeightSource | Unset): Source of the model weights:
             - `huggingface`: download from HuggingFace using `huggingface_model_id`
             - `s3_presigned`: download from a presigned S3 URL
             - `s3_assume_role`: download from S3 using an assumed IAM role
-        huggingface_model_id (str | Unset): Required when `weight_source` is `huggingface`. Example: meta-
-            llama/Llama-3-8B-Instruct.
-        s3_url (str | Unset): Required when `weight_source` is `s3_presigned` or `s3_assume_role`.
+        s3_url (str | Unset): Required when `weight_source` is `s3_presigned` or
+            `s3_assume_role`. Conditional requirement is enforced by
+            the server (returns 422); not encoded as a JSON Schema
+            keyword for OAS-3.0-tooling compatibility.
         s3_role_arn (str | Unset): Required when `weight_source` is `s3_assume_role`.
+            Conditional requirement is enforced by the server (returns
+            422); not encoded as a JSON Schema keyword.
         hf_token_secret_id (str | Unset): ID of a workspace secret holding a HuggingFace access token.
             Required for gated HuggingFace models.
         gpu_count (int | Unset):  Default: 1.
@@ -41,9 +52,9 @@ class CustomModelCreate:
     """
 
     name: str
+    huggingface_model_id: str
     display_name: str | Unset = UNSET
     weight_source: WeightSource | Unset = UNSET
-    huggingface_model_id: str | Unset = UNSET
     s3_url: str | Unset = UNSET
     s3_role_arn: str | Unset = UNSET
     hf_token_secret_id: str | Unset = UNSET
@@ -59,13 +70,13 @@ class CustomModelCreate:
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
+        huggingface_model_id = self.huggingface_model_id
+
         display_name = self.display_name
 
         weight_source: str | Unset = UNSET
         if not isinstance(self.weight_source, Unset):
             weight_source = self.weight_source.value
-
-        huggingface_model_id = self.huggingface_model_id
 
         s3_url = self.s3_url
 
@@ -101,14 +112,13 @@ class CustomModelCreate:
         field_dict.update(
             {
                 "name": name,
+                "huggingface_model_id": huggingface_model_id,
             }
         )
         if display_name is not UNSET:
             field_dict["display_name"] = display_name
         if weight_source is not UNSET:
             field_dict["weight_source"] = weight_source
-        if huggingface_model_id is not UNSET:
-            field_dict["huggingface_model_id"] = huggingface_model_id
         if s3_url is not UNSET:
             field_dict["s3_url"] = s3_url
         if s3_role_arn is not UNSET:
@@ -139,6 +149,8 @@ class CustomModelCreate:
         d = dict(src_dict)
         name = d.pop("name")
 
+        huggingface_model_id = d.pop("huggingface_model_id")
+
         display_name = d.pop("display_name", UNSET)
 
         _weight_source = d.pop("weight_source", UNSET)
@@ -147,8 +159,6 @@ class CustomModelCreate:
             weight_source = UNSET
         else:
             weight_source = WeightSource(_weight_source)
-
-        huggingface_model_id = d.pop("huggingface_model_id", UNSET)
 
         s3_url = d.pop("s3_url", UNSET)
 
@@ -186,9 +196,9 @@ class CustomModelCreate:
 
         custom_model_create = cls(
             name=name,
+            huggingface_model_id=huggingface_model_id,
             display_name=display_name,
             weight_source=weight_source,
-            huggingface_model_id=huggingface_model_id,
             s3_url=s3_url,
             s3_role_arn=s3_role_arn,
             hf_token_secret_id=hf_token_secret_id,

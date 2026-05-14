@@ -39,7 +39,7 @@ class CustomModel:
                 - `s3_presigned`: download from a presigned S3 URL
                 - `s3_assume_role`: download from S3 using an assumed IAM role
             gpu_count (int): Number of GPUs allocated per replica.
-            gpu_memory_utilization (float): Fraction of GPU memory vLLM is allowed to use.
+            gpu_memory_utilization (float): Fraction of GPU memory the inference runtime is allowed to use.
             capabilities (list[Capability]):
             min_replicas (int): Minimum replicas to keep warm. `0` allows scale-to-zero.
             max_replicas (int): Maximum replicas the autoscaler may run.
