@@ -6,6 +6,9 @@ from typing import Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.validate_model_response_artifact_type import (
+    ValidateModelResponseArtifactType,
+)
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ValidateModelResponse")
@@ -22,6 +25,24 @@ class ValidateModelResponse:
         num_params (int | None | Unset):
         estimated_memory_gb (float | None | Unset):
         max_context_length (int | None | Unset):
+        artifact_type (ValidateModelResponseArtifactType | Unset): `lora` when AF detected an `adapter_config.json` in
+            the HuggingFace
+            repo at validate time; `base` otherwise (the default — what every
+            existing caller saw before the LoRA auto-detect work landed). Use
+            this to branch in client code without keeping track of two
+            different `weight_source` enum values for the HF case.
+
+            When `artifact_type=lora`, the `architectures`, `num_params`,
+            `estimated_memory_gb`, and `max_context_length` fields describe
+            the **base** model (resolved from `adapter_config.json`), not
+            the adapter itself.
+             Default: ValidateModelResponseArtifactType.BASE.
+        detected_base_model_id (None | str | Unset): Populated only when `artifact_type=lora`. The base model id read
+            from `adapter_config.json::base_model_name_or_path`. Use to pin
+            the base on subsequent deploy calls or to surface a "detected as
+            LoRA adapter for X" affordance in your UI.
+        lora_rank (int | None | Unset): Populated only when `artifact_type=lora`. The `r` value from
+            `adapter_config.json` (LoRA rank).
     """
 
     valid: bool
@@ -31,6 +52,11 @@ class ValidateModelResponse:
     num_params: int | None | Unset = UNSET
     estimated_memory_gb: float | None | Unset = UNSET
     max_context_length: int | None | Unset = UNSET
+    artifact_type: ValidateModelResponseArtifactType | Unset = (
+        ValidateModelResponseArtifactType.BASE
+    )
+    detected_base_model_id: None | str | Unset = UNSET
+    lora_rank: int | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -66,6 +92,22 @@ class ValidateModelResponse:
         else:
             max_context_length = self.max_context_length
 
+        artifact_type: str | Unset = UNSET
+        if not isinstance(self.artifact_type, Unset):
+            artifact_type = self.artifact_type.value
+
+        detected_base_model_id: None | str | Unset
+        if isinstance(self.detected_base_model_id, Unset):
+            detected_base_model_id = UNSET
+        else:
+            detected_base_model_id = self.detected_base_model_id
+
+        lora_rank: int | None | Unset
+        if isinstance(self.lora_rank, Unset):
+            lora_rank = UNSET
+        else:
+            lora_rank = self.lora_rank
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -85,6 +127,12 @@ class ValidateModelResponse:
             field_dict["estimated_memory_gb"] = estimated_memory_gb
         if max_context_length is not UNSET:
             field_dict["max_context_length"] = max_context_length
+        if artifact_type is not UNSET:
+            field_dict["artifact_type"] = artifact_type
+        if detected_base_model_id is not UNSET:
+            field_dict["detected_base_model_id"] = detected_base_model_id
+        if lora_rank is not UNSET:
+            field_dict["lora_rank"] = lora_rank
 
         return field_dict
 
@@ -137,6 +185,33 @@ class ValidateModelResponse:
             d.pop("max_context_length", UNSET)
         )
 
+        _artifact_type = d.pop("artifact_type", UNSET)
+        artifact_type: ValidateModelResponseArtifactType | Unset
+        if isinstance(_artifact_type, Unset):
+            artifact_type = UNSET
+        else:
+            artifact_type = ValidateModelResponseArtifactType(_artifact_type)
+
+        def _parse_detected_base_model_id(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        detected_base_model_id = _parse_detected_base_model_id(
+            d.pop("detected_base_model_id", UNSET)
+        )
+
+        def _parse_lora_rank(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        lora_rank = _parse_lora_rank(d.pop("lora_rank", UNSET))
+
         validate_model_response = cls(
             valid=valid,
             error=error,
@@ -145,6 +220,9 @@ class ValidateModelResponse:
             num_params=num_params,
             estimated_memory_gb=estimated_memory_gb,
             max_context_length=max_context_length,
+            artifact_type=artifact_type,
+            detected_base_model_id=detected_base_model_id,
+            lora_rank=lora_rank,
         )
 
         validate_model_response.additional_properties = d

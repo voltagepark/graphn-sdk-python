@@ -21,12 +21,18 @@ class ValidateModelRequest:
         hf_token_secret_id (None | str | Unset): ID of a workspace secret holding a HuggingFace token.
         quantization (ValidateModelRequestQuantization | Unset):
         gpu_memory_utilization (float | Unset):  Default: 0.9.
+        model_size_gb (int | None | Unset): Optional caller-supplied estimate of the on-disk weights size,
+            in GiB. When provided, the platform sizes the model-weights PVC
+            from this hint instead of waiting for a HuggingFace head-bytes
+            probe; useful for very large models where the probe would
+            otherwise stall the validate response.
     """
 
     huggingface_model_id: str
     hf_token_secret_id: None | str | Unset = UNSET
     quantization: ValidateModelRequestQuantization | Unset = UNSET
     gpu_memory_utilization: float | Unset = 0.9
+    model_size_gb: int | None | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         huggingface_model_id = self.huggingface_model_id
@@ -43,6 +49,12 @@ class ValidateModelRequest:
 
         gpu_memory_utilization = self.gpu_memory_utilization
 
+        model_size_gb: int | None | Unset
+        if isinstance(self.model_size_gb, Unset):
+            model_size_gb = UNSET
+        else:
+            model_size_gb = self.model_size_gb
+
         field_dict: dict[str, Any] = {}
 
         field_dict.update(
@@ -56,6 +68,8 @@ class ValidateModelRequest:
             field_dict["quantization"] = quantization
         if gpu_memory_utilization is not UNSET:
             field_dict["gpu_memory_utilization"] = gpu_memory_utilization
+        if model_size_gb is not UNSET:
+            field_dict["model_size_gb"] = model_size_gb
 
         return field_dict
 
@@ -84,11 +98,21 @@ class ValidateModelRequest:
 
         gpu_memory_utilization = d.pop("gpu_memory_utilization", UNSET)
 
+        def _parse_model_size_gb(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        model_size_gb = _parse_model_size_gb(d.pop("model_size_gb", UNSET))
+
         validate_model_request = cls(
             huggingface_model_id=huggingface_model_id,
             hf_token_secret_id=hf_token_secret_id,
             quantization=quantization,
             gpu_memory_utilization=gpu_memory_utilization,
+            model_size_gb=model_size_gb,
         )
 
         return validate_model_request

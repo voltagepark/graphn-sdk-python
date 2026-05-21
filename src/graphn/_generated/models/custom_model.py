@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
 from ..models.capability import Capability
+from ..models.custom_model_artifact_type import CustomModelArtifactType
 from ..models.custom_model_quantization import CustomModelQuantization
 from ..models.custom_model_status import CustomModelStatus
 from ..models.weight_source import WeightSource
@@ -50,6 +51,29 @@ class CustomModel:
             huggingface_model_id (str | Unset): Set when `weight_source` is `huggingface`.
             s3_url (None | str | Unset): Set when `weight_source` is `s3_presigned` or `s3_assume_role`.
             s3_role_arn (None | str | Unset): Set when `weight_source` is `s3_assume_role`.
+            artifact_type (CustomModelArtifactType | Unset): Whether this import is a full base checkpoint or a LoRA
+                adapter on top of an allowlisted base. Set eagerly at
+                create-time:
+
+                * **`huggingface`** imports are classified by probing
+                  `adapter_config.json` on the upstream repo.
+                * **`s3_*`** imports are classified as `lora` iff
+                  `base_model_id` is supplied on the create request;
+                  otherwise the bundle is treated as `base`. If the
+                  downloaded S3 bundle later turns out to be a LoRA
+                  adapter (caller forgot the hint), the model deploys to
+                  `failed` with an actionable `error_message`.
+            base_model_id (None | str | Unset): Populated when `artifact_type=lora`. The base model id the
+                adapter loads on top of. For HuggingFace imports this is
+                either `adapter_config.json::base_model_name_or_path` or
+                the caller's `base_model_id` override on
+                `CustomModelCreate` (the override wins on disagreement).
+                For S3 imports it is the caller-supplied
+                `base_model_id` from `CustomModelCreate`.
+            lora_adapter_name (None | str | Unset): vLLM routing name the LoRA adapter is served under.
+                Defaults to the model's short name; clients address it
+                via `model=<lora_adapter_name>` in chat completions.
+            lora_rank (int | None | Unset): `r` value from `adapter_config.json` when `artifact_type=lora`.
             max_model_len (int | None | Unset): Maximum context length in tokens.
             quantization (CustomModelQuantization | Unset): Weight quantization scheme, if any.
             replicas_available (int | None | Unset): Currently serving replicas (live status).
@@ -78,6 +102,10 @@ class CustomModel:
     huggingface_model_id: str | Unset = UNSET
     s3_url: None | str | Unset = UNSET
     s3_role_arn: None | str | Unset = UNSET
+    artifact_type: CustomModelArtifactType | Unset = UNSET
+    base_model_id: None | str | Unset = UNSET
+    lora_adapter_name: None | str | Unset = UNSET
+    lora_rank: int | None | Unset = UNSET
     max_model_len: int | None | Unset = UNSET
     quantization: CustomModelQuantization | Unset = UNSET
     replicas_available: int | None | Unset = UNSET
@@ -133,6 +161,28 @@ class CustomModel:
             s3_role_arn = UNSET
         else:
             s3_role_arn = self.s3_role_arn
+
+        artifact_type: str | Unset = UNSET
+        if not isinstance(self.artifact_type, Unset):
+            artifact_type = self.artifact_type.value
+
+        base_model_id: None | str | Unset
+        if isinstance(self.base_model_id, Unset):
+            base_model_id = UNSET
+        else:
+            base_model_id = self.base_model_id
+
+        lora_adapter_name: None | str | Unset
+        if isinstance(self.lora_adapter_name, Unset):
+            lora_adapter_name = UNSET
+        else:
+            lora_adapter_name = self.lora_adapter_name
+
+        lora_rank: int | None | Unset
+        if isinstance(self.lora_rank, Unset):
+            lora_rank = UNSET
+        else:
+            lora_rank = self.lora_rank
 
         max_model_len: int | None | Unset
         if isinstance(self.max_model_len, Unset):
@@ -210,6 +260,14 @@ class CustomModel:
             field_dict["s3_url"] = s3_url
         if s3_role_arn is not UNSET:
             field_dict["s3_role_arn"] = s3_role_arn
+        if artifact_type is not UNSET:
+            field_dict["artifact_type"] = artifact_type
+        if base_model_id is not UNSET:
+            field_dict["base_model_id"] = base_model_id
+        if lora_adapter_name is not UNSET:
+            field_dict["lora_adapter_name"] = lora_adapter_name
+        if lora_rank is not UNSET:
+            field_dict["lora_rank"] = lora_rank
         if max_model_len is not UNSET:
             field_dict["max_model_len"] = max_model_len
         if quantization is not UNSET:
@@ -284,6 +342,40 @@ class CustomModel:
             return cast(None | str | Unset, data)
 
         s3_role_arn = _parse_s3_role_arn(d.pop("s3_role_arn", UNSET))
+
+        _artifact_type = d.pop("artifact_type", UNSET)
+        artifact_type: CustomModelArtifactType | Unset
+        if isinstance(_artifact_type, Unset):
+            artifact_type = UNSET
+        else:
+            artifact_type = CustomModelArtifactType(_artifact_type)
+
+        def _parse_base_model_id(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        base_model_id = _parse_base_model_id(d.pop("base_model_id", UNSET))
+
+        def _parse_lora_adapter_name(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        lora_adapter_name = _parse_lora_adapter_name(d.pop("lora_adapter_name", UNSET))
+
+        def _parse_lora_rank(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        lora_rank = _parse_lora_rank(d.pop("lora_rank", UNSET))
 
         def _parse_max_model_len(data: object) -> int | None | Unset:
             if data is None:
@@ -385,6 +477,10 @@ class CustomModel:
             huggingface_model_id=huggingface_model_id,
             s3_url=s3_url,
             s3_role_arn=s3_role_arn,
+            artifact_type=artifact_type,
+            base_model_id=base_model_id,
+            lora_adapter_name=lora_adapter_name,
+            lora_rank=lora_rank,
             max_model_len=max_model_len,
             quantization=quantization,
             replicas_available=replicas_available,

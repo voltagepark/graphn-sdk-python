@@ -1,5 +1,6 @@
 """Contains all the data models used in inputs/outputs"""
 
+from .architecture_info import ArchitectureInfo
 from .capability import Capability
 from .chat_completion_request import ChatCompletionRequest
 from .chat_completion_request_response_format import ChatCompletionRequestResponseFormat
@@ -16,11 +17,13 @@ from .chat_message_role import ChatMessageRole
 from .chat_message_tool_calls_item import ChatMessageToolCallsItem
 from .custom_model import CustomModel
 from .custom_model_access import CustomModelAccess
+from .custom_model_artifact_type import CustomModelArtifactType
 from .custom_model_create import CustomModelCreate
 from .custom_model_create_quantization import CustomModelCreateQuantization
 from .custom_model_list import CustomModelList
 from .custom_model_quantization import CustomModelQuantization
 from .custom_model_status import CustomModelStatus
+from .custom_model_update import CustomModelUpdate
 from .discover_imported_models_request import DiscoverImportedModelsRequest
 from .discover_imported_models_response import DiscoverImportedModelsResponse
 from .discovered_imported_model import DiscoveredImportedModel
@@ -38,6 +41,7 @@ from .secret import Secret
 from .secret_create import SecretCreate
 from .secret_list import SecretList
 from .secret_update import SecretUpdate
+from .supported_architectures import SupportedArchitectures
 from .test_connection_request import TestConnectionRequest
 from .test_connection_response import TestConnectionResponse
 from .test_connection_response_usage import TestConnectionResponseUsage
@@ -46,9 +50,11 @@ from .tts_request_response_format import TTSRequestResponseFormat
 from .validate_model_request import ValidateModelRequest
 from .validate_model_request_quantization import ValidateModelRequestQuantization
 from .validate_model_response import ValidateModelResponse
+from .validate_model_response_artifact_type import ValidateModelResponseArtifactType
 from .weight_source import WeightSource
 
 __all__ = (
+    "ArchitectureInfo",
     "Capability",
     "ChatCompletionRequest",
     "ChatCompletionRequestResponseFormat",
@@ -63,11 +69,13 @@ __all__ = (
     "ChatMessageToolCallsItem",
     "CustomModel",
     "CustomModelAccess",
+    "CustomModelArtifactType",
     "CustomModelCreate",
     "CustomModelCreateQuantization",
     "CustomModelList",
     "CustomModelQuantization",
     "CustomModelStatus",
+    "CustomModelUpdate",
     "DiscoveredImportedModel",
     "DiscoverImportedModelsRequest",
     "DiscoverImportedModelsResponse",
@@ -85,6 +93,7 @@ __all__ = (
     "SecretCreate",
     "SecretList",
     "SecretUpdate",
+    "SupportedArchitectures",
     "TestConnectionRequest",
     "TestConnectionResponse",
     "TestConnectionResponseUsage",
@@ -93,5 +102,6 @@ __all__ = (
     "ValidateModelRequest",
     "ValidateModelRequestQuantization",
     "ValidateModelResponse",
+    "ValidateModelResponseArtifactType",
     "WeightSource",
 )
