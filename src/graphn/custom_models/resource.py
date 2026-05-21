@@ -30,6 +30,7 @@ from graphn.custom_models.types import (
     CustomModelStatus,
     GpuHoursResponse,
     Quantization,
+    SupportedArchitectures,
     ValidateModelResponse,
     WeightSource,
 )
@@ -65,6 +66,7 @@ def _build_create_body(
     min_replicas: int | None,
     max_replicas: int | None,
     cooldown_seconds: int | None,
+    base_model_id: str | None,
     extra: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
     if weight_source in _S3_WEIGHT_SOURCES and not (huggingface_model_id or "").strip():
@@ -107,6 +109,8 @@ def _build_create_body(
         body["max_replicas"] = max_replicas
     if cooldown_seconds is not None:
         body["cooldown_seconds"] = cooldown_seconds
+    if base_model_id is not None:
+        body["base_model_id"] = base_model_id
     if extra:
         body.update(extra)
     return body
@@ -118,6 +122,7 @@ def _build_validate_body(
     hf_token_secret_id: str | None,
     quantization: Quantization | None,
     gpu_memory_utilization: float | None,
+    model_size_gb: int | None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {"huggingface_model_id": huggingface_model_id}
     if hf_token_secret_id is not None:
@@ -126,6 +131,42 @@ def _build_validate_body(
         body["quantization"] = quantization
     if gpu_memory_utilization is not None:
         body["gpu_memory_utilization"] = gpu_memory_utilization
+    if model_size_gb is not None:
+        body["model_size_gb"] = model_size_gb
+    return body
+
+
+def _build_update_body(
+    *,
+    name: str | None,
+    min_replicas: int | None,
+    max_replicas: int | None,
+    cooldown_seconds: int | None,
+    extra: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    body: dict[str, Any] = {}
+    if name is not None:
+        body["name"] = name
+    if min_replicas is not None:
+        body["min_replicas"] = min_replicas
+    if max_replicas is not None:
+        body["max_replicas"] = max_replicas
+    if cooldown_seconds is not None:
+        body["cooldown_seconds"] = cooldown_seconds
+    if extra:
+        body.update(extra)
+    if not body:
+        raise ValidationError(
+            (
+                "update() requires at least one of: name, min_replicas, "
+                "max_replicas, cooldown_seconds (or an `extra` mapping with "
+                "additional fields). The control plane rejects empty PATCH "
+                "bodies with 422; this check fires one round-trip earlier."
+            ),
+            status_code=422,
+            code="empty_update",
+            details={},
+        )
     return body
 
 
@@ -162,6 +203,7 @@ class CustomModels:
         min_replicas: int | None = None,
         max_replicas: int | None = None,
         cooldown_seconds: int | None = None,
+        base_model_id: str | None = None,
         extra: Mapping[str, Any] | None = None,
         idempotency_key: str | None = None,
     ) -> CustomModel:
@@ -181,6 +223,7 @@ class CustomModels:
             min_replicas=min_replicas,
             max_replicas=max_replicas,
             cooldown_seconds=cooldown_seconds,
+            base_model_id=base_model_id,
             extra=extra,
         )
         data = self._transport.request(
@@ -190,6 +233,64 @@ class CustomModels:
             idempotency_key=idempotency_key,
         )
         return CustomModel.model_validate(data)
+
+    def update(
+        self,
+        model_id: str,
+        *,
+        name: str | None = None,
+        min_replicas: int | None = None,
+        max_replicas: int | None = None,
+        cooldown_seconds: int | None = None,
+        extra: Mapping[str, Any] | None = None,
+    ) -> CustomModel:
+        """Partially update mutable fields on a custom model.
+
+        Applies in place to the live deployment — no rolling restart,
+        no downtime. Immutable fields (``huggingface_model_id``,
+        ``weight_source``, GPU topology, …) are not exposed; change
+        them by deleting and re-creating the model. At least one
+        keyword argument (or an ``extra`` field) must be supplied.
+
+        Raises
+        ------
+        graphn.ValidationError
+            If no fields are provided (code ``empty_update``).
+        graphn.NotFoundError
+            If ``model_id`` doesn't exist in the workspace.
+        """
+
+        body = _build_update_body(
+            name=name,
+            min_replicas=min_replicas,
+            max_replicas=max_replicas,
+            cooldown_seconds=cooldown_seconds,
+            extra=extra,
+        )
+        data = self._transport.request(
+            "PATCH",
+            self._transport.cp_path("custom-models", model_id),
+            json=body,
+        )
+        return CustomModel.model_validate(data)
+
+    def supported_architectures(self) -> SupportedArchitectures:
+        """List HuggingFace architectures the platform can deploy.
+
+        Returns the static catalog of model architectures supported by
+        the platform's serving runtimes, each annotated with the
+        capability tags (``tool_calling``, ``vision``, …) it exposes.
+        Use this to drive architecture/capability filters in client
+        UIs before calling :meth:`validate`. The list is updated
+        alongside platform runtime upgrades; clients should not cache
+        it across build cycles.
+        """
+
+        data = self._transport.request(
+            "GET",
+            self._transport.cp_path("custom-models", "supported-architectures"),
+        )
+        return SupportedArchitectures.model_validate(data)
 
     def list(
         self,
@@ -250,12 +351,14 @@ class CustomModels:
         hf_token_secret_id: str | None = None,
         quantization: Quantization | None = None,
         gpu_memory_utilization: float | None = None,
+        model_size_gb: int | None = None,
     ) -> ValidateModelResponse:
         body = _build_validate_body(
             huggingface_model_id=huggingface_model_id,
             hf_token_secret_id=hf_token_secret_id,
             quantization=quantization,
             gpu_memory_utilization=gpu_memory_utilization,
+            model_size_gb=model_size_gb,
         )
         data = self._transport.request(
             "POST",
@@ -332,6 +435,7 @@ class AsyncCustomModels:
         min_replicas: int | None = None,
         max_replicas: int | None = None,
         cooldown_seconds: int | None = None,
+        base_model_id: str | None = None,
         extra: Mapping[str, Any] | None = None,
         idempotency_key: str | None = None,
     ) -> CustomModel:
@@ -351,6 +455,7 @@ class AsyncCustomModels:
             min_replicas=min_replicas,
             max_replicas=max_replicas,
             cooldown_seconds=cooldown_seconds,
+            base_model_id=base_model_id,
             extra=extra,
         )
         data = await self._transport.request(
@@ -360,6 +465,41 @@ class AsyncCustomModels:
             idempotency_key=idempotency_key,
         )
         return CustomModel.model_validate(data)
+
+    async def update(
+        self,
+        model_id: str,
+        *,
+        name: str | None = None,
+        min_replicas: int | None = None,
+        max_replicas: int | None = None,
+        cooldown_seconds: int | None = None,
+        extra: Mapping[str, Any] | None = None,
+    ) -> CustomModel:
+        """Asynchronous mirror of :meth:`CustomModels.update`."""
+
+        body = _build_update_body(
+            name=name,
+            min_replicas=min_replicas,
+            max_replicas=max_replicas,
+            cooldown_seconds=cooldown_seconds,
+            extra=extra,
+        )
+        data = await self._transport.request(
+            "PATCH",
+            self._transport.cp_path("custom-models", model_id),
+            json=body,
+        )
+        return CustomModel.model_validate(data)
+
+    async def supported_architectures(self) -> SupportedArchitectures:
+        """Asynchronous mirror of :meth:`CustomModels.supported_architectures`."""
+
+        data = await self._transport.request(
+            "GET",
+            self._transport.cp_path("custom-models", "supported-architectures"),
+        )
+        return SupportedArchitectures.model_validate(data)
 
     async def list(
         self,
@@ -422,12 +562,14 @@ class AsyncCustomModels:
         hf_token_secret_id: str | None = None,
         quantization: Quantization | None = None,
         gpu_memory_utilization: float | None = None,
+        model_size_gb: int | None = None,
     ) -> ValidateModelResponse:
         body = _build_validate_body(
             huggingface_model_id=huggingface_model_id,
             hf_token_secret_id=hf_token_secret_id,
             quantization=quantization,
             gpu_memory_utilization=gpu_memory_utilization,
+            model_size_gb=model_size_gb,
         )
         data = await self._transport.request(
             "POST",

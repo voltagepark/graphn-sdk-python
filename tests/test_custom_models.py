@@ -333,3 +333,286 @@ async def test_async_create_s3_requires_huggingface_model_id(
         )
     assert exc_info.value.code == "missing_huggingface_model_id"
     assert respx_mock.calls.call_count == 0
+
+
+def test_create_s3_lora_passes_base_model_id(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    """`base_model_id` is the only way to classify an S3 bundle as LoRA at create."""
+
+    route = respx_mock.post(cp_url("custom-models")).mock(
+        return_value=httpx.Response(
+            201,
+            json=_model_payload(
+                weight_source="s3_presigned",
+                huggingface_model_id="org/qwen3-finetune",
+                artifact_type="lora",
+                base_model_id="Qwen/Qwen3-4B",
+            ),
+        )
+    )
+
+    model = client.custom_models.create(
+        name="my-lora",
+        weight_source="s3_presigned",
+        huggingface_model_id="org/qwen3-finetune",
+        s3_url="https://example.com/lora.tar.gz",
+        base_model_id="Qwen/Qwen3-4B",
+    )
+
+    assert route.called
+    sent = json.loads(route.calls.last.request.content)
+    assert sent["base_model_id"] == "Qwen/Qwen3-4B"
+    assert model.artifact_type == "lora"
+    assert model.base_model_id == "Qwen/Qwen3-4B"
+
+
+def test_create_huggingface_lora_override_passes_base_model_id(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    """On HF imports `base_model_id` overrides `adapter_config.json::base_model_name_or_path`."""
+
+    route = respx_mock.post(cp_url("custom-models")).mock(
+        return_value=httpx.Response(201, json=_model_payload())
+    )
+
+    client.custom_models.create(
+        name="my-lora",
+        huggingface_model_id="org/some-lora",
+        base_model_id="meta-llama/Llama-3-8B",
+    )
+
+    sent = json.loads(route.calls.last.request.content)
+    assert sent["base_model_id"] == "meta-llama/Llama-3-8B"
+
+
+def test_get_returns_typed_lora_fields(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get(cp_url("custom-models/cm_lora")).mock(
+        return_value=httpx.Response(
+            200,
+            json=_model_payload(
+                id="cm_lora",
+                artifact_type="lora",
+                base_model_id="Qwen/Qwen3-4B",
+                lora_adapter_name="my-lora",
+                lora_rank=16,
+            ),
+        )
+    )
+
+    model = client.custom_models.get("cm_lora")
+    assert model.artifact_type == "lora"
+    assert model.base_model_id == "Qwen/Qwen3-4B"
+    assert model.lora_adapter_name == "my-lora"
+    assert model.lora_rank == 16
+
+
+def test_get_legacy_response_treats_artifact_type_as_none(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    """Older control planes don't return `artifact_type`; SDK must tolerate it."""
+
+    respx_mock.get(cp_url("custom-models/cm_legacy")).mock(
+        return_value=httpx.Response(200, json=_model_payload(id="cm_legacy"))
+    )
+
+    model = client.custom_models.get("cm_legacy")
+    assert model.artifact_type is None
+    assert model.base_model_id is None
+    assert model.lora_adapter_name is None
+    assert model.lora_rank is None
+
+
+def test_validate_returns_lora_fields(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.post(cp_url("custom-models/validate")).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "valid": True,
+                "artifact_type": "lora",
+                "detected_base_model_id": "Qwen/Qwen3-4B",
+                "lora_rank": 16,
+                "architectures": ["Qwen3ForCausalLM"],
+                "num_params": 7_500_000_000,
+            },
+        )
+    )
+
+    resp = client.custom_models.validate(huggingface_model_id="org/some-lora")
+    assert resp.valid is True
+    assert resp.artifact_type == "lora"
+    assert resp.detected_base_model_id == "Qwen/Qwen3-4B"
+    assert resp.lora_rank == 16
+
+
+def test_validate_forwards_model_size_gb(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    route = respx_mock.post(cp_url("custom-models/validate")).mock(
+        return_value=httpx.Response(200, json={"valid": True})
+    )
+
+    client.custom_models.validate(
+        huggingface_model_id="meta-llama/Llama-3-405B",
+        model_size_gb=812,
+    )
+    sent = json.loads(route.calls.last.request.content)
+    assert sent["model_size_gb"] == 812
+
+
+def test_update_sends_patch_with_body(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    route = respx_mock.patch(cp_url("custom-models/cm_01")).mock(
+        return_value=httpx.Response(
+            200,
+            json=_model_payload(
+                status="ready",
+                min_replicas=1,
+                max_replicas=4,
+                cooldown_seconds=300,
+                display_name="renamed",
+            ),
+        )
+    )
+
+    model = client.custom_models.update(
+        "cm_01",
+        name="renamed",
+        min_replicas=1,
+        max_replicas=4,
+        cooldown_seconds=300,
+    )
+
+    assert route.called
+    assert route.calls.last.request.method == "PATCH"
+    sent = json.loads(route.calls.last.request.content)
+    assert sent == {
+        "name": "renamed",
+        "min_replicas": 1,
+        "max_replicas": 4,
+        "cooldown_seconds": 300,
+    }
+    assert model.min_replicas == 1
+    assert model.max_replicas == 4
+    assert model.cooldown_seconds == 300
+
+
+def test_update_rejects_empty_body(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    """An empty PATCH must fail client-side, never hitting the wire."""
+
+    with pytest.raises(ValidationError) as exc_info:
+        client.custom_models.update("cm_01")
+    assert exc_info.value.code == "empty_update"
+    assert respx_mock.calls.call_count == 0
+
+
+def test_update_404_maps_to_not_found(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.patch(cp_url("custom-models/missing")).mock(
+        return_value=httpx.Response(
+            404, json={"code": "not_found", "message": "no such model"}
+        )
+    )
+
+    with pytest.raises(NotFoundError):
+        client.custom_models.update("missing", min_replicas=1)
+
+
+def test_update_extra_passes_through(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    """`extra` lets callers PATCH future fields without an SDK release."""
+
+    route = respx_mock.patch(cp_url("custom-models/cm_01")).mock(
+        return_value=httpx.Response(200, json=_model_payload())
+    )
+
+    client.custom_models.update("cm_01", extra={"future_field": "value"})
+    sent = json.loads(route.calls.last.request.content)
+    assert sent == {"future_field": "value"}
+
+
+def test_supported_architectures_returns_typed(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get(cp_url("custom-models/supported-architectures")).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "architectures": [
+                    {
+                        "name": "LlamaForCausalLM",
+                        "capabilities": ["tool_calling", "streaming"],
+                    },
+                    {
+                        "name": "Qwen3VLMoeForConditionalGeneration",
+                        "capabilities": ["vision", "image_input", "streaming"],
+                    },
+                ],
+            },
+        )
+    )
+
+    catalog = client.custom_models.supported_architectures()
+    assert [a.name for a in catalog.architectures] == [
+        "LlamaForCausalLM",
+        "Qwen3VLMoeForConditionalGeneration",
+    ]
+    assert catalog.architectures[1].capabilities == ["vision", "image_input", "streaming"]
+
+
+@pytest.mark.asyncio
+async def test_async_update_sends_patch_with_body(
+    async_client: AsyncClient, respx_mock: respx.MockRouter
+) -> None:
+    route = respx_mock.patch(cp_url("custom-models/cm_01")).mock(
+        return_value=httpx.Response(
+            200, json=_model_payload(min_replicas=2, max_replicas=6)
+        )
+    )
+
+    model = await async_client.custom_models.update(
+        "cm_01", min_replicas=2, max_replicas=6
+    )
+
+    assert route.called
+    sent = json.loads(route.calls.last.request.content)
+    assert sent == {"min_replicas": 2, "max_replicas": 6}
+    assert model.min_replicas == 2
+    assert model.max_replicas == 6
+
+
+@pytest.mark.asyncio
+async def test_async_update_rejects_empty_body(
+    async_client: AsyncClient, respx_mock: respx.MockRouter
+) -> None:
+    with pytest.raises(ValidationError):
+        await async_client.custom_models.update("cm_01")
+    assert respx_mock.calls.call_count == 0
+
+
+@pytest.mark.asyncio
+async def test_async_supported_architectures(
+    async_client: AsyncClient, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get(cp_url("custom-models/supported-architectures")).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "architectures": [
+                    {"name": "LlamaForCausalLM", "capabilities": ["tool_calling"]},
+                ],
+            },
+        )
+    )
+
+    catalog = await async_client.custom_models.supported_architectures()
+    assert catalog.architectures[0].name == "LlamaForCausalLM"
