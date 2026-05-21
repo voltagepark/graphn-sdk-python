@@ -21,6 +21,93 @@ No `git tag`, no `git push --tags`, no Actions clicks.
 
 ## [Unreleased]
 
+## [0.1.6] — 2026-05-21
+
+Spec-sync release plus a matching round of ergonomic wrappers. Picks
+up two new custom-model control-plane endpoints, exposes them
+through `client.custom_models`, and adds typed LoRA-adapter fields
+to the public `CustomModel` and `ValidateModelResponse` Pydantic
+models. The low-level generated client (`graphn._generated`) and
+the hand-curated resource layer (`graphn.custom_models`) are both
+fully in sync with the upstream OpenAPI spec.
+
+### Added
+
+- `client.custom_models.update(model_id, *, name=..., min_replicas=...,
+ max_replicas=..., cooldown_seconds=..., extra=...)` (sync and async).
+ Issues `PATCH /v1/{workspaceId}/custom-models/{modelId}` against the
+ control plane and returns the refreshed :class:`CustomModel`.
+ Mutates a vetted set of post-create fields in place against the
+ live deployment — no rolling restart, no downtime. Immutable fields
+ (`huggingface_model_id`, `weight_source`, GPU topology, …) are not
+ exposed; change them by deleting and re-creating the model. The SDK
+ refuses an empty PATCH client-side (raises
+ `graphn.ValidationError` with code `empty_update`), one round-trip
+ earlier than the server's `422`.
+- `client.custom_models.supported_architectures()` (sync and async).
+ Returns a typed :class:`SupportedArchitectures` catalog of model
+ architectures the platform's serving runtimes can deploy, each
+ annotated with the capability tags (`tool_calling`, `vision`,
+ `image_input`, `video_input`, `streaming`, `json_mode`) it exposes.
+ Intended for driving architecture/capability filters in client UIs
+ before calling :meth:`client.custom_models.validate`. The list is
+ updated alongside platform runtime upgrades; clients should not
+ cache it across build cycles.
+- LoRA-adapter visibility on the existing types. `CustomModel` gains
+ `artifact_type` (`Literal["base", "lora"] | None`), `base_model_id`,
+ `lora_adapter_name`, and `lora_rank` typed fields; older control
+ planes that predate the LoRA work leave `artifact_type` unset and
+ should be treated as `"base"` for compatibility. `ValidateModelResponse`
+ gains `artifact_type`, `detected_base_model_id`, and `lora_rank` so
+ callers can detect that a HuggingFace repo contains a LoRA adapter
+ (via `adapter_config.json`) before deploying. When
+ `artifact_type == "lora"` on the validate response, the
+ `architectures` / `num_params` / `estimated_memory_gb` /
+ `max_context_length` fields describe the **base** model resolved
+ from `adapter_config.json`, not the adapter itself.
+- `client.custom_models.create(..., base_model_id=...)` (sync and async).
+ Required on `weight_source=s3_*` LoRA imports — it's the only way to
+ classify the bundle as an adapter at create time; omitting it routes
+ the import through the base path, and a LoRA bundle that wasn't
+ declared will deploy to `failed` with an actionable error. Optional
+ on `weight_source=huggingface`, where it **overrides**
+ `adapter_config.json::base_model_name_or_path` from the upstream
+ adapter repo — useful when the recorded base id isn't a valid
+ HuggingFace id (e.g. a local filesystem path used during training).
+ The base id must be one of the platform's allowlisted bases (see
+ `client.custom_models.supported_architectures()`).
+- `client.custom_models.validate(..., model_size_gb=...)` (sync and
+ async). Optional caller-supplied estimate (in GiB) of the on-disk
+ weights size. When provided, the platform sizes the model-weights
+ PVC from this hint instead of waiting for a HuggingFace head-bytes
+ probe; useful for very large models (e.g. 405B) where the probe
+ would otherwise stall the validate response.
+- New public exports from `graphn`: `ArchitectureInfo`,
+ `SupportedArchitectures`, `ArtifactType`.
+
+### Changed
+
+- `CustomModelCreate.huggingface_model_id` is now a **required**
+ field on the generated `attrs` dataclass (previously
+ `str | Unset`). This mirrors the server-side behavior already
+ shipped in v0.1.3 (the control plane has returned `422` for omitted
+ `huggingface_model_id` on every weight source since
+ voltagepark/takao#1997) and the client-side `ValidationError` the
+ high-level `client.custom_models.create` resource has raised since
+ v0.1.3. The generated type just catches up; callers using the
+ hand-curated `client.custom_models.create` keyword-only API are
+ unaffected — the high-level resource still accepts
+ `huggingface_model_id` as a keyword argument and the existing
+ client-side guard fires before the request is built.
+- `CustomModelCreate.s3_role_arn` docstring now records the
+ `graphn-byom-*` role-name prefix the platform enforces. No wire or
+ validation change in the SDK; the constraint has been server-side
+ since 0.1.3 and the customer-facing CloudFormation template
+ enforces the same prefix at stack-create time. Doc-only.
+- `CustomModel.gpu_memory_utilization` docstring no longer names the
+ serving engine (`vLLM`). Engine-agnostic wording aligns with the
+ 0.1.3 scrub of customer-facing serving-engine references.
+
 ## [0.1.5] — 2026-05-14
 
 Patch release. Widens the upper bound on the `openai` runtime

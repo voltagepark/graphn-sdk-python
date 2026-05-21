@@ -22,12 +22,15 @@ from graphn._exceptions import (
 from graphn._pagination import AsyncPage, SyncPage
 from graphn._version import __version__
 from graphn.custom_models.types import (
+    ArchitectureInfo,
+    ArtifactType,
     Capability,
     CustomModel,
     CustomModelAccess,
     CustomModelStatus,
     GpuHoursResponse,
     Quantization,
+    SupportedArchitectures,
     ValidateModelResponse,
     WeightSource,
 )
@@ -36,6 +39,8 @@ from graphn.secrets.types import Secret
 __all__ = [
     "APIConnectionError",
     "APIError",
+    "ArchitectureInfo",
+    "ArtifactType",
     "AsyncClient",
     "AsyncPage",
     "AuthenticationError",
@@ -53,6 +58,7 @@ __all__ = [
     "RateLimitError",
     "Secret",
     "ServerError",
+    "SupportedArchitectures",
     "SyncPage",
     "ValidateModelResponse",
     "ValidationError",
