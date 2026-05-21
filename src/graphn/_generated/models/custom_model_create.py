@@ -36,9 +36,14 @@ class CustomModelCreate:
             `s3_assume_role`. Conditional requirement is enforced by
             the server (returns 422); not encoded as a JSON Schema
             keyword for OAS-3.0-tooling compatibility.
-        s3_role_arn (str | Unset): Required when `weight_source` is `s3_assume_role`.
-            Conditional requirement is enforced by the server (returns
-            422); not encoded as a JSON Schema keyword.
+        s3_role_arn (str | Unset): Required when `weight_source` is `s3_assume_role`. The role
+            name (the segment after `:role/`) must start with
+            `graphn-byom-`; GraphN's platform IAM policy is scoped to
+            that prefix as a defense-in-depth boundary, and the
+            customer-facing CloudFormation template enforces the same
+            constraint at stack-create time. Conditional requirement
+            (s3_assume_role only) is enforced by the server (returns
+            422); the format itself is checked against this pattern.
         hf_token_secret_id (str | Unset): ID of a workspace secret holding a HuggingFace access token.
             Required for gated HuggingFace models.
         gpu_count (int | Unset):  Default: 1.
@@ -49,6 +54,27 @@ class CustomModelCreate:
         min_replicas (int | Unset):  Default: 0.
         max_replicas (int | Unset):  Default: 1.
         cooldown_seconds (int | Unset):  Default: 600.
+        base_model_id (str | Unset): Override / hint for LoRA imports. Must be one of the
+            platform's allowlisted base models (see
+            `GET /v1/{workspaceId}/custom-models/supported-architectures`).
+
+            * **`weight_source=s3_*`**: this is the **only** way to
+              classify the bundle as a LoRA adapter at create-time --
+              omitting it routes the import through the base path,
+              and a bundle that later turns out to be a LoRA adapter
+              will deploy to `failed` with an actionable error
+              ("re-create with `base_model_id` set").
+            * **`weight_source=huggingface`**: the field **overrides**
+              `adapter_config.json::base_model_name_or_path` from the
+              adapter repo. Useful for adapters trained against a
+              local filesystem path (e.g. `C:/users/.../base`) whose
+              recorded base id isn't a valid HF id. When the override
+              disagrees with the adapter's declared base the caller's
+              value wins; the disagreement is logged server-side for
+              debuggability.
+
+            Ignored when the resolved artifact type is `base`.
+             Example: Qwen/Qwen3.5-4B.
     """
 
     name: str
@@ -66,6 +92,7 @@ class CustomModelCreate:
     min_replicas: int | Unset = 0
     max_replicas: int | Unset = 1
     cooldown_seconds: int | Unset = 600
+    base_model_id: str | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
@@ -107,6 +134,8 @@ class CustomModelCreate:
 
         cooldown_seconds = self.cooldown_seconds
 
+        base_model_id = self.base_model_id
+
         field_dict: dict[str, Any] = {}
 
         field_dict.update(
@@ -141,6 +170,8 @@ class CustomModelCreate:
             field_dict["max_replicas"] = max_replicas
         if cooldown_seconds is not UNSET:
             field_dict["cooldown_seconds"] = cooldown_seconds
+        if base_model_id is not UNSET:
+            field_dict["base_model_id"] = base_model_id
 
         return field_dict
 
@@ -194,6 +225,8 @@ class CustomModelCreate:
 
         cooldown_seconds = d.pop("cooldown_seconds", UNSET)
 
+        base_model_id = d.pop("base_model_id", UNSET)
+
         custom_model_create = cls(
             name=name,
             huggingface_model_id=huggingface_model_id,
@@ -210,6 +243,7 @@ class CustomModelCreate:
             min_replicas=min_replicas,
             max_replicas=max_replicas,
             cooldown_seconds=cooldown_seconds,
+            base_model_id=base_model_id,
         )
 
         return custom_model_create
