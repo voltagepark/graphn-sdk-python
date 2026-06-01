@@ -49,6 +49,7 @@ from .tts_request import TTSRequest
 from .tts_request_response_format import TTSRequestResponseFormat
 from .validate_model_request import ValidateModelRequest
 from .validate_model_request_quantization import ValidateModelRequestQuantization
+from .validate_model_request_weight_source import ValidateModelRequestWeightSource
 from .validate_model_response import ValidateModelResponse
 from .validate_model_response_artifact_type import ValidateModelResponseArtifactType
 from .weight_source import WeightSource
@@ -101,6 +102,7 @@ __all__ = (
     "TTSRequestResponseFormat",
     "ValidateModelRequest",
     "ValidateModelRequestQuantization",
+    "ValidateModelRequestWeightSource",
     "ValidateModelResponse",
     "ValidateModelResponseArtifactType",
     "WeightSource",

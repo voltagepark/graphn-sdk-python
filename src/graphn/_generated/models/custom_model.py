@@ -6,7 +6,6 @@ from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..models.capability import Capability
 from ..models.custom_model_artifact_type import CustomModelArtifactType
@@ -317,9 +316,9 @@ class CustomModel:
 
         cooldown_seconds = d.pop("cooldown_seconds")
 
-        created_at = isoparse(d.pop("created_at"))
+        created_at = datetime.datetime.fromisoformat(d.pop("created_at"))
 
-        updated_at = isoparse(d.pop("updated_at"))
+        updated_at = datetime.datetime.fromisoformat(d.pop("updated_at"))
 
         display_name = d.pop("display_name", UNSET)
 
