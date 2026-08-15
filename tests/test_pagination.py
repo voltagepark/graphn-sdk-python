@@ -21,6 +21,13 @@ def test_raw_page_accepts_total_field() -> None:
     assert page.continue_token is None
 
 
+def test_raw_page_accepts_bare_list() -> None:
+    page = RawPage.from_response([{"id": "kb_1"}, {"id": "kb_2"}], lambda x: x)
+    assert [item["id"] for item in page.items] == ["kb_1", "kb_2"]
+    assert page.count == 2
+    assert page.continue_token is None
+
+
 def test_sync_page_iterates_across_pages() -> None:
     pages = [
         RawPage(items=["a", "b"], count=2, continue_token="t1"),

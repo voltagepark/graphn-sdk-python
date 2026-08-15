@@ -21,6 +21,34 @@ No `git tag`, no `git push --tags`, no Actions clicks.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-08-15
+
+First-party wrappers for the full CLI-reachable Graphn API (OpenAPI 0.7.0).
+v0.2.x is the agent platform SDK, not an import helper.
+
+### Added
+
+- Resource modules on `Client` / `AsyncClient`: `agents`, `functions`,
+  `mcp_servers`, `workflows`, `executions`, `triggers`, `knowledgebases`,
+  `organizations`, `workspaces`, `api_keys`, `blueprints`, `storages`,
+  `batch`.
+- `imported_models` now has workspace CRUD in addition to discover/test.
+- Polling helpers: `executions.wait`, `knowledgebases.wait_ingest`
+  (alongside `custom_models.wait_until_ready`).
+- `GRAPHN_GATEWAY_URL` and `GRAPHN_STORAGE_URL` on the transport
+  (prod defaults `https://gateway.graphn.ai` / `https://storage.graphn.ai`).
+
+### Changed
+
+- README Scope rewritten for the agent platform. Chat/TTS still
+  delegate to the official `openai` package.
+- `client.models.list()` merges the control-plane catalog
+  (`GET /v1/models`, same as `graphn model list`) with the inference
+  OpenAI list (imported/custom). Inference list alone is not the catalog.
+- `workflows.create` / `workflows.update` auto-link DSL `agents`,
+  `functions`, and `mcp_servers` through `save_bundle`, matching
+  `graphn wf create`. Pass `link_resources=False` to skip.
+
 ## [0.1.6] — 2026-05-21
 
 Spec-sync release plus a matching round of ergonomic wrappers. Picks
@@ -327,5 +355,6 @@ boundary.
 - Requires Python 3.10+.
 - Apache 2.0 licensed (matches the `graphn` CLI).
 
-[Unreleased]: https://github.com/voltagepark/graphn-sdk-python/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/voltagepark/graphn-sdk-python/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/voltagepark/graphn-sdk-python/releases/tag/v0.2.0
 [0.1.0]: https://github.com/voltagepark/graphn-sdk-python/releases/tag/v0.1.0

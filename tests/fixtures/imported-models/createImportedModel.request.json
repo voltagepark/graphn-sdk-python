@@ -1,0 +1,6 @@
+{
+  "name": "my-gpt",
+  "display_name": "My GPT",
+  "endpoint": "https://api.example.com/v1",
+  "model_id": "gpt-4o"
+}

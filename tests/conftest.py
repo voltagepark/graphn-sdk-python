@@ -20,6 +20,8 @@ API_KEY = "gn_test_token"
 WORKSPACE_ID = "ws_test"
 BASE_URL = "https://api.graphn.test"
 INFERENCE_URL = "https://inference.graphn.test"
+GATEWAY_URL = "https://gateway.graphn.test"
+STORAGE_URL = "https://storage.graphn.test"
 
 
 @pytest.fixture
@@ -56,6 +58,8 @@ def client(respx_mock: respx.MockRouter) -> Iterator[Client]:
         workspace_id=WORKSPACE_ID,
         base_url=BASE_URL,
         inference_url=INFERENCE_URL,
+        gateway_url=GATEWAY_URL,
+        storage_url=STORAGE_URL,
         max_retries=0,
         timeout=5.0,
     )
@@ -70,6 +74,8 @@ async def async_client(respx_mock: respx.MockRouter) -> AsyncIterator[AsyncClien
         workspace_id=WORKSPACE_ID,
         base_url=BASE_URL,
         inference_url=INFERENCE_URL,
+        gateway_url=GATEWAY_URL,
+        storage_url=STORAGE_URL,
         max_retries=0,
         timeout=5.0,
     )
@@ -83,6 +89,12 @@ def cp_url(path: str) -> str:
     """Build the absolute control-plane URL for ``path``."""
 
     return f"{BASE_URL}/v1/{WORKSPACE_ID}/{path.lstrip('/')}"
+
+
+def gw_url(path: str) -> str:
+    """Build the absolute gateway URL for ``path``."""
+
+    return f"{GATEWAY_URL}/v1/{WORKSPACE_ID}/{path.lstrip('/')}"
 
 
 def inference_url_for(path: str) -> str:

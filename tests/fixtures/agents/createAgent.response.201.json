@@ -1,0 +1,14 @@
+{
+  "id": "ag_01",
+  "workspace_id": "ws_test",
+  "name": "Research Bot",
+  "spec": {
+    "instructions": "Help me",
+    "model": "qwen3-80b",
+    "mcp_tools": [],
+    "timeout_seconds": 120,
+    "max_llm_calls": 20
+  },
+  "created_at": "2026-08-15T00:00:00Z",
+  "updated_at": "2026-08-15T00:00:00Z"
+}

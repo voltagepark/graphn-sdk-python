@@ -1,0 +1,1 @@
+{"name": "double", "type": "custom", "files": {"main.py": "def main(x):\n    return x * 2\n"}}

@@ -15,7 +15,9 @@ Wraps ``httpx.Client`` / ``httpx.AsyncClient`` with:
 
 The control-plane URL construction utility :func:`cp_path` lives here
 too so resource modules can call ``self._transport.cp_path("custom-models")``
-and stay agnostic of the workspace id wiring.
+and stay agnostic of the workspace id wiring. Gateway and storage hosts
+are absolute URLs so the same ``request()`` can reach all four Graphn
+hosts without swapping the httpx client.
 """
 
 from __future__ import annotations
@@ -89,8 +91,10 @@ class _TransportConfig:
         "api_key",
         "base_url",
         "default_headers",
+        "gateway_url",
         "inference_url",
         "max_retries",
+        "storage_url",
         "timeout",
         "workspace_id",
     )
@@ -102,6 +106,8 @@ class _TransportConfig:
         workspace_id: str,
         base_url: str,
         inference_url: str,
+        gateway_url: str,
+        storage_url: str,
         timeout: float,
         max_retries: int,
         default_headers: Mapping[str, str] | None = None,
@@ -110,6 +116,8 @@ class _TransportConfig:
         self.workspace_id = workspace_id
         self.base_url = base_url.rstrip("/")
         self.inference_url = inference_url.rstrip("/")
+        self.gateway_url = gateway_url.rstrip("/")
+        self.storage_url = storage_url.rstrip("/")
         self.timeout = timeout
         self.max_retries = max_retries
         self.default_headers = _normalize_headers(default_headers)
@@ -130,6 +138,27 @@ class _TransportConfig:
         ws = quote(self.workspace_id, safe="")
         return f"/v1/{ws}/{encoded}"
 
+    def org_path(self, org_id: str, *parts: str) -> str:
+        """Build an org-scoped control-plane path (no workspace segment)."""
+
+        encoded = "/".join(quote(p.strip("/"), safe="") for p in parts if p)
+        oid = quote(org_id, safe="")
+        if encoded:
+            return f"/v1/{oid}/{encoded}"
+        return f"/v1/{oid}"
+
+    def gw_url(self, *parts: str) -> str:
+        """Absolute gateway URL with the workspace id injected."""
+
+        encoded = "/".join(quote(p.strip("/"), safe="") for p in parts if p)
+        ws = quote(self.workspace_id, safe="")
+        return f"{self.gateway_url}/v1/{ws}/{encoded}"
+
+    def storage_object_url(self, bucket: str, key: str) -> str:
+        """Absolute S3-overlay object URL on the storage host."""
+
+        return f"{self.storage_url}/{quote(bucket, safe='')}/{quote(key.lstrip('/'), safe='/')}"
+
 
 class SyncTransport:
     """Synchronous httpx-backed transport."""
@@ -149,12 +178,23 @@ class SyncTransport:
     def cp_path(self, *parts: str) -> str:
         return self._cfg.cp_path(*parts)
 
+    def org_path(self, org_id: str, *parts: str) -> str:
+        return self._cfg.org_path(org_id, *parts)
+
+    def gw_url(self, *parts: str) -> str:
+        return self._cfg.gw_url(*parts)
+
+    def storage_object_url(self, bucket: str, key: str) -> str:
+        return self._cfg.storage_object_url(bucket, key)
+
     def request(
         self,
         method: str,
         path: str,
         *,
         json: Any = None,
+        content: bytes | None = None,
+        files: Any = None,
         params: Mapping[str, Any] | None = None,
         headers: Mapping[str, str] | None = None,
         idempotency_key: str | None = None,
@@ -173,6 +213,8 @@ class SyncTransport:
                     method,
                     path,
                     json=json,
+                    content=content,
+                    files=files,
                     params=params,
                     headers=merged_headers,
                 )
@@ -215,12 +257,23 @@ class AsyncTransport:
     def cp_path(self, *parts: str) -> str:
         return self._cfg.cp_path(*parts)
 
+    def org_path(self, org_id: str, *parts: str) -> str:
+        return self._cfg.org_path(org_id, *parts)
+
+    def gw_url(self, *parts: str) -> str:
+        return self._cfg.gw_url(*parts)
+
+    def storage_object_url(self, bucket: str, key: str) -> str:
+        return self._cfg.storage_object_url(bucket, key)
+
     async def request(
         self,
         method: str,
         path: str,
         *,
         json: Any = None,
+        content: bytes | None = None,
+        files: Any = None,
         params: Mapping[str, Any] | None = None,
         headers: Mapping[str, str] | None = None,
         idempotency_key: str | None = None,
@@ -239,6 +292,8 @@ class AsyncTransport:
                     method,
                     path,
                     json=json,
+                    content=content,
+                    files=files,
                     params=params,
                     headers=merged_headers,
                 )

@@ -49,9 +49,14 @@ class RawPage(Generic[T]):
     @classmethod
     def from_response(
         cls,
-        body: Mapping[str, Any],
+        body: Mapping[str, Any] | list[Any],
         item_builder: ItemBuilder[T],
     ) -> RawPage[T]:
+        # Knowledge bases (and a few proxied services) return a bare JSON
+        # array. Envelope lists use ``items`` plus ``count`` or ``total``.
+        if isinstance(body, list):
+            items = [item_builder(item) for item in body]
+            return cls(items=items, count=len(items), continue_token=None)
         items = [item_builder(item) for item in body.get("items", []) or []]
         # The spec uses ``count`` for ``SecretList`` but ``total`` for
         # ``CustomModelList``; accept either so the same helper works
