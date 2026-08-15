@@ -5,41 +5,38 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Tests](https://github.com/voltagepark/graphn-sdk-python/actions/workflows/test.yml/badge.svg)](https://github.com/voltagepark/graphn-sdk-python/actions/workflows/test.yml)
 
-The official Python SDK for [Graphn](https://graphn.ai). Import any
-LLM — from HuggingFace or your own S3 bucket — into your workspace,
-get an OpenAI-compatible inference endpoint, and call it from Python
-in a handful of lines, without standing up a single GPU yourself.
+The official Python SDK for [Graphn](https://graphn.ai). Author
+workflows, agents, functions, and knowledge bases, then run them —
+or import a custom model and chat through the OpenAI-compatible
+inference endpoint — from Python.
 
-> **v0.1.x scope** — This release line covers **custom-model import
-> (HuggingFace + S3) and OpenAI-compatible inference** end-to-end.
-> A lot of the broader Graphn platform
-> (agents, knowledge bases, workflows, evals, datasets, guardrails,
-> billing, full BYO-inference CRUD, etc.) is **not yet exposed**
-> through this SDK. Those surfaces will be added in subsequent
-> minor releases as their HTTP APIs stabilize. See
-> [Scope](#scope) below for the exact list.
+> **v0.2.x** covers the full CLI-reachable Graphn API (control plane,
+> inference, gateway, and storage). Python is the only first-party
+> wrapped package; other languages generate from the public
+> [OpenAPI spec](https://github.com/voltagepark/graphn-openapi).
+> See [Scope](#scope) below.
 
 ```python
 import graphn
 
 with graphn.Client() as c:
-    model = c.custom_models.create(
-        name="my-llama",
-        huggingface_model_id="Qwen/Qwen3-0.6B",
-        weight_source="huggingface",
-    )
-    c.custom_models.wait_until_ready(model.id)
+    wf = c.workflows.create(name="qa", dsl="name: qa\nsteps: []")
+    c.workflows.publish(wf.id)
+    run = c.workflows.run(wf.id, input={"q": "..."})
+    result = c.executions.wait(run.execution_id or "")
+    hits = c.knowledgebases.search("kb_...", query="...")
+```
 
+Chat and TTS still go through the official `openai` package:
+
+```python
+with graphn.Client() as c:
     resp = c.chat.completions.create(
-        model=model.id,
+        model="Qwen/Qwen3-0.6B",
         messages=[{"role": "user", "content": "Hello!"}],
     )
     print(resp.choices[0].message.content)
 ```
-
-That's it. Cold-start, retry, OpenAI-compatible serialization, and
-the gateway's routing prefix are all handled for you — pass the
-bare `model.id` everywhere.
 
 ## Install
 
@@ -56,8 +53,10 @@ The SDK reads credentials from the environment by default:
 ```bash
 export GRAPHN_API_KEY=gn_...           # required
 export GRAPHN_WORKSPACE_ID=ws_...      # required
-export GRAPHN_BASE_URL=https://cp.graphn.ai      # optional
+export GRAPHN_BASE_URL=https://cp.graphn.ai          # optional
 export GRAPHN_INFERENCE_URL=https://model.graphn.ai  # optional
+export GRAPHN_GATEWAY_URL=https://gateway.graphn.ai  # optional
+export GRAPHN_STORAGE_URL=https://storage.graphn.ai  # optional
 ```
 
 Or pass them explicitly:
@@ -70,43 +69,48 @@ Get an API key from the [Graphn dashboard](https://graphn.ai).
 
 ## Scope
 
-### What's in the box (v0.1.x)
+### What's in the box (v0.2.x)
 
 | Module | What it does |
 |---|---|
-| `client.custom_models` | Import models from HuggingFace, S3 presigned URLs, or S3 + IAM role; list, get, refresh, wake, delete, `wait_until_ready`, validate |
-| `client.secrets` | CRUD for workspace secrets (HuggingFace tokens, etc) |
-| `client.chat.completions` | OpenAI-compatible chat completions, streaming + non-streaming, **with auto-wake on cold start** |
-| `client.models` | List models served by the gateway |
+| `client.workflows` | CRUD, publish, bundle, versions, run, test, dry-run. `create`/`update` auto-link DSL `agents`/`functions`/`mcp_servers` via `save_bundle` (same as `graphn wf create`) |
+| `client.agents` | CRUD, publish, archive, dry-run, run |
+| `client.functions` | CRUD, builtins, publish, test, dry-run |
+| `client.mcp_servers` | CRUD, publish, start/stop/status, tools, refresh |
+| `client.executions` | list/get; `wait` polls until terminal; UUID ids go to the gateway |
+| `client.triggers` | Workspace-scoped cron/webhook trigger CRUD |
+| `client.knowledgebases` | CRUD, documents, search, ingest; `wait_ingest` |
+| `client.imported_models` | Full BYO CRUD plus discover/test on the inference host |
+| `client.organizations` / `client.workspaces` / `client.api_keys` | Org, workspace, and API-key administration |
+| `client.blueprints` | Public catalog list/get and workspace deploy |
+| `client.storages` | REST object-store overlay plus S3-host get/put/delete |
+| `client.batch` | Gateway batch submit, poll, items, JSONL output, cancel |
+| `client.custom_models` | Import from HuggingFace / S3; `wait_until_ready`, validate |
+| `client.secrets` | CRUD for workspace secrets |
+| `client.chat.completions` | OpenAI-compatible chat, streaming + non-streaming, **with auto-wake on cold start** |
+| `client.models` | List every callable model: CP catalog plus imported/custom from inference |
 | `client.tts` | Text-to-speech: list voices, synthesize |
-| `client.imported_models` | Discover and probe BYO inference endpoints (read-only, no full CRUD yet) |
 
 Both `graphn.Client` and `graphn.AsyncClient` exist with identical APIs.
 
-### What's *not* in the box yet
+### Not wrapped (generate from the spec, or wait)
 
-The Graphn platform is broader than what's exposed here. The
-following surfaces exist on the platform but do **not** have SDK
-coverage in v0.1.x — file an issue on the
+These exist on the platform but are **not** first-class SDK resources
+in v0.2.x — file an issue on the
 [SDK repo](https://github.com/voltagepark/graphn-sdk-python/issues)
 to vote on what you need next:
 
-- **Agents** — defining, running, and inspecting agent workflows
-- **Knowledge bases / RAG** — corpus management, retrieval, indexing
-- **Workflows** — long-running Temporal-backed orchestration
-- **Evals & datasets** — eval suites, dataset upload, run results
-- **Guardrails** — policy authoring and inference-time enforcement
-- **Imported models (BYO inference) — full CRUD** — only listing
-  and probe are exposed today
-- **Usage & billing** — usage stats, GPU-hour reporting beyond the
-  read-only `client.custom_models.gpu_hours()` helper
-- **Workspace / member / API-key administration**
+- **Evals & datasets**
+- **Guardrails** (policy authoring)
+- **Voice agents / conversations**
+- **Usage & billing** beyond `client.custom_models.gpu_hours()`
 
-Until they land here, those endpoints can be hit via raw HTTP using
-your `gn_...` API key. The control plane is documented at
-[graphn.ai/docs/api](https://graphn.ai/docs/api) and the OpenAPI
-3.1 spec is mirrored at
-[voltagepark/graphn-openapi](https://github.com/voltagepark/graphn-openapi).
+Those endpoints can still be hit via raw HTTP using your `gn_...` API
+key. The OpenAPI 3.1 spec is mirrored at
+[voltagepark/graphn-openapi](https://github.com/voltagepark/graphn-openapi)
+and rendered at [graphn.ai/api](https://graphn.ai/api). Other languages
+generate from that spec (`npx @hey-api/openapi-ts`, `oapi-codegen`,
+`openapi-generator-cli -g java`).
 
 ## The 80% recipe: import a model and chat with it
 

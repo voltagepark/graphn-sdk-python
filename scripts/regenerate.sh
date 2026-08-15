@@ -69,9 +69,14 @@ fi
 
 echo "[regenerate] using spec: ${spec}"
 
-if ! command -v openapi-python-client >/dev/null 2>&1; then
+if command -v openapi-python-client >/dev/null 2>&1; then
+    GENERATE=(openapi-python-client generate)
+elif command -v uvx >/dev/null 2>&1; then
+    GENERATE=(uvx --from 'openapi-python-client>=0.21' openapi-python-client generate)
+else
     echo "[regenerate] openapi-python-client not found; install with:" >&2
     echo "             pip install -e '.[dev]'" >&2
+    echo "             or install uv and re-run (uvx fallback)." >&2
     exit 1
 fi
 
@@ -97,9 +102,9 @@ generator_args=(
 )
 
 if [[ "${spec}" == http://* || "${spec}" == https://* ]]; then
-    openapi-python-client generate --url "${spec}" "${generator_args[@]}"
+    "${GENERATE[@]}" --url "${spec}" "${generator_args[@]}"
 else
-    openapi-python-client generate --path "${spec}" "${generator_args[@]}"
+    "${GENERATE[@]}" --path "${spec}" "${generator_args[@]}"
 fi
 
 if [[ ! -d "${WORKDIR}/out" ]]; then

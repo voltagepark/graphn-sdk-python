@@ -39,9 +39,7 @@ def _model_payload(**overrides: object) -> dict[str, object]:
     return base
 
 
-def test_create_sends_workspace_path_and_body(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_create_sends_workspace_path_and_body(client: Client, respx_mock: respx.MockRouter) -> None:
     route = respx_mock.post(cp_url("custom-models")).mock(
         return_value=httpx.Response(201, json=_model_payload())
     )
@@ -70,9 +68,7 @@ def test_create_sends_workspace_path_and_body(
     assert model.status == "pending"
 
 
-def test_create_attaches_idempotency_key(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_create_attaches_idempotency_key(client: Client, respx_mock: respx.MockRouter) -> None:
     route = respx_mock.post(cp_url("custom-models")).mock(
         return_value=httpx.Response(201, json=_model_payload())
     )
@@ -86,9 +82,7 @@ def test_create_attaches_idempotency_key(
     assert route.calls.last.request.headers["Idempotency-Key"] == "abc-123"
 
 
-def test_get_returns_typed_model(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_get_returns_typed_model(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("custom-models/cm_01")).mock(
         return_value=httpx.Response(200, json=_model_payload(status="ready"))
     )
@@ -97,9 +91,7 @@ def test_get_returns_typed_model(
     assert model.status == "ready"
 
 
-def test_get_404_maps_to_not_found(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_get_404_maps_to_not_found(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("custom-models/missing")).mock(
         return_value=httpx.Response(
             404,
@@ -113,9 +105,7 @@ def test_get_404_maps_to_not_found(
     assert exc_info.value.message == "no such model"
 
 
-def test_validate_400_raises_validation_error(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_validate_400_raises_validation_error(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.post(cp_url("custom-models/validate")).mock(
         return_value=httpx.Response(
             422,
@@ -142,9 +132,7 @@ def test_wait_until_ready_polls_until_ready(
         ]
     )
 
-    model = client.custom_models.wait_until_ready(
-        "cm_01", timeout=60, poll_interval=0.1
-    )
+    model = client.custom_models.wait_until_ready("cm_01", timeout=60, poll_interval=0.1)
 
     assert model.status == "ready"
     assert route.call_count == 3
@@ -173,9 +161,7 @@ def test_wait_until_ready_times_out(
 ) -> None:
     monkeypatch.setattr("graphn.custom_models.resource.time.sleep", lambda _: None)
     times = iter([0.0, 0.0, 100.0])
-    monkeypatch.setattr(
-        "graphn.custom_models.resource.time.monotonic", lambda: next(times)
-    )
+    monkeypatch.setattr("graphn.custom_models.resource.time.monotonic", lambda: next(times))
     respx_mock.post(cp_url("custom-models/cm_01/refresh")).mock(
         return_value=httpx.Response(200, json=_model_payload(status="deploying"))
     )
@@ -184,9 +170,7 @@ def test_wait_until_ready_times_out(
         client.custom_models.wait_until_ready("cm_01", timeout=1, poll_interval=0.1)
 
 
-def test_list_auto_paginates(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_list_auto_paginates(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("custom-models")).mock(
         side_effect=[
             httpx.Response(
@@ -314,9 +298,7 @@ def test_create_huggingface_does_not_require_huggingface_model_id_client_side(
     )
 
     with pytest.raises(ValidationError) as exc_info:
-        client.custom_models.create(
-            name="my-hf-model", weight_source="huggingface"
-        )
+        client.custom_models.create(name="my-hf-model", weight_source="huggingface")
     assert route.called
     assert exc_info.value.code == "validation_error"
 
@@ -335,9 +317,7 @@ async def test_async_create_s3_requires_huggingface_model_id(
     assert respx_mock.calls.call_count == 0
 
 
-def test_create_s3_lora_passes_base_model_id(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_create_s3_lora_passes_base_model_id(client: Client, respx_mock: respx.MockRouter) -> None:
     """`base_model_id` is the only way to classify an S3 bundle as LoRA at create."""
 
     route = respx_mock.post(cp_url("custom-models")).mock(
@@ -386,9 +366,7 @@ def test_create_huggingface_lora_override_passes_base_model_id(
     assert sent["base_model_id"] == "meta-llama/Llama-3-8B"
 
 
-def test_get_returns_typed_lora_fields(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_get_returns_typed_lora_fields(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("custom-models/cm_lora")).mock(
         return_value=httpx.Response(
             200,
@@ -425,9 +403,7 @@ def test_get_legacy_response_treats_artifact_type_as_none(
     assert model.lora_rank is None
 
 
-def test_validate_returns_lora_fields(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_validate_returns_lora_fields(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.post(cp_url("custom-models/validate")).mock(
         return_value=httpx.Response(
             200,
@@ -449,9 +425,7 @@ def test_validate_returns_lora_fields(
     assert resp.lora_rank == 16
 
 
-def test_validate_forwards_model_size_gb(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_validate_forwards_model_size_gb(client: Client, respx_mock: respx.MockRouter) -> None:
     route = respx_mock.post(cp_url("custom-models/validate")).mock(
         return_value=httpx.Response(200, json={"valid": True})
     )
@@ -464,9 +438,7 @@ def test_validate_forwards_model_size_gb(
     assert sent["model_size_gb"] == 812
 
 
-def test_update_sends_patch_with_body(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_update_sends_patch_with_body(client: Client, respx_mock: respx.MockRouter) -> None:
     route = respx_mock.patch(cp_url("custom-models/cm_01")).mock(
         return_value=httpx.Response(
             200,
@@ -502,9 +474,7 @@ def test_update_sends_patch_with_body(
     assert model.cooldown_seconds == 300
 
 
-def test_update_rejects_empty_body(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_update_rejects_empty_body(client: Client, respx_mock: respx.MockRouter) -> None:
     """An empty PATCH must fail client-side, never hitting the wire."""
 
     with pytest.raises(ValidationError) as exc_info:
@@ -513,22 +483,16 @@ def test_update_rejects_empty_body(
     assert respx_mock.calls.call_count == 0
 
 
-def test_update_404_maps_to_not_found(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_update_404_maps_to_not_found(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.patch(cp_url("custom-models/missing")).mock(
-        return_value=httpx.Response(
-            404, json={"code": "not_found", "message": "no such model"}
-        )
+        return_value=httpx.Response(404, json={"code": "not_found", "message": "no such model"})
     )
 
     with pytest.raises(NotFoundError):
         client.custom_models.update("missing", min_replicas=1)
 
 
-def test_update_extra_passes_through(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_update_extra_passes_through(client: Client, respx_mock: respx.MockRouter) -> None:
     """`extra` lets callers PATCH future fields without an SDK release."""
 
     route = respx_mock.patch(cp_url("custom-models/cm_01")).mock(
@@ -574,14 +538,10 @@ async def test_async_update_sends_patch_with_body(
     async_client: AsyncClient, respx_mock: respx.MockRouter
 ) -> None:
     route = respx_mock.patch(cp_url("custom-models/cm_01")).mock(
-        return_value=httpx.Response(
-            200, json=_model_payload(min_replicas=2, max_replicas=6)
-        )
+        return_value=httpx.Response(200, json=_model_payload(min_replicas=2, max_replicas=6))
     )
 
-    model = await async_client.custom_models.update(
-        "cm_01", min_replicas=2, max_replicas=6
-    )
+    model = await async_client.custom_models.update("cm_01", min_replicas=2, max_replicas=6)
 
     assert route.called
     sent = json.loads(route.calls.last.request.content)

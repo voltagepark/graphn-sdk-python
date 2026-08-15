@@ -1,23 +1,22 @@
-"""Imported (BYO) model discovery + connectivity checks.
-
-Both endpoints live on the inference host and are used by the dashboard
-to validate user-provided OpenAI-compatible endpoints before importing
-them into a workspace.
-"""
+"""Imported (BYO) models: workspace CRUD plus inference-host probes."""
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from datetime import datetime
 from typing import Any
 
 import httpx
 from pydantic import BaseModel, ConfigDict
 
+from graphn._pagination import AsyncPage, RawPage, SyncPage
 from graphn._transport import (
     AsyncTransport,
     SyncTransport,
     _build_error,
     _TransportConfig,
 )
+from graphn._util import compact, merge_extra, page_params
 
 _DISCOVER_PATH = "/v1/imported-models/discover-models"
 _TEST_PATH = "/v1/imported-models/test-connection"
@@ -42,6 +41,24 @@ class TestConnectionResponse(BaseModel):
     response: str
     model: str
     usage: dict[str, Any] | None = None
+
+
+class ImportedModel(BaseModel):
+    model_config = ConfigDict(extra="allow", frozen=True)
+
+    id: str
+    name: str
+    display_name: str
+    workspace_id: str
+    endpoint: str
+    model_id: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    owner_id: str | None = None
+    api_key_secret_id: str | None = None
+    type: str | None = None
+    description: str | None = None
 
 
 def _discover_body(*, endpoint: str, api_key_secret_id: str) -> dict[str, Any]:
@@ -116,6 +133,71 @@ class ImportedModels:
             raise _build_error(response, request_id=None)
         return TestConnectionResponse.model_validate(response.json())
 
+    def create(
+        self,
+        *,
+        name: str,
+        display_name: str,
+        endpoint: str,
+        model_id: str,
+        extra: Mapping[str, Any] | None = None,
+        **fields: Any,
+    ) -> ImportedModel:
+        data = self._transport.request(
+            "POST",
+            self._transport.cp_path("imported-models"),
+            json=merge_extra(
+                compact(
+                    {
+                        "name": name,
+                        "display_name": display_name,
+                        "endpoint": endpoint,
+                        "model_id": model_id,
+                        **fields,
+                    }
+                ),
+                extra,
+            ),
+        )
+        return ImportedModel.model_validate(data)
+
+    def list(
+        self,
+        *,
+        limit: int | None = None,
+        continue_token: str | None = None,
+    ) -> SyncPage[ImportedModel]:
+        def fetch(token: str | None) -> RawPage[ImportedModel]:
+            data = self._transport.request(
+                "GET",
+                self._transport.cp_path("imported-models"),
+                params=page_params(limit, token),
+            )
+            return RawPage.from_response(data or {}, ImportedModel.model_validate)
+
+        first = fetch(continue_token)
+        return SyncPage(first=first, fetch_next=fetch)
+
+    def get(self, imported_model_id: str) -> ImportedModel:
+        data = self._transport.request(
+            "GET", self._transport.cp_path("imported-models", imported_model_id)
+        )
+        return ImportedModel.model_validate(data)
+
+    def update(self, imported_model_id: str, **fields: Any) -> ImportedModel:
+        extra = fields.pop("extra", None)
+        data = self._transport.request(
+            "PUT",
+            self._transport.cp_path("imported-models", imported_model_id),
+            json=merge_extra(compact(fields), extra),
+        )
+        return ImportedModel.model_validate(data)
+
+    def delete(self, imported_model_id: str) -> None:
+        self._transport.request(
+            "DELETE", self._transport.cp_path("imported-models", imported_model_id)
+        )
+
     def close(self) -> None:
         if self._client is not None:
             self._client.close()
@@ -170,6 +252,71 @@ class AsyncImportedModels:
         if response.status_code >= 400:
             raise _build_error(response, request_id=None)
         return TestConnectionResponse.model_validate(response.json())
+
+    async def create(
+        self,
+        *,
+        name: str,
+        display_name: str,
+        endpoint: str,
+        model_id: str,
+        extra: Mapping[str, Any] | None = None,
+        **fields: Any,
+    ) -> ImportedModel:
+        data = await self._transport.request(
+            "POST",
+            self._transport.cp_path("imported-models"),
+            json=merge_extra(
+                compact(
+                    {
+                        "name": name,
+                        "display_name": display_name,
+                        "endpoint": endpoint,
+                        "model_id": model_id,
+                        **fields,
+                    }
+                ),
+                extra,
+            ),
+        )
+        return ImportedModel.model_validate(data)
+
+    async def list(
+        self,
+        *,
+        limit: int | None = None,
+        continue_token: str | None = None,
+    ) -> AsyncPage[ImportedModel]:
+        async def fetch(token: str | None) -> RawPage[ImportedModel]:
+            data = await self._transport.request(
+                "GET",
+                self._transport.cp_path("imported-models"),
+                params=page_params(limit, token),
+            )
+            return RawPage.from_response(data or {}, ImportedModel.model_validate)
+
+        first = await fetch(continue_token)
+        return AsyncPage(first=first, fetch_next=fetch)
+
+    async def get(self, imported_model_id: str) -> ImportedModel:
+        data = await self._transport.request(
+            "GET", self._transport.cp_path("imported-models", imported_model_id)
+        )
+        return ImportedModel.model_validate(data)
+
+    async def update(self, imported_model_id: str, **fields: Any) -> ImportedModel:
+        extra = fields.pop("extra", None)
+        data = await self._transport.request(
+            "PUT",
+            self._transport.cp_path("imported-models", imported_model_id),
+            json=merge_extra(compact(fields), extra),
+        )
+        return ImportedModel.model_validate(data)
+
+    async def delete(self, imported_model_id: str) -> None:
+        await self._transport.request(
+            "DELETE", self._transport.cp_path("imported-models", imported_model_id)
+        )
 
     async def aclose(self) -> None:
         if self._client is not None:

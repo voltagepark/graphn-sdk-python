@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "graphn"
-version = "0.1.6"
-description = "Official Python SDK for the Graphn API: custom-model lifecycle, secrets, and OpenAI-compatible inference."
+version = "0.2.0"
+description = "Official Python SDK for the Graphn API: workflows, agents, knowledge bases, custom models, and OpenAI-compatible inference."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [{ name = "Voltage Park" }]
-keywords = ["graphn", "voltagepark", "llm", "inference", "custom-models", "openai"]
+keywords = ["graphn", "voltagepark", "llm", "inference", "agents", "workflows", "custom-models", "openai"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

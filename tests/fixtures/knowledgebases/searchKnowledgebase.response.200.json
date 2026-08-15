@@ -1,0 +1,13 @@
+{
+  "query": "hello",
+  "total": 1,
+  "results": [
+    {
+      "id": "chunk_1",
+      "text": "hello world",
+      "score": 0.9,
+      "document_id": "doc_1",
+      "source": "notes.txt"
+    }
+  ]
+}

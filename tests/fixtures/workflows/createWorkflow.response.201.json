@@ -1,0 +1,8 @@
+{
+  "id": "wf_01",
+  "workspace_id": "ws_test",
+  "name": "qa",
+  "dsl": "name: qa\nsteps: []",
+  "created_at": "2026-08-15T00:00:00Z",
+  "updated_at": "2026-08-15T00:00:00Z"
+}

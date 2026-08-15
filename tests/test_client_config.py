@@ -25,6 +25,8 @@ def test_resolves_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("GRAPHN_WORKSPACE_ID", "ws_env")
     monkeypatch.setenv("GRAPHN_BASE_URL", "https://api.graphn.test")
     monkeypatch.setenv("GRAPHN_INFERENCE_URL", "https://inference.graphn.test")
+    monkeypatch.setenv("GRAPHN_GATEWAY_URL", "https://gateway.graphn.test")
+    monkeypatch.setenv("GRAPHN_STORAGE_URL", "https://storage.graphn.test")
 
     client = Client()
     try:
@@ -32,6 +34,8 @@ def test_resolves_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
         assert client.workspace_id == "ws_env"
         assert client.base_url == "https://api.graphn.test"
         assert client.inference_url == "https://inference.graphn.test"
+        assert client.gateway_url == "https://gateway.graphn.test"
+        assert client.storage_url == "https://storage.graphn.test"
     finally:
         client.close()
 
@@ -41,6 +45,8 @@ def test_default_base_urls() -> None:
     try:
         assert client.base_url == "https://cp.graphn.ai"
         assert client.inference_url == "https://model.graphn.ai"
+        assert client.gateway_url == "https://gateway.graphn.ai"
+        assert client.storage_url == "https://storage.graphn.ai"
     finally:
         client.close()
 

@@ -67,9 +67,22 @@ def test_chat_completions_propagates_error_responses(
         )
 
 
-def test_models_list_uses_inference_host(
+def test_models_list_merges_cp_catalog_and_inference(
     client: Client, respx_mock: respx.MockRouter
 ) -> None:
+    from tests.conftest import BASE_URL
+
+    respx_mock.get(f"{BASE_URL}/v1/models").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "models": [
+                    {"id": "qwen3-80b", "name": "qwen3-80b", "source": "built-in"},
+                    {"id": "whisper-large-v3", "name": "whisper-large-v3"},
+                ]
+            },
+        )
+    )
     respx_mock.get(inference_url_for("v1/models")).mock(
         return_value=httpx.Response(
             200,
@@ -77,18 +90,41 @@ def test_models_list_uses_inference_host(
                 "object": "list",
                 "data": [
                     {
-                        "id": "my-llama",
+                        "id": "opus-4-6",
                         "object": "model",
                         "created": 1,
-                        "owned_by": "graphn",
-                    }
+                        "owned_by": "imported",
+                    },
+                    {
+                        "id": "qwen3-80b",
+                        "object": "model",
+                        "owned_by": "built-in",
+                    },
                 ],
             },
         )
     )
 
     models = list(client.models.list())
-    assert [m.id for m in models] == ["my-llama"]
+    assert [m.id for m in models] == ["qwen3-80b", "whisper-large-v3", "opus-4-6"]
+    by_id = {m.id: m for m in models}
+    assert by_id["opus-4-6"].owned_by == "imported"
+
+
+def test_models_list_survives_inference_failure(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    from tests.conftest import BASE_URL
+
+    respx_mock.get(f"{BASE_URL}/v1/models").mock(
+        return_value=httpx.Response(200, json={"models": [{"id": "qwen3-80b"}]})
+    )
+    respx_mock.get(inference_url_for("v1/models")).mock(
+        return_value=httpx.Response(502, json={"error": "upstream"})
+    )
+
+    models = list(client.models.list())
+    assert [m.id for m in models] == ["qwen3-80b"]
 
 
 @pytest.mark.asyncio
@@ -108,10 +144,7 @@ async def test_async_chat_completions(
 
 _COLD_START_BODY = {
     "error": {
-        "message": (
-            "Model is scaled to zero and is now warming up. "
-            "Try again in 1-2 minutes."
-        ),
+        "message": ("Model is scaled to zero and is now warming up. Try again in 1-2 minutes."),
         "type": "service_unavailable",
     }
 }
@@ -131,9 +164,7 @@ def test_chat_auto_wakes_cold_custom_model_and_retries(
             httpx.Response(200, json=_CHAT_RESPONSE),
         ]
     )
-    wake_route = respx_mock.post(
-        cp_url("custom-models/cm_deadbeef/wake")
-    ).mock(
+    wake_route = respx_mock.post(cp_url("custom-models/cm_deadbeef/wake")).mock(
         return_value=httpx.Response(
             200,
             json={
@@ -196,9 +227,7 @@ def test_chat_does_not_wake_for_built_in_models(
     assert not wake_route.called
 
 
-def test_chat_auto_wake_can_be_disabled(
-    client: Client, respx_mock: respx.MockRouter
-) -> None:
+def test_chat_auto_wake_can_be_disabled(client: Client, respx_mock: respx.MockRouter) -> None:
     from openai import InternalServerError
 
     from tests.conftest import cp_url
@@ -232,9 +261,7 @@ async def test_async_chat_auto_wakes_cold_custom_model(
             httpx.Response(200, json=_CHAT_RESPONSE),
         ]
     )
-    wake_route = respx_mock.post(
-        cp_url("custom-models/cm_aabbccdd/wake")
-    ).mock(
+    wake_route = respx_mock.post(cp_url("custom-models/cm_aabbccdd/wake")).mock(
         return_value=httpx.Response(
             200,
             json={

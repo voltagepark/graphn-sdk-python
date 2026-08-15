@@ -6,7 +6,7 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
+from typing_extensions import Self
 
 from ..types import UNSET, Unset
 
@@ -77,7 +77,7 @@ class Secret:
         return field_dict
 
     @classmethod
-    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+    def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -87,9 +87,9 @@ class Secret:
 
         value_preview = d.pop("value_preview")
 
-        created_at = isoparse(d.pop("created_at"))
+        created_at = datetime.datetime.fromisoformat(d.pop("created_at"))
 
-        updated_at = isoparse(d.pop("updated_at"))
+        updated_at = datetime.datetime.fromisoformat(d.pop("updated_at"))
 
         provider_id = d.pop("provider_id", UNSET)
 
