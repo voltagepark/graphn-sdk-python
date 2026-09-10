@@ -92,7 +92,9 @@ class AgentSpec:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.agent_spec_output_schema import AgentSpecOutputSchema
+        from ..models.agent_spec_output_schema import (
+            AgentSpecOutputSchema,
+        )
         from ..models.model_settings import ModelSettings
         from ..models.tool_reference import ToolReference
 

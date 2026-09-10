@@ -81,7 +81,9 @@ class ChatCompletionResponse:
         from ..models.chat_completion_response_choices_item import (
             ChatCompletionResponseChoicesItem,
         )
-        from ..models.chat_completion_response_usage import ChatCompletionResponseUsage
+        from ..models.chat_completion_response_usage import (
+            ChatCompletionResponseUsage,
+        )
 
         d = dict(src_dict)
         id = d.pop("id")

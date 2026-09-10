@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ValidateModelRequestQuantization(str, Enum):
+class ValidateModelRequestQuantization(StrEnum):
     AWQ = "awq"
     FP8 = "fp8"
     GGUF = "gguf"

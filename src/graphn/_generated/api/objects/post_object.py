@@ -125,12 +125,12 @@ def sync_detailed(
     upload_id: str | Unset = UNSET,
     part_number: int | Unset = UNSET,
 ) -> Response[Error | StoragePostResult]:
-    r"""MPU init/complete or mint a presigned URL
+    """MPU init/complete or mint a presigned URL
 
      Query-string dispatch:
 
     - `?uploads` — initiate multipart upload.
-    - `?uploadId=` — complete MPU. Body `{ \"parts\":[{\"part_number\":N,\"etag\":\"...\"}] }`.
+    - `?uploadId=` — complete MPU. Body `{ "parts":[{"part_number":N,"etag":"..."}] }`.
     - `?type=download&expires=SEC` — presigned GET.
     - `?type=upload&expires=&max-size=&content-type=` — presigned PUT.
     - `?type=upload_part&upload_id=&part_number=` — presigned MPU part.
@@ -192,12 +192,12 @@ def sync(
     upload_id: str | Unset = UNSET,
     part_number: int | Unset = UNSET,
 ) -> Error | StoragePostResult | None:
-    r"""MPU init/complete or mint a presigned URL
+    """MPU init/complete or mint a presigned URL
 
      Query-string dispatch:
 
     - `?uploads` — initiate multipart upload.
-    - `?uploadId=` — complete MPU. Body `{ \"parts\":[{\"part_number\":N,\"etag\":\"...\"}] }`.
+    - `?uploadId=` — complete MPU. Body `{ "parts":[{"part_number":N,"etag":"..."}] }`.
     - `?type=download&expires=SEC` — presigned GET.
     - `?type=upload&expires=&max-size=&content-type=` — presigned PUT.
     - `?type=upload_part&upload_id=&part_number=` — presigned MPU part.
@@ -254,12 +254,12 @@ async def asyncio_detailed(
     upload_id: str | Unset = UNSET,
     part_number: int | Unset = UNSET,
 ) -> Response[Error | StoragePostResult]:
-    r"""MPU init/complete or mint a presigned URL
+    """MPU init/complete or mint a presigned URL
 
      Query-string dispatch:
 
     - `?uploads` — initiate multipart upload.
-    - `?uploadId=` — complete MPU. Body `{ \"parts\":[{\"part_number\":N,\"etag\":\"...\"}] }`.
+    - `?uploadId=` — complete MPU. Body `{ "parts":[{"part_number":N,"etag":"..."}] }`.
     - `?type=download&expires=SEC` — presigned GET.
     - `?type=upload&expires=&max-size=&content-type=` — presigned PUT.
     - `?type=upload_part&upload_id=&part_number=` — presigned MPU part.
@@ -319,12 +319,12 @@ async def asyncio(
     upload_id: str | Unset = UNSET,
     part_number: int | Unset = UNSET,
 ) -> Error | StoragePostResult | None:
-    r"""MPU init/complete or mint a presigned URL
+    """MPU init/complete or mint a presigned URL
 
      Query-string dispatch:
 
     - `?uploads` — initiate multipart upload.
-    - `?uploadId=` — complete MPU. Body `{ \"parts\":[{\"part_number\":N,\"etag\":\"...\"}] }`.
+    - `?uploadId=` — complete MPU. Body `{ "parts":[{"part_number":N,"etag":"..."}] }`.
     - `?type=download&expires=SEC` — presigned GET.
     - `?type=upload&expires=&max-size=&content-type=` — presigned PUT.
     - `?type=upload_part&upload_id=&part_number=` — presigned MPU part.

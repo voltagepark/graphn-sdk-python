@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from attrs import define as _attrs_define
 from typing_extensions import Self
 
+from ..models.function_create_type import FunctionCreateType
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -23,7 +24,7 @@ class FunctionCreate:
     """
     Attributes:
         name (str):
-        type_ (str | Unset):
+        type_ (FunctionCreateType | Unset):
         description (str | Unset):
         files (FunctionCreateFiles | Unset):
         parameters_schema (FunctionCreateParametersSchema | Unset):
@@ -33,7 +34,7 @@ class FunctionCreate:
     """
 
     name: str
-    type_: str | Unset = UNSET
+    type_: FunctionCreateType | Unset = UNSET
     description: str | Unset = UNSET
     files: FunctionCreateFiles | Unset = UNSET
     parameters_schema: FunctionCreateParametersSchema | Unset = UNSET
@@ -44,7 +45,9 @@ class FunctionCreate:
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
-        type_ = self.type_
+        type_: str | Unset = UNSET
+        if not isinstance(self.type_, Unset):
+            type_ = self.type_.value
 
         description = self.description
 
@@ -96,7 +99,12 @@ class FunctionCreate:
         d = dict(src_dict)
         name = d.pop("name")
 
-        type_ = d.pop("type", UNSET)
+        _type_ = d.pop("type", UNSET)
+        type_: FunctionCreateType | Unset
+        if isinstance(_type_, Unset):
+            type_ = UNSET
+        else:
+            type_ = FunctionCreateType(_type_)
 
         description = d.pop("description", UNSET)
 

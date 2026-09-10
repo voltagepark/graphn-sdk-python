@@ -78,8 +78,12 @@ class WorkflowBundle:
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
         from ..models.workflow import Workflow
-        from ..models.workflow_bundle_agents_item import WorkflowBundleAgentsItem
-        from ..models.workflow_bundle_functions_item import WorkflowBundleFunctionsItem
+        from ..models.workflow_bundle_agents_item import (
+            WorkflowBundleAgentsItem,
+        )
+        from ..models.workflow_bundle_functions_item import (
+            WorkflowBundleFunctionsItem,
+        )
         from ..models.workflow_bundle_mcp_servers_item import (
             WorkflowBundleMcpServersItem,
         )

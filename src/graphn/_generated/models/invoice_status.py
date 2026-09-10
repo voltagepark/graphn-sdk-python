@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class InvoiceStatus(str, Enum):
+class InvoiceStatus(StrEnum):
     CLOSED = "closed"
     CURRENT = "current"
 

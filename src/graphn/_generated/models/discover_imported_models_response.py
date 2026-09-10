@@ -40,7 +40,9 @@ class DiscoverImportedModelsResponse:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.discovered_imported_model import DiscoveredImportedModel
+        from ..models.discovered_imported_model import (
+            DiscoveredImportedModel,
+        )
 
         d = dict(src_dict)
         models = []

@@ -7,6 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 from typing_extensions import Self
 
+from ..models.function_spec_type import FunctionSpecType
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -21,7 +22,7 @@ T = TypeVar("T", bound="FunctionSpec")
 class FunctionSpec:
     """
     Attributes:
-        type_ (str | Unset):
+        type_ (FunctionSpecType | Unset):
         description (str | Unset):
         files (FunctionSpecFiles | Unset):
         parameters_schema (FunctionSpecParametersSchema | Unset):
@@ -29,7 +30,7 @@ class FunctionSpec:
         memory_mb (int | Unset):
     """
 
-    type_: str | Unset = UNSET
+    type_: FunctionSpecType | Unset = UNSET
     description: str | Unset = UNSET
     files: FunctionSpecFiles | Unset = UNSET
     parameters_schema: FunctionSpecParametersSchema | Unset = UNSET
@@ -38,7 +39,9 @@ class FunctionSpec:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        type_ = self.type_
+        type_: str | Unset = UNSET
+        if not isinstance(self.type_, Unset):
+            type_ = self.type_.value
 
         description = self.description
 
@@ -80,7 +83,12 @@ class FunctionSpec:
         )
 
         d = dict(src_dict)
-        type_ = d.pop("type", UNSET)
+        _type_ = d.pop("type", UNSET)
+        type_: FunctionSpecType | Unset
+        if isinstance(_type_, Unset):
+            type_ = UNSET
+        else:
+            type_ = FunctionSpecType(_type_)
 
         description = d.pop("description", UNSET)
 

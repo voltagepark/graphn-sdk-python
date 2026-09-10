@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class CustomModelArtifactType(str, Enum):
+class CustomModelArtifactType(StrEnum):
     BASE = "base"
     LORA = "lora"
 

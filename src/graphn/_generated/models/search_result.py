@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -28,6 +29,9 @@ class SearchResult:
         document_type (str | Unset):
         image_url (str | Unset):
         video_url (str | Unset):
+        expires_at (datetime.datetime | Unset):
+        expires_in (int | Unset):
+        media_href (str | Unset):
         segment_start_sec (float | Unset):
         segment_end_sec (float | Unset):
         metadata (SearchResultMetadata | Unset):
@@ -41,6 +45,9 @@ class SearchResult:
     document_type: str | Unset = UNSET
     image_url: str | Unset = UNSET
     video_url: str | Unset = UNSET
+    expires_at: datetime.datetime | Unset = UNSET
+    expires_in: int | Unset = UNSET
+    media_href: str | Unset = UNSET
     segment_start_sec: float | Unset = UNSET
     segment_end_sec: float | Unset = UNSET
     metadata: SearchResultMetadata | Unset = UNSET
@@ -62,6 +69,14 @@ class SearchResult:
         image_url = self.image_url
 
         video_url = self.video_url
+
+        expires_at: str | Unset = UNSET
+        if not isinstance(self.expires_at, Unset):
+            expires_at = self.expires_at.isoformat()
+
+        expires_in = self.expires_in
+
+        media_href = self.media_href
 
         segment_start_sec = self.segment_start_sec
 
@@ -88,6 +103,12 @@ class SearchResult:
             field_dict["image_url"] = image_url
         if video_url is not UNSET:
             field_dict["video_url"] = video_url
+        if expires_at is not UNSET:
+            field_dict["expires_at"] = expires_at
+        if expires_in is not UNSET:
+            field_dict["expires_in"] = expires_in
+        if media_href is not UNSET:
+            field_dict["media_href"] = media_href
         if segment_start_sec is not UNSET:
             field_dict["segment_start_sec"] = segment_start_sec
         if segment_end_sec is not UNSET:
@@ -99,7 +120,9 @@ class SearchResult:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.search_result_metadata import SearchResultMetadata
+        from ..models.search_result_metadata import (
+            SearchResultMetadata,
+        )
 
         d = dict(src_dict)
         id = d.pop("id")
@@ -117,6 +140,17 @@ class SearchResult:
         image_url = d.pop("image_url", UNSET)
 
         video_url = d.pop("video_url", UNSET)
+
+        _expires_at = d.pop("expires_at", UNSET)
+        expires_at: datetime.datetime | Unset
+        if isinstance(_expires_at, Unset):
+            expires_at = UNSET
+        else:
+            expires_at = datetime.datetime.fromisoformat(_expires_at)
+
+        expires_in = d.pop("expires_in", UNSET)
+
+        media_href = d.pop("media_href", UNSET)
 
         segment_start_sec = d.pop("segment_start_sec", UNSET)
 
@@ -138,6 +172,9 @@ class SearchResult:
             document_type=document_type,
             image_url=image_url,
             video_url=video_url,
+            expires_at=expires_at,
+            expires_in=expires_in,
+            media_href=media_href,
             segment_start_sec=segment_start_sec,
             segment_end_sec=segment_end_sec,
             metadata=metadata,

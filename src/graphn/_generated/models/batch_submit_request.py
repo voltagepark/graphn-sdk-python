@@ -71,7 +71,9 @@ class BatchSubmitRequest:
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
         from ..models.batch_file_ref import BatchFileRef
         from ..models.batch_input_item import BatchInputItem
-        from ..models.batch_submit_request_metadata import BatchSubmitRequestMetadata
+        from ..models.batch_submit_request_metadata import (
+            BatchSubmitRequestMetadata,
+        )
         from ..models.batch_submit_request_parameters import (
             BatchSubmitRequestParameters,
         )

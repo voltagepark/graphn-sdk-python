@@ -57,7 +57,9 @@ class BatchKnowledgebasesResponse:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.batch_knowledgebase_result import BatchKnowledgebaseResult
+        from ..models.batch_knowledgebase_result import (
+            BatchKnowledgebaseResult,
+        )
 
         d = dict(src_dict)
         total = d.pop("total")

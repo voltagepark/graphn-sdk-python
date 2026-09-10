@@ -52,7 +52,9 @@ class TestConnectionResponse:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.test_connection_response_usage import TestConnectionResponseUsage
+        from ..models.test_connection_response_usage import (
+            TestConnectionResponseUsage,
+        )
 
         d = dict(src_dict)
         response = d.pop("response")
