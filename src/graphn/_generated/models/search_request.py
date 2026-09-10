@@ -21,7 +21,9 @@ class SearchRequest:
     Attributes:
         query (str):
         top_k (int | Unset):
-        rerank (bool | Unset):
+        rerank (bool | Unset): Requests result reranking. When the vector top-K contains a video
+            hit, the batch remains in vector order and returned scores are
+            vector-similarity scores.
         reranker_model (str | Unset):
         score_threshold (float | Unset):
         metadata_filter (SearchRequestMetadataFilter | Unset):
@@ -71,7 +73,9 @@ class SearchRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.search_request_metadata_filter import SearchRequestMetadataFilter
+        from ..models.search_request_metadata_filter import (
+            SearchRequestMetadataFilter,
+        )
 
         d = dict(src_dict)
         query = d.pop("query")

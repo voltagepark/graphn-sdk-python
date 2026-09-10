@@ -45,7 +45,9 @@ class WorkflowRunRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.workflow_run_request_input import WorkflowRunRequestInput
+        from ..models.workflow_run_request_input import (
+            WorkflowRunRequestInput,
+        )
 
         d = dict(src_dict)
         _input_ = d.pop("input", UNSET)

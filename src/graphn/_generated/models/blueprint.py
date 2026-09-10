@@ -105,8 +105,12 @@ class Blueprint:
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
         from ..models.blueprint_agents_item import BlueprintAgentsItem
-        from ..models.blueprint_functions_item import BlueprintFunctionsItem
-        from ..models.blueprint_mcp_servers_item import BlueprintMcpServersItem
+        from ..models.blueprint_functions_item import (
+            BlueprintFunctionsItem,
+        )
+        from ..models.blueprint_mcp_servers_item import (
+            BlueprintMcpServersItem,
+        )
 
         d = dict(src_dict)
         id = d.pop("id")

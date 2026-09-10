@@ -45,7 +45,9 @@ class McpSaveVersionRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.mcp_save_version_request_files import McpSaveVersionRequestFiles
+        from ..models.mcp_save_version_request_files import (
+            McpSaveVersionRequestFiles,
+        )
 
         d = dict(src_dict)
         _files = d.pop("files", UNSET)

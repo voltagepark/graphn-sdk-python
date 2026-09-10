@@ -69,7 +69,9 @@ class ChatMessage:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.chat_message_tool_calls_item import ChatMessageToolCallsItem
+        from ..models.chat_message_tool_calls_item import (
+            ChatMessageToolCallsItem,
+        )
 
         d = dict(src_dict)
         role = ChatMessageRole(d.pop("role"))

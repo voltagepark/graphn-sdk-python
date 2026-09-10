@@ -30,6 +30,8 @@ class Trigger:
         updated_at (datetime.datetime):
         cron_schedule (str | Unset):
         input_ (TriggerInput | Unset):
+        connection_id (str | Unset):
+        event_type (str | Unset):
         temporal_schedule_id (str | Unset):
         schedule_synced (bool | Unset):
         schedule_status (str | Unset):
@@ -52,6 +54,8 @@ class Trigger:
     updated_at: datetime.datetime
     cron_schedule: str | Unset = UNSET
     input_: TriggerInput | Unset = UNSET
+    connection_id: str | Unset = UNSET
+    event_type: str | Unset = UNSET
     temporal_schedule_id: str | Unset = UNSET
     schedule_synced: bool | Unset = UNSET
     schedule_status: str | Unset = UNSET
@@ -85,6 +89,10 @@ class Trigger:
         input_: dict[str, Any] | Unset = UNSET
         if not isinstance(self.input_, Unset):
             input_ = self.input_.to_dict()
+
+        connection_id = self.connection_id
+
+        event_type = self.event_type
 
         temporal_schedule_id = self.temporal_schedule_id
 
@@ -125,6 +133,10 @@ class Trigger:
             field_dict["cron_schedule"] = cron_schedule
         if input_ is not UNSET:
             field_dict["input"] = input_
+        if connection_id is not UNSET:
+            field_dict["connection_id"] = connection_id
+        if event_type is not UNSET:
+            field_dict["event_type"] = event_type
         if temporal_schedule_id is not UNSET:
             field_dict["temporal_schedule_id"] = temporal_schedule_id
         if schedule_synced is not UNSET:
@@ -178,6 +190,10 @@ class Trigger:
         else:
             input_ = TriggerInput.from_dict(_input_)
 
+        connection_id = d.pop("connection_id", UNSET)
+
+        event_type = d.pop("event_type", UNSET)
+
         temporal_schedule_id = d.pop("temporal_schedule_id", UNSET)
 
         schedule_synced = d.pop("schedule_synced", UNSET)
@@ -210,6 +226,8 @@ class Trigger:
             updated_at=updated_at,
             cron_schedule=cron_schedule,
             input_=input_,
+            connection_id=connection_id,
+            event_type=event_type,
             temporal_schedule_id=temporal_schedule_id,
             schedule_synced=schedule_synced,
             schedule_status=schedule_status,

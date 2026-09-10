@@ -76,8 +76,12 @@ class McpServerUpdate:
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
         from ..models.mcp_server_spec import McpServerSpec
-        from ..models.mcp_server_update_files import McpServerUpdateFiles
-        from ..models.mcp_server_update_secrets import McpServerUpdateSecrets
+        from ..models.mcp_server_update_files import (
+            McpServerUpdateFiles,
+        )
+        from ..models.mcp_server_update_secrets import (
+            McpServerUpdateSecrets,
+        )
 
         d = dict(src_dict)
         name = d.pop("name", UNSET)

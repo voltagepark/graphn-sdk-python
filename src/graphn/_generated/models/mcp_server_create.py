@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from attrs import define as _attrs_define
 from typing_extensions import Self
 
+from ..models.mcp_server_create_type import McpServerCreateType
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -22,7 +23,7 @@ class McpServerCreate:
     """
     Attributes:
         name (str):
-        type_ (str | Unset):
+        type_ (McpServerCreateType | Unset):
         files (McpServerCreateFiles | Unset):
         endpoint_url (str | Unset):
         workflow_id (str | Unset):
@@ -31,7 +32,7 @@ class McpServerCreate:
     """
 
     name: str
-    type_: str | Unset = UNSET
+    type_: McpServerCreateType | Unset = UNSET
     files: McpServerCreateFiles | Unset = UNSET
     endpoint_url: str | Unset = UNSET
     workflow_id: str | Unset = UNSET
@@ -41,7 +42,9 @@ class McpServerCreate:
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
-        type_ = self.type_
+        type_: str | Unset = UNSET
+        if not isinstance(self.type_, Unset):
+            type_ = self.type_.value
 
         files: dict[str, Any] | Unset = UNSET
         if not isinstance(self.files, Unset):
@@ -83,14 +86,23 @@ class McpServerCreate:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.mcp_server_create_files import McpServerCreateFiles
-        from ..models.mcp_server_create_secrets import McpServerCreateSecrets
+        from ..models.mcp_server_create_files import (
+            McpServerCreateFiles,
+        )
+        from ..models.mcp_server_create_secrets import (
+            McpServerCreateSecrets,
+        )
         from ..models.mcp_server_spec import McpServerSpec
 
         d = dict(src_dict)
         name = d.pop("name")
 
-        type_ = d.pop("type", UNSET)
+        _type_ = d.pop("type", UNSET)
+        type_: McpServerCreateType | Unset
+        if isinstance(_type_, Unset):
+            type_ = UNSET
+        else:
+            type_ = McpServerCreateType(_type_)
 
         _files = d.pop("files", UNSET)
         files: McpServerCreateFiles | Unset

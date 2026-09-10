@@ -58,6 +58,7 @@ from .billing_usage_time_series_item import BillingUsageTimeSeriesItem
 from .blueprint import Blueprint
 from .blueprint_agents_item import BlueprintAgentsItem
 from .blueprint_deploy_request import BlueprintDeployRequest
+from .blueprint_deploy_resource_i_ds import BlueprintDeployResourceIDs
 from .blueprint_deploy_response import BlueprintDeployResponse
 from .blueprint_functions_item import BlueprintFunctionsItem
 from .blueprint_list import BlueprintList
@@ -83,6 +84,16 @@ from .chat_completion_response_usage import ChatCompletionResponseUsage
 from .chat_message import ChatMessage
 from .chat_message_role import ChatMessageRole
 from .chat_message_tool_calls_item import ChatMessageToolCallsItem
+from .connection import Connection
+from .connection_account_metadata import ConnectionAccountMetadata
+from .connection_authorization_challenge import ConnectionAuthorizationChallenge
+from .connection_authorization_start import ConnectionAuthorizationStart
+from .connection_create import ConnectionCreate
+from .connection_create_kind import ConnectionCreateKind
+from .connection_kind import ConnectionKind
+from .connection_list import ConnectionList
+from .connection_status import ConnectionStatus
+from .connection_watch_status import ConnectionWatchStatus
 from .create_billing_setup_intent_response_200 import (
     CreateBillingSetupIntentResponse200,
 )
@@ -98,6 +109,7 @@ from .custom_model_update import CustomModelUpdate
 from .discover_imported_models_request import DiscoverImportedModelsRequest
 from .discover_imported_models_response import DiscoverImportedModelsResponse
 from .discovered_imported_model import DiscoveredImportedModel
+from .document_media import DocumentMedia
 from .embed_request import EmbedRequest
 from .embed_response import EmbedResponse
 from .embedding_model import EmbeddingModel
@@ -109,6 +121,7 @@ from .function import Function
 from .function_create import FunctionCreate
 from .function_create_files import FunctionCreateFiles
 from .function_create_parameters_schema import FunctionCreateParametersSchema
+from .function_create_type import FunctionCreateType
 from .function_dry_run_request import FunctionDryRunRequest
 from .function_dry_run_request_files import FunctionDryRunRequestFiles
 from .function_dry_run_request_input import FunctionDryRunRequestInput
@@ -116,6 +129,7 @@ from .function_list import FunctionList
 from .function_spec import FunctionSpec
 from .function_spec_files import FunctionSpecFiles
 from .function_spec_parameters_schema import FunctionSpecParametersSchema
+from .function_spec_type import FunctionSpecType
 from .function_test_request import FunctionTestRequest
 from .function_test_request_input import FunctionTestRequestInput
 from .function_test_response import FunctionTestResponse
@@ -124,6 +138,8 @@ from .function_update_files import FunctionUpdateFiles
 from .function_update_parameters_schema import FunctionUpdateParametersSchema
 from .get_billing_invoice_response_200 import GetBillingInvoiceResponse200
 from .get_billing_usage_filter import GetBillingUsageFilter
+from .google_pub_sub_envelope import GooglePubSubEnvelope
+from .google_pub_sub_envelope_message import GooglePubSubEnvelopeMessage
 from .gpu_hours_response import GpuHoursResponse
 from .id_list_request import IdListRequest
 from .imported_model import ImportedModel
@@ -139,6 +155,12 @@ from .ingest_item_list import IngestItemList
 from .ingest_job import IngestJob
 from .ingest_job_list import IngestJobList
 from .ingest_job_summary import IngestJobSummary
+from .integration import Integration
+from .integration_auth_mode import IntegrationAuthMode
+from .integration_capability import IntegrationCapability
+from .integration_event import IntegrationEvent
+from .integration_kind import IntegrationKind
+from .integration_list import IntegrationList
 from .invitation import Invitation
 from .invitation_accept_result import InvitationAcceptResult
 from .invitation_create import InvitationCreate
@@ -154,6 +176,7 @@ from .kb_document import KbDocument
 from .kb_document_metadata import KbDocumentMetadata
 from .knowledge_base import KnowledgeBase
 from .knowledge_base_create import KnowledgeBaseCreate
+from .knowledge_base_list_response import KnowledgeBaseListResponse
 from .knowledge_base_stats import KnowledgeBaseStats
 from .knowledge_base_update import KnowledgeBaseUpdate
 from .list_billing_invoices_response_200 import ListBillingInvoicesResponse200
@@ -163,7 +186,13 @@ from .list_billing_invoices_response_200_empty_reason import (
 from .list_billing_payment_methods_response_200 import (
     ListBillingPaymentMethodsResponse200,
 )
+from .list_knowledgebases_order import ListKnowledgebasesOrder
+from .list_knowledgebases_sort import ListKnowledgebasesSort
+from .list_knowledgebases_status import ListKnowledgebasesStatus
 from .list_tts_voices_response_200 import ListTtsVoicesResponse200
+from .managed_connection_tool_call import ManagedConnectionToolCall
+from .managed_connection_tool_call_arguments import ManagedConnectionToolCallArguments
+from .managed_connection_tool_result import ManagedConnectionToolResult
 from .mcp_discover_tools_request import McpDiscoverToolsRequest
 from .mcp_discover_tools_request_files import McpDiscoverToolsRequestFiles
 from .mcp_discover_tools_response import McpDiscoverToolsResponse
@@ -176,10 +205,13 @@ from .mcp_server import McpServer
 from .mcp_server_create import McpServerCreate
 from .mcp_server_create_files import McpServerCreateFiles
 from .mcp_server_create_secrets import McpServerCreateSecrets
+from .mcp_server_create_type import McpServerCreateType
 from .mcp_server_list import McpServerList
 from .mcp_server_spec import McpServerSpec
 from .mcp_server_spec_files import McpServerSpecFiles
 from .mcp_server_spec_secrets import McpServerSpecSecrets
+from .mcp_server_spec_tool_capabilities import McpServerSpecToolCapabilities
+from .mcp_server_spec_type import McpServerSpecType
 from .mcp_server_status import McpServerStatus
 from .mcp_server_update import McpServerUpdate
 from .mcp_server_update_files import McpServerUpdateFiles
@@ -257,6 +289,7 @@ from .upload_knowledgebase_document_files_body import (
     UploadKnowledgebaseDocumentFilesBody,
 )
 from .upload_storage_file_body import UploadStorageFileBody
+from .usage_day import UsageDay
 from .validate_model_request import ValidateModelRequest
 from .validate_model_request_quantization import ValidateModelRequestQuantization
 from .validate_model_request_weight_source import ValidateModelRequestWeightSource
@@ -378,6 +411,7 @@ __all__ = (
     "Blueprint",
     "BlueprintAgentsItem",
     "BlueprintDeployRequest",
+    "BlueprintDeployResourceIDs",
     "BlueprintDeployResponse",
     "BlueprintFunctionsItem",
     "BlueprintList",
@@ -401,6 +435,16 @@ __all__ = (
     "ChatMessage",
     "ChatMessageRole",
     "ChatMessageToolCallsItem",
+    "Connection",
+    "ConnectionAccountMetadata",
+    "ConnectionAuthorizationChallenge",
+    "ConnectionAuthorizationStart",
+    "ConnectionCreate",
+    "ConnectionCreateKind",
+    "ConnectionKind",
+    "ConnectionList",
+    "ConnectionStatus",
+    "ConnectionWatchStatus",
     "CreateBillingSetupIntentResponse200",
     "CustomModel",
     "CustomModelAccess",
@@ -414,6 +458,7 @@ __all__ = (
     "DiscoverImportedModelsRequest",
     "DiscoverImportedModelsResponse",
     "DiscoveredImportedModel",
+    "DocumentMedia",
     "EmbedRequest",
     "EmbedResponse",
     "EmbeddingModel",
@@ -425,6 +470,7 @@ __all__ = (
     "FunctionCreate",
     "FunctionCreateFiles",
     "FunctionCreateParametersSchema",
+    "FunctionCreateType",
     "FunctionDryRunRequest",
     "FunctionDryRunRequestFiles",
     "FunctionDryRunRequestInput",
@@ -432,6 +478,7 @@ __all__ = (
     "FunctionSpec",
     "FunctionSpecFiles",
     "FunctionSpecParametersSchema",
+    "FunctionSpecType",
     "FunctionTestRequest",
     "FunctionTestRequestInput",
     "FunctionTestResponse",
@@ -440,6 +487,8 @@ __all__ = (
     "FunctionUpdateParametersSchema",
     "GetBillingInvoiceResponse200",
     "GetBillingUsageFilter",
+    "GooglePubSubEnvelope",
+    "GooglePubSubEnvelopeMessage",
     "GpuHoursResponse",
     "IdListRequest",
     "ImportedModel",
@@ -455,6 +504,12 @@ __all__ = (
     "IngestJob",
     "IngestJobList",
     "IngestJobSummary",
+    "Integration",
+    "IntegrationAuthMode",
+    "IntegrationCapability",
+    "IntegrationEvent",
+    "IntegrationKind",
+    "IntegrationList",
     "Invitation",
     "InvitationAcceptResult",
     "InvitationCreate",
@@ -470,12 +525,19 @@ __all__ = (
     "KbDocumentMetadata",
     "KnowledgeBase",
     "KnowledgeBaseCreate",
+    "KnowledgeBaseListResponse",
     "KnowledgeBaseStats",
     "KnowledgeBaseUpdate",
     "ListBillingInvoicesResponse200",
     "ListBillingInvoicesResponse200EmptyReason",
     "ListBillingPaymentMethodsResponse200",
+    "ListKnowledgebasesOrder",
+    "ListKnowledgebasesSort",
+    "ListKnowledgebasesStatus",
     "ListTtsVoicesResponse200",
+    "ManagedConnectionToolCall",
+    "ManagedConnectionToolCallArguments",
+    "ManagedConnectionToolResult",
     "McpDiscoverToolsRequest",
     "McpDiscoverToolsRequestFiles",
     "McpDiscoverToolsResponse",
@@ -488,10 +550,13 @@ __all__ = (
     "McpServerCreate",
     "McpServerCreateFiles",
     "McpServerCreateSecrets",
+    "McpServerCreateType",
     "McpServerList",
     "McpServerSpec",
     "McpServerSpecFiles",
     "McpServerSpecSecrets",
+    "McpServerSpecToolCapabilities",
+    "McpServerSpecType",
     "McpServerStatus",
     "McpServerUpdate",
     "McpServerUpdateFiles",
@@ -565,6 +630,7 @@ __all__ = (
     "UploadDocumentFromURLRequestMetadata",
     "UploadKnowledgebaseDocumentFilesBody",
     "UploadStorageFileBody",
+    "UsageDay",
     "ValidateModelRequest",
     "ValidateModelRequestQuantization",
     "ValidateModelRequestWeightSource",
