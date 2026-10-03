@@ -85,10 +85,10 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     body: CustomModelCreate,
 ) -> Response[CustomModel | Error]:
-    r"""Register a new custom model
+    """Register a new custom model
 
      Begin import + deployment of a custom model. The response returns
-    immediately with `status: \"deploying\"`. Poll `getCustomModel`
+    immediately with `status: "deploying"`. Poll `getCustomModel`
     (or use the SDK's `wait_until_ready`) until the status reaches
     `ready` or `failed`.
 
@@ -122,10 +122,10 @@ def sync(
     client: AuthenticatedClient | Client,
     body: CustomModelCreate,
 ) -> CustomModel | Error | None:
-    r"""Register a new custom model
+    """Register a new custom model
 
      Begin import + deployment of a custom model. The response returns
-    immediately with `status: \"deploying\"`. Poll `getCustomModel`
+    immediately with `status: "deploying"`. Poll `getCustomModel`
     (or use the SDK's `wait_until_ready`) until the status reaches
     `ready` or `failed`.
 
@@ -154,10 +154,10 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     body: CustomModelCreate,
 ) -> Response[CustomModel | Error]:
-    r"""Register a new custom model
+    """Register a new custom model
 
      Begin import + deployment of a custom model. The response returns
-    immediately with `status: \"deploying\"`. Poll `getCustomModel`
+    immediately with `status: "deploying"`. Poll `getCustomModel`
     (or use the SDK's `wait_until_ready`) until the status reaches
     `ready` or `failed`.
 
@@ -189,10 +189,10 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     body: CustomModelCreate,
 ) -> CustomModel | Error | None:
-    r"""Register a new custom model
+    """Register a new custom model
 
      Begin import + deployment of a custom model. The response returns
-    immediately with `status: \"deploying\"`. Poll `getCustomModel`
+    immediately with `status: "deploying"`. Poll `getCustomModel`
     (or use the SDK's `wait_until_ready`) until the status reaches
     `ready` or `failed`.
 

@@ -39,7 +39,9 @@ class FunctionTestRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.function_test_request_input import FunctionTestRequestInput
+        from ..models.function_test_request_input import (
+            FunctionTestRequestInput,
+        )
 
         d = dict(src_dict)
         _input_ = d.pop("input", UNSET)

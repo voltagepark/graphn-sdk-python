@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -29,6 +29,8 @@ class AdminBillingState:
         custom_models_disabled (bool | Unset):
         allow_negative_balance (bool | Unset):
         negative_limit_cents (int | Unset):
+        reserve_est_cents (int | None | Unset):
+        reserve_est_cents_default (int | Unset):
     """
 
     org_id: str
@@ -44,6 +46,8 @@ class AdminBillingState:
     custom_models_disabled: bool | Unset = UNSET
     allow_negative_balance: bool | Unset = UNSET
     negative_limit_cents: int | Unset = UNSET
+    reserve_est_cents: int | None | Unset = UNSET
+    reserve_est_cents_default: int | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -73,6 +77,14 @@ class AdminBillingState:
 
         negative_limit_cents = self.negative_limit_cents
 
+        reserve_est_cents: int | None | Unset
+        if isinstance(self.reserve_est_cents, Unset):
+            reserve_est_cents = UNSET
+        else:
+            reserve_est_cents = self.reserve_est_cents
+
+        reserve_est_cents_default = self.reserve_est_cents_default
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -101,6 +113,10 @@ class AdminBillingState:
             field_dict["allowNegativeBalance"] = allow_negative_balance
         if negative_limit_cents is not UNSET:
             field_dict["negativeLimitCents"] = negative_limit_cents
+        if reserve_est_cents is not UNSET:
+            field_dict["reserveEstCents"] = reserve_est_cents
+        if reserve_est_cents_default is not UNSET:
+            field_dict["reserveEstCentsDefault"] = reserve_est_cents_default
 
         return field_dict
 
@@ -133,6 +149,17 @@ class AdminBillingState:
 
         negative_limit_cents = d.pop("negativeLimitCents", UNSET)
 
+        def _parse_reserve_est_cents(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        reserve_est_cents = _parse_reserve_est_cents(d.pop("reserveEstCents", UNSET))
+
+        reserve_est_cents_default = d.pop("reserveEstCentsDefault", UNSET)
+
         admin_billing_state = cls(
             org_id=org_id,
             billing_account_exists=billing_account_exists,
@@ -147,6 +174,8 @@ class AdminBillingState:
             custom_models_disabled=custom_models_disabled,
             allow_negative_balance=allow_negative_balance,
             negative_limit_cents=negative_limit_cents,
+            reserve_est_cents=reserve_est_cents,
+            reserve_est_cents_default=reserve_est_cents_default,
         )
 
         admin_billing_state.additional_properties = d

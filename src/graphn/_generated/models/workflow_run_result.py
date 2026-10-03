@@ -105,7 +105,9 @@ class WorkflowRunResult:
         from ..models.workflow_run_result_resources_accessed_item import (
             WorkflowRunResultResourcesAccessedItem,
         )
-        from ..models.workflow_run_result_trace import WorkflowRunResultTrace
+        from ..models.workflow_run_result_trace import (
+            WorkflowRunResultTrace,
+        )
 
         d = dict(src_dict)
         execution_id = d.pop("execution_id", UNSET)

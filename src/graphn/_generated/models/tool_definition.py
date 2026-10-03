@@ -55,7 +55,9 @@ class ToolDefinition:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.tool_definition_input_schema import ToolDefinitionInputSchema
+        from ..models.tool_definition_input_schema import (
+            ToolDefinitionInputSchema,
+        )
 
         d = dict(src_dict)
         name = d.pop("name")

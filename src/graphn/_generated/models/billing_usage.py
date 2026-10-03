@@ -63,7 +63,9 @@ class BillingUsage:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.billing_usage_time_series_item import BillingUsageTimeSeriesItem
+        from ..models.billing_usage_time_series_item import (
+            BillingUsageTimeSeriesItem,
+        )
 
         d = dict(src_dict)
         total_spend_cents = d.pop("totalSpendCents")

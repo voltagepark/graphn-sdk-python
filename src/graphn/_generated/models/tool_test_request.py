@@ -39,7 +39,9 @@ class ToolTestRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.tool_test_request_input import ToolTestRequestInput
+        from ..models.tool_test_request_input import (
+            ToolTestRequestInput,
+        )
 
         d = dict(src_dict)
         _input_ = d.pop("input", UNSET)

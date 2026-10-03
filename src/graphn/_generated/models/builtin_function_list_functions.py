@@ -16,8 +16,6 @@ T = TypeVar("T", bound="BuiltinFunctionListFunctions")
 
 @_attrs_define
 class BuiltinFunctionListFunctions:
-    """ """
-
     additional_properties: dict[str, BuiltinFunctionInfo] = _attrs_field(
         init=False, factory=dict
     )

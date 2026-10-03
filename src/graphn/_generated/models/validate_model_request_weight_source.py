@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ValidateModelRequestWeightSource(str, Enum):
+class ValidateModelRequestWeightSource(StrEnum):
     HUGGINGFACE = "huggingface"
     S3_ASSUME_ROLE = "s3_assume_role"
 

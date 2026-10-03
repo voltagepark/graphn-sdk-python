@@ -21,9 +21,11 @@ class TriggerCreate:
     Attributes:
         name (str):
         workflow_id (str):
-        cron_schedule (str):
+        cron_schedule (str | Unset):
         input_ (TriggerCreateInput | Unset):
         enabled (bool | Unset):
+        connection_id (str | Unset):
+        event_type (str | Unset):
         webhook_auth (str | Unset):
         hmac_secret_id (str | Unset):
         hmac_algorithm (str | Unset):
@@ -33,9 +35,11 @@ class TriggerCreate:
 
     name: str
     workflow_id: str
-    cron_schedule: str
+    cron_schedule: str | Unset = UNSET
     input_: TriggerCreateInput | Unset = UNSET
     enabled: bool | Unset = UNSET
+    connection_id: str | Unset = UNSET
+    event_type: str | Unset = UNSET
     webhook_auth: str | Unset = UNSET
     hmac_secret_id: str | Unset = UNSET
     hmac_algorithm: str | Unset = UNSET
@@ -55,6 +59,10 @@ class TriggerCreate:
 
         enabled = self.enabled
 
+        connection_id = self.connection_id
+
+        event_type = self.event_type
+
         webhook_auth = self.webhook_auth
 
         hmac_secret_id = self.hmac_secret_id
@@ -71,13 +79,18 @@ class TriggerCreate:
             {
                 "name": name,
                 "workflow_id": workflow_id,
-                "cron_schedule": cron_schedule,
             }
         )
+        if cron_schedule is not UNSET:
+            field_dict["cron_schedule"] = cron_schedule
         if input_ is not UNSET:
             field_dict["input"] = input_
         if enabled is not UNSET:
             field_dict["enabled"] = enabled
+        if connection_id is not UNSET:
+            field_dict["connection_id"] = connection_id
+        if event_type is not UNSET:
+            field_dict["event_type"] = event_type
         if webhook_auth is not UNSET:
             field_dict["webhook_auth"] = webhook_auth
         if hmac_secret_id is not UNSET:
@@ -100,7 +113,7 @@ class TriggerCreate:
 
         workflow_id = d.pop("workflow_id")
 
-        cron_schedule = d.pop("cron_schedule")
+        cron_schedule = d.pop("cron_schedule", UNSET)
 
         _input_ = d.pop("input", UNSET)
         input_: TriggerCreateInput | Unset
@@ -110,6 +123,10 @@ class TriggerCreate:
             input_ = TriggerCreateInput.from_dict(_input_)
 
         enabled = d.pop("enabled", UNSET)
+
+        connection_id = d.pop("connection_id", UNSET)
+
+        event_type = d.pop("event_type", UNSET)
 
         webhook_auth = d.pop("webhook_auth", UNSET)
 
@@ -127,6 +144,8 @@ class TriggerCreate:
             cron_schedule=cron_schedule,
             input_=input_,
             enabled=enabled,
+            connection_id=connection_id,
+            event_type=event_type,
             webhook_auth=webhook_auth,
             hmac_secret_id=hmac_secret_id,
             hmac_algorithm=hmac_algorithm,

@@ -83,9 +83,15 @@ class WorkflowUpdate:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.workflow_update_input_schema import WorkflowUpdateInputSchema
-        from ..models.workflow_update_layout import WorkflowUpdateLayout
-        from ..models.workflow_update_output_schema import WorkflowUpdateOutputSchema
+        from ..models.workflow_update_input_schema import (
+            WorkflowUpdateInputSchema,
+        )
+        from ..models.workflow_update_layout import (
+            WorkflowUpdateLayout,
+        )
+        from ..models.workflow_update_output_schema import (
+            WorkflowUpdateOutputSchema,
+        )
 
         d = dict(src_dict)
         name = d.pop("name", UNSET)

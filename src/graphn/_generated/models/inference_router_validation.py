@@ -1,0 +1,78 @@
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+from typing_extensions import Self
+
+T = TypeVar("T", bound="InferenceRouterValidation")
+
+
+@_attrs_define
+class InferenceRouterValidation:
+    """
+    Attributes:
+        valid (bool):
+        manifest (str):
+        manifest_hash (str):
+    """
+
+    valid: bool
+    manifest: str
+    manifest_hash: str
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        valid = self.valid
+
+        manifest = self.manifest
+
+        manifest_hash = self.manifest_hash
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "valid": valid,
+                "manifest": manifest,
+                "manifest_hash": manifest_hash,
+            }
+        )
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
+        d = dict(src_dict)
+        valid = d.pop("valid")
+
+        manifest = d.pop("manifest")
+
+        manifest_hash = d.pop("manifest_hash")
+
+        inference_router_validation = cls(
+            valid=valid,
+            manifest=manifest,
+            manifest_hash=manifest_hash,
+        )
+
+        inference_router_validation.additional_properties = d
+        return inference_router_validation
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

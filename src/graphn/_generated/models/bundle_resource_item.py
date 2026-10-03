@@ -55,7 +55,9 @@ class BundleResourceItem:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.bundle_resource_item_spec import BundleResourceItemSpec
+        from ..models.bundle_resource_item_spec import (
+            BundleResourceItemSpec,
+        )
 
         d = dict(src_dict)
         name = d.pop("name")

@@ -54,8 +54,12 @@ class McpDryRunTestRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.mcp_dry_run_test_request_files import McpDryRunTestRequestFiles
-        from ..models.mcp_dry_run_test_request_input import McpDryRunTestRequestInput
+        from ..models.mcp_dry_run_test_request_files import (
+            McpDryRunTestRequestFiles,
+        )
+        from ..models.mcp_dry_run_test_request_input import (
+            McpDryRunTestRequestInput,
+        )
 
         d = dict(src_dict)
         _files = d.pop("files", UNSET)

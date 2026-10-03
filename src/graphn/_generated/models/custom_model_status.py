@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class CustomModelStatus(str, Enum):
+class CustomModelStatus(StrEnum):
     DELETING = "deleting"
     DEPLOYING = "deploying"
     FAILED = "failed"

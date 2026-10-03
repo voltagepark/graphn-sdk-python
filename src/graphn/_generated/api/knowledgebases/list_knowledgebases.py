@@ -8,6 +8,10 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.knowledge_base import KnowledgeBase
+from ...models.knowledge_base_list_response import KnowledgeBaseListResponse
+from ...models.list_knowledgebases_order import ListKnowledgebasesOrder
+from ...models.list_knowledgebases_sort import ListKnowledgebasesSort
+from ...models.list_knowledgebases_status import ListKnowledgebasesStatus
 from ...types import UNSET, Response, Unset
 
 
@@ -16,6 +20,10 @@ def _get_kwargs(
     *,
     limit: int | Unset = 50,
     cursor: str | Unset = UNSET,
+    q: str | Unset = UNSET,
+    status: ListKnowledgebasesStatus | Unset = UNSET,
+    sort: ListKnowledgebasesSort | Unset = ListKnowledgebasesSort.CREATED_AT,
+    order: ListKnowledgebasesOrder | Unset = ListKnowledgebasesOrder.DESC,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -23,6 +31,26 @@ def _get_kwargs(
     params["limit"] = limit
 
     params["cursor"] = cursor
+
+    params["q"] = q
+
+    json_status: str | Unset = UNSET
+    if not isinstance(status, Unset):
+        json_status = status.value
+
+    params["status"] = json_status
+
+    json_sort: str | Unset = UNSET
+    if not isinstance(sort, Unset):
+        json_sort = sort.value
+
+    params["sort"] = json_sort
+
+    json_order: str | Unset = UNSET
+    if not isinstance(order, Unset):
+        json_order = order.value
+
+    params["order"] = json_order
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -39,14 +67,34 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | list[KnowledgeBase] | None:
+) -> Error | KnowledgeBaseListResponse | list[KnowledgeBase] | None:
     if response.status_code == 200:
-        response_200 = []
-        _response_200 = response.json()
-        for response_200_item_data in _response_200:
-            response_200_item = KnowledgeBase.from_dict(response_200_item_data)
 
-            response_200.append(response_200_item)
+        def _parse_response_200(
+            data: object,
+        ) -> KnowledgeBaseListResponse | list[KnowledgeBase]:
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                response_200_type_0 = []
+                _response_200_type_0 = data
+                for response_200_type_0_item_data in _response_200_type_0:
+                    response_200_type_0_item = KnowledgeBase.from_dict(
+                        response_200_type_0_item_data
+                    )
+
+                    response_200_type_0.append(response_200_type_0_item)
+
+                return response_200_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            if not isinstance(data, dict):
+                raise TypeError()
+            response_200_type_1 = KnowledgeBaseListResponse.from_dict(data)
+
+            return response_200_type_1
+
+        response_200 = _parse_response_200(response.json())
 
         return response_200
 
@@ -73,7 +121,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | list[KnowledgeBase]]:
+) -> Response[Error | KnowledgeBaseListResponse | list[KnowledgeBase]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -88,29 +136,41 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     limit: int | Unset = 50,
     cursor: str | Unset = UNSET,
-) -> Response[Error | list[KnowledgeBase]]:
+    q: str | Unset = UNSET,
+    status: ListKnowledgebasesStatus | Unset = UNSET,
+    sort: ListKnowledgebasesSort | Unset = ListKnowledgebasesSort.CREATED_AT,
+    order: ListKnowledgebasesOrder | Unset = ListKnowledgebasesOrder.DESC,
+) -> Response[Error | KnowledgeBaseListResponse | list[KnowledgeBase]]:
     """List knowledge bases
 
-     Default response is a JSON array. When `cursor` is supplied the service may return a paginated
-    envelope instead.
+     Default response is a JSON array. When `cursor` or any filter/sort control
+    is supplied, the service returns a paginated envelope.
 
     Args:
         workspace_id (str):
         limit (int | Unset):  Default: 50.
         cursor (str | Unset):
+        q (str | Unset):
+        status (ListKnowledgebasesStatus | Unset):
+        sort (ListKnowledgebasesSort | Unset):  Default: ListKnowledgebasesSort.CREATED_AT.
+        order (ListKnowledgebasesOrder | Unset):  Default: ListKnowledgebasesOrder.DESC.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | list[KnowledgeBase]]
+        Response[Error | KnowledgeBaseListResponse | list[KnowledgeBase]]
     """
 
     kwargs = _get_kwargs(
         workspace_id=workspace_id,
         limit=limit,
         cursor=cursor,
+        q=q,
+        status=status,
+        sort=sort,
+        order=order,
     )
 
     response = client.get_httpx_client().request(
@@ -126,23 +186,31 @@ def sync(
     client: AuthenticatedClient | Client,
     limit: int | Unset = 50,
     cursor: str | Unset = UNSET,
-) -> Error | list[KnowledgeBase] | None:
+    q: str | Unset = UNSET,
+    status: ListKnowledgebasesStatus | Unset = UNSET,
+    sort: ListKnowledgebasesSort | Unset = ListKnowledgebasesSort.CREATED_AT,
+    order: ListKnowledgebasesOrder | Unset = ListKnowledgebasesOrder.DESC,
+) -> Error | KnowledgeBaseListResponse | list[KnowledgeBase] | None:
     """List knowledge bases
 
-     Default response is a JSON array. When `cursor` is supplied the service may return a paginated
-    envelope instead.
+     Default response is a JSON array. When `cursor` or any filter/sort control
+    is supplied, the service returns a paginated envelope.
 
     Args:
         workspace_id (str):
         limit (int | Unset):  Default: 50.
         cursor (str | Unset):
+        q (str | Unset):
+        status (ListKnowledgebasesStatus | Unset):
+        sort (ListKnowledgebasesSort | Unset):  Default: ListKnowledgebasesSort.CREATED_AT.
+        order (ListKnowledgebasesOrder | Unset):  Default: ListKnowledgebasesOrder.DESC.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | list[KnowledgeBase]
+        Error | KnowledgeBaseListResponse | list[KnowledgeBase]
     """
 
     return sync_detailed(
@@ -150,6 +218,10 @@ def sync(
         client=client,
         limit=limit,
         cursor=cursor,
+        q=q,
+        status=status,
+        sort=sort,
+        order=order,
     ).parsed
 
 
@@ -159,29 +231,41 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     limit: int | Unset = 50,
     cursor: str | Unset = UNSET,
-) -> Response[Error | list[KnowledgeBase]]:
+    q: str | Unset = UNSET,
+    status: ListKnowledgebasesStatus | Unset = UNSET,
+    sort: ListKnowledgebasesSort | Unset = ListKnowledgebasesSort.CREATED_AT,
+    order: ListKnowledgebasesOrder | Unset = ListKnowledgebasesOrder.DESC,
+) -> Response[Error | KnowledgeBaseListResponse | list[KnowledgeBase]]:
     """List knowledge bases
 
-     Default response is a JSON array. When `cursor` is supplied the service may return a paginated
-    envelope instead.
+     Default response is a JSON array. When `cursor` or any filter/sort control
+    is supplied, the service returns a paginated envelope.
 
     Args:
         workspace_id (str):
         limit (int | Unset):  Default: 50.
         cursor (str | Unset):
+        q (str | Unset):
+        status (ListKnowledgebasesStatus | Unset):
+        sort (ListKnowledgebasesSort | Unset):  Default: ListKnowledgebasesSort.CREATED_AT.
+        order (ListKnowledgebasesOrder | Unset):  Default: ListKnowledgebasesOrder.DESC.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | list[KnowledgeBase]]
+        Response[Error | KnowledgeBaseListResponse | list[KnowledgeBase]]
     """
 
     kwargs = _get_kwargs(
         workspace_id=workspace_id,
         limit=limit,
         cursor=cursor,
+        q=q,
+        status=status,
+        sort=sort,
+        order=order,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -195,23 +279,31 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     limit: int | Unset = 50,
     cursor: str | Unset = UNSET,
-) -> Error | list[KnowledgeBase] | None:
+    q: str | Unset = UNSET,
+    status: ListKnowledgebasesStatus | Unset = UNSET,
+    sort: ListKnowledgebasesSort | Unset = ListKnowledgebasesSort.CREATED_AT,
+    order: ListKnowledgebasesOrder | Unset = ListKnowledgebasesOrder.DESC,
+) -> Error | KnowledgeBaseListResponse | list[KnowledgeBase] | None:
     """List knowledge bases
 
-     Default response is a JSON array. When `cursor` is supplied the service may return a paginated
-    envelope instead.
+     Default response is a JSON array. When `cursor` or any filter/sort control
+    is supplied, the service returns a paginated envelope.
 
     Args:
         workspace_id (str):
         limit (int | Unset):  Default: 50.
         cursor (str | Unset):
+        q (str | Unset):
+        status (ListKnowledgebasesStatus | Unset):
+        sort (ListKnowledgebasesSort | Unset):  Default: ListKnowledgebasesSort.CREATED_AT.
+        order (ListKnowledgebasesOrder | Unset):  Default: ListKnowledgebasesOrder.DESC.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | list[KnowledgeBase]
+        Error | KnowledgeBaseListResponse | list[KnowledgeBase]
     """
 
     return (
@@ -220,5 +312,9 @@ async def asyncio(
             client=client,
             limit=limit,
             cursor=cursor,
+            q=q,
+            status=status,
+            sort=sort,
+            order=order,
         )
     ).parsed
