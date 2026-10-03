@@ -156,7 +156,9 @@ class Workflow:
         from ..models.resource_version_ref import ResourceVersionRef
         from ..models.workflow_input_schema import WorkflowInputSchema
         from ..models.workflow_layout import WorkflowLayout
-        from ..models.workflow_output_schema import WorkflowOutputSchema
+        from ..models.workflow_output_schema import (
+            WorkflowOutputSchema,
+        )
         from ..models.workflow_source import WorkflowSource
 
         d = dict(src_dict)

@@ -65,7 +65,9 @@ class IngestItemInput:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.ingest_item_input_metadata import IngestItemInputMetadata
+        from ..models.ingest_item_input_metadata import (
+            IngestItemInputMetadata,
+        )
 
         d = dict(src_dict)
         url = d.pop("url")

@@ -94,10 +94,18 @@ class WorkflowCreate:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.workflow_create_input_schema import WorkflowCreateInputSchema
-        from ..models.workflow_create_layout import WorkflowCreateLayout
-        from ..models.workflow_create_output_schema import WorkflowCreateOutputSchema
-        from ..models.workflow_create_source import WorkflowCreateSource
+        from ..models.workflow_create_input_schema import (
+            WorkflowCreateInputSchema,
+        )
+        from ..models.workflow_create_layout import (
+            WorkflowCreateLayout,
+        )
+        from ..models.workflow_create_output_schema import (
+            WorkflowCreateOutputSchema,
+        )
+        from ..models.workflow_create_source import (
+            WorkflowCreateSource,
+        )
 
         d = dict(src_dict)
         name = d.pop("name")

@@ -59,8 +59,12 @@ class AsyncSubmitRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.async_submit_request_input import AsyncSubmitRequestInput
-        from ..models.async_submit_request_metadata import AsyncSubmitRequestMetadata
+        from ..models.async_submit_request_input import (
+            AsyncSubmitRequestInput,
+        )
+        from ..models.async_submit_request_metadata import (
+            AsyncSubmitRequestMetadata,
+        )
         from ..models.async_submit_request_parameters import (
             AsyncSubmitRequestParameters,
         )

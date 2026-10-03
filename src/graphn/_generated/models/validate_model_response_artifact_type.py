@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ValidateModelResponseArtifactType(str, Enum):
+class ValidateModelResponseArtifactType(StrEnum):
     BASE = "base"
     LORA = "lora"
 

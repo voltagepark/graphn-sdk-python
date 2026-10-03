@@ -12,8 +12,6 @@ T = TypeVar("T", bound="FunctionUpdateFiles")
 
 @_attrs_define
 class FunctionUpdateFiles:
-    """ """
-
     additional_properties: dict[str, str] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

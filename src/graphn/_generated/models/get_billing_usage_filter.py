@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class GetBillingUsageFilter(str, Enum):
+class GetBillingUsageFilter(StrEnum):
     ONE_DAY = "ONE_DAY"
     ONE_YEAR = "ONE_YEAR"
     SEVEN_DAY = "SEVEN_DAY"

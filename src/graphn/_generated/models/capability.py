@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Capability(str, Enum):
+class Capability(StrEnum):
     EMBEDDING = "embedding"
     REASONING = "reasoning"
     TOOL_CALLING = "tool_calling"

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ModelOwnedBy(str, Enum):
+class ModelOwnedBy(StrEnum):
     BUILT_IN = "built-in"
     CUSTOM = "custom"
     IMPORTED = "imported"
