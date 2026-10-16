@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class MemberRoleUpdateRole(str, Enum):
+class MemberRoleUpdateRole(StrEnum):
     ADMIN = "admin"
     MEMBER = "member"
     OWNER = "owner"

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ModelObject(str, Enum):
+class ModelObject(StrEnum):
     MODEL = "model"
 
     def __str__(self) -> str:

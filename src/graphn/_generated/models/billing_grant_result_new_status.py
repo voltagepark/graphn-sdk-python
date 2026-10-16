@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class BillingGrantResultNewStatus(str, Enum):
+class BillingGrantResultNewStatus(StrEnum):
     LOW = "low"
     OK = "ok"
     OUT_OF_BALANCE = "out_of_balance"
