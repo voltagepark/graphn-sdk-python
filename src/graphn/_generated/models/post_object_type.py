@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class PostObjectType(str, Enum):
+class PostObjectType(StrEnum):
     DOWNLOAD = "download"
     UPLOAD = "upload"
     UPLOAD_PART = "upload_part"

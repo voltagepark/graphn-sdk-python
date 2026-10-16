@@ -78,12 +78,12 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[CustomModel | Error]:
-    r"""Wake a scaled-to-zero custom model
+    """Wake a scaled-to-zero custom model
 
      Custom models scale to zero replicas after `cooldown_seconds` of
     inactivity. Calling `wake` brings the deployment back up to its
     configured `min_replicas` (or 1 if `min_replicas` is 0). Returns
-    immediately; poll `getCustomModel` until `status: \"ready\"` and a
+    immediately; poll `getCustomModel` until `status: "ready"` and a
     non-empty `endpoint`.
 
     Args:
@@ -116,12 +116,12 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
 ) -> CustomModel | Error | None:
-    r"""Wake a scaled-to-zero custom model
+    """Wake a scaled-to-zero custom model
 
      Custom models scale to zero replicas after `cooldown_seconds` of
     inactivity. Calling `wake` brings the deployment back up to its
     configured `min_replicas` (or 1 if `min_replicas` is 0). Returns
-    immediately; poll `getCustomModel` until `status: \"ready\"` and a
+    immediately; poll `getCustomModel` until `status: "ready"` and a
     non-empty `endpoint`.
 
     Args:
@@ -149,12 +149,12 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[CustomModel | Error]:
-    r"""Wake a scaled-to-zero custom model
+    """Wake a scaled-to-zero custom model
 
      Custom models scale to zero replicas after `cooldown_seconds` of
     inactivity. Calling `wake` brings the deployment back up to its
     configured `min_replicas` (or 1 if `min_replicas` is 0). Returns
-    immediately; poll `getCustomModel` until `status: \"ready\"` and a
+    immediately; poll `getCustomModel` until `status: "ready"` and a
     non-empty `endpoint`.
 
     Args:
@@ -185,12 +185,12 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
 ) -> CustomModel | Error | None:
-    r"""Wake a scaled-to-zero custom model
+    """Wake a scaled-to-zero custom model
 
      Custom models scale to zero replicas after `cooldown_seconds` of
     inactivity. Calling `wake` brings the deployment back up to its
     configured `min_replicas` (or 1 if `min_replicas` is 0). Returns
-    immediately; poll `getCustomModel` until `status: \"ready\"` and a
+    immediately; poll `getCustomModel` until `status: "ready"` and a
     non-empty `endpoint`.
 
     Args:

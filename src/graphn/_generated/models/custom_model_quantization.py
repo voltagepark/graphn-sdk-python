@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class CustomModelQuantization(str, Enum):
+class CustomModelQuantization(StrEnum):
     AWQ = "awq"
     FP8 = "fp8"
     GGUF = "gguf"
