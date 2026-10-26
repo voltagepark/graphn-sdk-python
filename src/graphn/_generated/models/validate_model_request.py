@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, Self, TypeVar, cast
 
 from attrs import define as _attrs_define
-from typing_extensions import Self
 
 from ..models.validate_model_request_quantization import (
     ValidateModelRequestQuantization,
@@ -28,11 +27,10 @@ class ValidateModelRequest:
             in the customer's bucket, not the HF Hub.
         weight_source (ValidateModelRequestWeightSource | Unset): Which validation path to run. `huggingface` (default)
             queries
-            the HuggingFace Hub API. `s3_assume_role` chains the same
-            two-hop AssumeRole the smart-loader uses (bootstrap user
-            → platform role → customer role with ExternalId) and
-            probes `<s3_url>config.json` directly, so an unsupported
-            architecture surfaces before AF provisions a download Job.
+            the HuggingFace Hub API. `s3_assume_role` assumes your role
+            with its ExternalId, as the import does, and reads
+            `<s3_url>config.json` directly, so an unsupported
+            architecture surfaces before any download starts.
             `s3_presigned` is intentionally not accepted: presigned
             URLs deliver a single archive object and architecture
             detection requires the full extract.
@@ -40,9 +38,9 @@ class ValidateModelRequest:
         s3_url (None | str | Unset): S3 prefix (must end with `/`). Required when
             `weight_source` is `s3_assume_role`. Points at the
             directory containing `config.json` + safetensors in
-            HuggingFace layout; the smart-loader uses `aws s3 sync`
-            on this path so a single archive object is rejected at
-            the API boundary.
+            HuggingFace layout. The import copies the whole prefix,
+            so a single archive object is rejected at the API
+            boundary.
         s3_role_arn (None | str | Unset): Customer IAM role ARN. Required when `weight_source` is
             `s3_assume_role`. Role name must start with `graphn-byom-`
             (the platform IAM is scoped to that prefix as

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from typing_extensions import Self
 
 if TYPE_CHECKING:
     from ..models.builtin_function_info import BuiltinFunctionInfo
@@ -16,8 +15,6 @@ T = TypeVar("T", bound="BuiltinFunctionListFunctions")
 
 @_attrs_define
 class BuiltinFunctionListFunctions:
-    """ """
-
     additional_properties: dict[str, BuiltinFunctionInfo] = _attrs_field(
         init=False, factory=dict
     )

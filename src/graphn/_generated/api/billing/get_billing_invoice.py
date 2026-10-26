@@ -12,14 +12,14 @@ from ...types import Response
 
 def _get_kwargs(
     org_id: str,
-    period_start: str,
+    invoice_id: str,
 ) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/v1/{org_id}/billing/invoices/{period_start}".format(
+        "url": "/v1/{org_id}/billing/invoices/{invoice_id}".format(
             org_id=quote(str(org_id), safe=""),
-            period_start=quote(str(period_start), safe=""),
+            invoice_id=quote(str(invoice_id), safe=""),
         ),
     }
 
@@ -53,15 +53,15 @@ def _build_response(
 
 def sync_detailed(
     org_id: str,
-    period_start: str,
+    invoice_id: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[GetBillingInvoiceResponse200]:
-    """Get billing statement detail
+    """Get billing invoice detail
 
     Args:
         org_id (str):
-        period_start (str):
+        invoice_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -73,7 +73,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         org_id=org_id,
-        period_start=period_start,
+        invoice_id=invoice_id,
     )
 
     response = client.get_httpx_client().request(
@@ -85,15 +85,15 @@ def sync_detailed(
 
 def sync(
     org_id: str,
-    period_start: str,
+    invoice_id: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> GetBillingInvoiceResponse200 | None:
-    """Get billing statement detail
+    """Get billing invoice detail
 
     Args:
         org_id (str):
-        period_start (str):
+        invoice_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -105,22 +105,22 @@ def sync(
 
     return sync_detailed(
         org_id=org_id,
-        period_start=period_start,
+        invoice_id=invoice_id,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
     org_id: str,
-    period_start: str,
+    invoice_id: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[GetBillingInvoiceResponse200]:
-    """Get billing statement detail
+    """Get billing invoice detail
 
     Args:
         org_id (str):
-        period_start (str):
+        invoice_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -132,7 +132,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         org_id=org_id,
-        period_start=period_start,
+        invoice_id=invoice_id,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -142,15 +142,15 @@ async def asyncio_detailed(
 
 async def asyncio(
     org_id: str,
-    period_start: str,
+    invoice_id: str,
     *,
     client: AuthenticatedClient | Client,
 ) -> GetBillingInvoiceResponse200 | None:
-    """Get billing statement detail
+    """Get billing invoice detail
 
     Args:
         org_id (str):
-        period_start (str):
+        invoice_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -163,7 +163,7 @@ async def asyncio(
     return (
         await asyncio_detailed(
             org_id=org_id,
-            period_start=period_start,
+            invoice_id=invoice_id,
             client=client,
         )
     ).parsed

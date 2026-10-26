@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from attrs import define as _attrs_define
-from typing_extensions import Self
 
 from ..types import UNSET, Unset
 
@@ -23,6 +22,8 @@ class TriggerUpdate:
         cron_schedule (str | Unset):
         input_ (TriggerUpdateInput | Unset):
         enabled (bool | Unset):
+        connection_id (str | Unset):
+        event_type (str | Unset):
         webhook_auth (str | Unset):
         hmac_secret_id (str | Unset):
         hmac_algorithm (str | Unset):
@@ -34,6 +35,8 @@ class TriggerUpdate:
     cron_schedule: str | Unset = UNSET
     input_: TriggerUpdateInput | Unset = UNSET
     enabled: bool | Unset = UNSET
+    connection_id: str | Unset = UNSET
+    event_type: str | Unset = UNSET
     webhook_auth: str | Unset = UNSET
     hmac_secret_id: str | Unset = UNSET
     hmac_algorithm: str | Unset = UNSET
@@ -50,6 +53,10 @@ class TriggerUpdate:
             input_ = self.input_.to_dict()
 
         enabled = self.enabled
+
+        connection_id = self.connection_id
+
+        event_type = self.event_type
 
         webhook_auth = self.webhook_auth
 
@@ -72,6 +79,10 @@ class TriggerUpdate:
             field_dict["input"] = input_
         if enabled is not UNSET:
             field_dict["enabled"] = enabled
+        if connection_id is not UNSET:
+            field_dict["connection_id"] = connection_id
+        if event_type is not UNSET:
+            field_dict["event_type"] = event_type
         if webhook_auth is not UNSET:
             field_dict["webhook_auth"] = webhook_auth
         if hmac_secret_id is not UNSET:
@@ -103,6 +114,10 @@ class TriggerUpdate:
 
         enabled = d.pop("enabled", UNSET)
 
+        connection_id = d.pop("connection_id", UNSET)
+
+        event_type = d.pop("event_type", UNSET)
+
         webhook_auth = d.pop("webhook_auth", UNSET)
 
         hmac_secret_id = d.pop("hmac_secret_id", UNSET)
@@ -118,6 +133,8 @@ class TriggerUpdate:
             cron_schedule=cron_schedule,
             input_=input_,
             enabled=enabled,
+            connection_id=connection_id,
+            event_type=event_type,
             webhook_auth=webhook_auth,
             hmac_secret_id=hmac_secret_id,
             hmac_algorithm=hmac_algorithm,

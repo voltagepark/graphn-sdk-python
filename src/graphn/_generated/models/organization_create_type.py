@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OrganizationCreateType(str, Enum):
+class OrganizationCreateType(StrEnum):
     PERSONAL = "personal"
     TEAM = "team"
 

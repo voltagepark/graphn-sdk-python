@@ -8,6 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.custom_model_list import CustomModelList
 from ...models.error import Error
+from ...models.list_custom_models_include import ListCustomModelsInclude
 from ...types import UNSET, Response, Unset
 
 
@@ -16,6 +17,7 @@ def _get_kwargs(
     *,
     limit: int | Unset = 50,
     continue_token: str | Unset = UNSET,
+    include: ListCustomModelsInclude | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -23,6 +25,12 @@ def _get_kwargs(
     params["limit"] = limit
 
     params["continue_token"] = continue_token
+
+    json_include: str | Unset = UNSET
+    if not isinstance(include, Unset):
+        json_include = include.value
+
+    params["include"] = json_include
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -44,6 +52,11 @@ def _parse_response(
         response_200 = CustomModelList.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 400:
+        response_400 = Error.from_dict(response.json())
+
+        return response_400
 
     if response.status_code == 401:
         response_401 = Error.from_dict(response.json())
@@ -78,6 +91,7 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     limit: int | Unset = 50,
     continue_token: str | Unset = UNSET,
+    include: ListCustomModelsInclude | Unset = UNSET,
 ) -> Response[CustomModelList | Error]:
     """List custom models in a workspace
 
@@ -85,6 +99,7 @@ def sync_detailed(
         workspace_id (str):
         limit (int | Unset):  Default: 50.
         continue_token (str | Unset):
+        include (ListCustomModelsInclude | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -98,6 +113,7 @@ def sync_detailed(
         workspace_id=workspace_id,
         limit=limit,
         continue_token=continue_token,
+        include=include,
     )
 
     response = client.get_httpx_client().request(
@@ -113,6 +129,7 @@ def sync(
     client: AuthenticatedClient | Client,
     limit: int | Unset = 50,
     continue_token: str | Unset = UNSET,
+    include: ListCustomModelsInclude | Unset = UNSET,
 ) -> CustomModelList | Error | None:
     """List custom models in a workspace
 
@@ -120,6 +137,7 @@ def sync(
         workspace_id (str):
         limit (int | Unset):  Default: 50.
         continue_token (str | Unset):
+        include (ListCustomModelsInclude | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -134,6 +152,7 @@ def sync(
         client=client,
         limit=limit,
         continue_token=continue_token,
+        include=include,
     ).parsed
 
 
@@ -143,6 +162,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     limit: int | Unset = 50,
     continue_token: str | Unset = UNSET,
+    include: ListCustomModelsInclude | Unset = UNSET,
 ) -> Response[CustomModelList | Error]:
     """List custom models in a workspace
 
@@ -150,6 +170,7 @@ async def asyncio_detailed(
         workspace_id (str):
         limit (int | Unset):  Default: 50.
         continue_token (str | Unset):
+        include (ListCustomModelsInclude | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -163,6 +184,7 @@ async def asyncio_detailed(
         workspace_id=workspace_id,
         limit=limit,
         continue_token=continue_token,
+        include=include,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -176,6 +198,7 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     limit: int | Unset = 50,
     continue_token: str | Unset = UNSET,
+    include: ListCustomModelsInclude | Unset = UNSET,
 ) -> CustomModelList | Error | None:
     """List custom models in a workspace
 
@@ -183,6 +206,7 @@ async def asyncio(
         workspace_id (str):
         limit (int | Unset):  Default: 50.
         continue_token (str | Unset):
+        include (ListCustomModelsInclude | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -198,5 +222,6 @@ async def asyncio(
             client=client,
             limit=limit,
             continue_token=continue_token,
+            include=include,
         )
     ).parsed

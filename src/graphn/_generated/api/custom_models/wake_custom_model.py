@@ -50,6 +50,11 @@ def _parse_response(
 
         return response_404
 
+    if response.status_code == 409:
+        response_409 = Error.from_dict(response.json())
+
+        return response_409
+
     if response.status_code == 422:
         response_422 = Error.from_dict(response.json())
 
@@ -78,13 +83,19 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[CustomModel | Error]:
-    r"""Wake a scaled-to-zero custom model
+    """Wake a scaled-to-zero custom model
 
      Custom models scale to zero replicas after `cooldown_seconds` of
     inactivity. Calling `wake` brings the deployment back up to its
     configured `min_replicas` (or 1 if `min_replicas` is 0). Returns
-    immediately; poll `getCustomModel` until `status: \"ready\"` and a
+    immediately; poll `getCustomModel` until `status: "ready"` and a
     non-empty `endpoint`.
+
+    Preview: waking an adapter wakes its shared base; the response is
+    the adapter, with its base's replica fields. Only a `ready` adapter wakes its base; any
+    other, or one whose base is failed, deleting or has serving turned
+    off, is refused with `409 NOT_SERVING`. `403 OWNER_NOT_ACTIVE` means
+    the base's owner is suspended or being deleted.
 
     Args:
         workspace_id (str):
@@ -116,13 +127,19 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
 ) -> CustomModel | Error | None:
-    r"""Wake a scaled-to-zero custom model
+    """Wake a scaled-to-zero custom model
 
      Custom models scale to zero replicas after `cooldown_seconds` of
     inactivity. Calling `wake` brings the deployment back up to its
     configured `min_replicas` (or 1 if `min_replicas` is 0). Returns
-    immediately; poll `getCustomModel` until `status: \"ready\"` and a
+    immediately; poll `getCustomModel` until `status: "ready"` and a
     non-empty `endpoint`.
+
+    Preview: waking an adapter wakes its shared base; the response is
+    the adapter, with its base's replica fields. Only a `ready` adapter wakes its base; any
+    other, or one whose base is failed, deleting or has serving turned
+    off, is refused with `409 NOT_SERVING`. `403 OWNER_NOT_ACTIVE` means
+    the base's owner is suspended or being deleted.
 
     Args:
         workspace_id (str):
@@ -149,13 +166,19 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[CustomModel | Error]:
-    r"""Wake a scaled-to-zero custom model
+    """Wake a scaled-to-zero custom model
 
      Custom models scale to zero replicas after `cooldown_seconds` of
     inactivity. Calling `wake` brings the deployment back up to its
     configured `min_replicas` (or 1 if `min_replicas` is 0). Returns
-    immediately; poll `getCustomModel` until `status: \"ready\"` and a
+    immediately; poll `getCustomModel` until `status: "ready"` and a
     non-empty `endpoint`.
+
+    Preview: waking an adapter wakes its shared base; the response is
+    the adapter, with its base's replica fields. Only a `ready` adapter wakes its base; any
+    other, or one whose base is failed, deleting or has serving turned
+    off, is refused with `409 NOT_SERVING`. `403 OWNER_NOT_ACTIVE` means
+    the base's owner is suspended or being deleted.
 
     Args:
         workspace_id (str):
@@ -185,13 +208,19 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
 ) -> CustomModel | Error | None:
-    r"""Wake a scaled-to-zero custom model
+    """Wake a scaled-to-zero custom model
 
      Custom models scale to zero replicas after `cooldown_seconds` of
     inactivity. Calling `wake` brings the deployment back up to its
     configured `min_replicas` (or 1 if `min_replicas` is 0). Returns
-    immediately; poll `getCustomModel` until `status: \"ready\"` and a
+    immediately; poll `getCustomModel` until `status: "ready"` and a
     non-empty `endpoint`.
+
+    Preview: waking an adapter wakes its shared base; the response is
+    the adapter, with its base's replica fields. Only a `ready` adapter wakes its base; any
+    other, or one whose base is failed, deleting or has serving turned
+    off, is refused with `409 NOT_SERVING`. `403 OWNER_NOT_ACTIVE` means
+    the base's owner is suspended or being deleted.
 
     Args:
         workspace_id (str):

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
 from attrs import define as _attrs_define
-from typing_extensions import Self
 
 from ..types import UNSET, Unset
 
@@ -27,9 +26,8 @@ class CustomModelUpdate:
             min_replicas (int | Unset): New floor for the autoscaler. `0` re-enables scale-to-zero;
                 any value `>= 1` keeps the model warm. Applied to the live
                 deployment in place — no rolling restart, no downtime.
-            max_replicas (int | Unset): New ceiling for the autoscaler. KServe propagates the value
-                to the underlying KEDA `ScaledObject`'s `maxReplicaCount` on
-                its next reconcile. Applied to the live deployment in place.
+            max_replicas (int | Unset): New ceiling for the autoscaler, applied to the live
+                deployment in place.
             cooldown_seconds (int | Unset): Idle period (in seconds) the controller waits before scaling
                 an idle replica back to zero. Persisted to the model record;
                 the controller picks it up on the next reconcile.

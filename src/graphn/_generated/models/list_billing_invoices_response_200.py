@@ -1,16 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from typing_extensions import Self
-
-from ..models.list_billing_invoices_response_200_empty_reason import (
-    ListBillingInvoicesResponse200EmptyReason,
-)
-from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.invoice import Invoice
@@ -24,11 +18,9 @@ class ListBillingInvoicesResponse200:
     """
     Attributes:
         invoices (list[Invoice]):
-        empty_reason (ListBillingInvoicesResponse200EmptyReason | Unset):
     """
 
     invoices: list[Invoice]
-    empty_reason: ListBillingInvoicesResponse200EmptyReason | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -37,10 +29,6 @@ class ListBillingInvoicesResponse200:
             invoices_item = invoices_item_data.to_dict()
             invoices.append(invoices_item)
 
-        empty_reason: str | Unset = UNSET
-        if not isinstance(self.empty_reason, Unset):
-            empty_reason = self.empty_reason.value
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -48,8 +36,6 @@ class ListBillingInvoicesResponse200:
                 "invoices": invoices,
             }
         )
-        if empty_reason is not UNSET:
-            field_dict["emptyReason"] = empty_reason
 
         return field_dict
 
@@ -65,16 +51,8 @@ class ListBillingInvoicesResponse200:
 
             invoices.append(invoices_item)
 
-        _empty_reason = d.pop("emptyReason", UNSET)
-        empty_reason: ListBillingInvoicesResponse200EmptyReason | Unset
-        if isinstance(_empty_reason, Unset):
-            empty_reason = UNSET
-        else:
-            empty_reason = ListBillingInvoicesResponse200EmptyReason(_empty_reason)
-
         list_billing_invoices_response_200 = cls(
             invoices=invoices,
-            empty_reason=empty_reason,
         )
 
         list_billing_invoices_response_200.additional_properties = d

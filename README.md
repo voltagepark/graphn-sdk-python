@@ -85,7 +85,7 @@ Get an API key from the [Graphn dashboard](https://graphn.ai).
 | `client.blueprints` | Public catalog list/get and workspace deploy |
 | `client.storages` | REST object-store overlay plus S3-host get/put/delete |
 | `client.batch` | Gateway batch submit, poll, items, JSONL output, cancel |
-| `client.custom_models` | Import from HuggingFace / S3; `wait_until_ready`, validate |
+| `client.custom_models` | Import from HuggingFace / S3; `wait_until_ready`, validate; LoRA adapters on a shared base (`.adapters`) |
 | `client.secrets` | CRUD for workspace secrets |
 | `client.chat.completions` | OpenAI-compatible chat, streaming + non-streaming, **with auto-wake on cold start** |
 | `client.models` | List every callable model: CP catalog plus imported/custom from inference |
@@ -200,6 +200,55 @@ Everything past the create call — `wait_until_ready`, chat completions,
 auto-wake, addressing by `model.id` — is identical regardless of
 weight source. See [`examples/import_from_s3.py`](examples/import_from_s3.py)
 for an end-to-end runnable script.
+
+## LoRA adapters on a shared base
+
+Deploy one base with `lora_enabled=True`, attach up to eight LoRA
+adapters to it, and call each adapter as its own model. Adapters run on
+the base's replicas, so they add no GPUs. LoRA adapters are in public
+beta; see the [guide](https://graphn.ai/docs/lora-adapters) for the
+adapter format and limits.
+
+```python
+base = c.custom_models.create(
+    name="qwen3-8b-base",
+    huggingface_model_id="Qwen/Qwen3-8B",
+    lora_enabled=True,
+    max_lora_rank=64,  # 16 or 64, fixed once created
+)
+c.custom_models.wait_until_ready(base.id)
+
+adapter = c.custom_models.adapters.attach(
+    base.id,
+    huggingface_model_id="my-org/qwen3-8b-support-lora",
+    name="support",
+)
+adapter = c.custom_models.adapters.wait_until_ready(adapter.id)
+
+resp = c.chat.completions.create(
+    model=adapter.id,
+    messages=[{"role": "user", "content": "Hello"}],
+)
+```
+
+Adapters come from Hugging Face or S3, like a base: pass
+`s3_url="https://...presigned..."` for a `.tar.gz` of the adapter
+folder, or `s3_url="s3://bucket/prefix/"` with `s3_role_arn`. Attaching
+takes a few minutes, and the base and its other adapters keep serving
+while it does. A failed adapter raises `graphn.APIError` whose message
+starts with the reason, such as `ADAPTER_RANK_EXCEEDS_BASE`.
+
+```python
+c.custom_models.adapters.list(base.id)      # oldest first
+c.custom_models.list(include_adapters=True)  # bases and adapters together
+
+c.custom_models.adapters.delete(adapter.id)
+c.custom_models.adapters.wait_until_deleted(adapter.id)
+c.custom_models.delete(base.id)  # ConflictError (HAS_ADAPTERS) until every adapter is gone
+```
+
+See [`examples/lora_adapters.py`](examples/lora_adapters.py) for a
+runnable script.
 
 ## Streaming
 

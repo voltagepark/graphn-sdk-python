@@ -48,6 +48,11 @@ def _parse_response(
 
         return response_404
 
+    if response.status_code == 409:
+        response_409 = Error.from_dict(response.json())
+
+        return response_409
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -74,6 +79,13 @@ def sync_detailed(
     """Delete a custom model
 
      Tears down the deployment and removes the model record. Idempotent.
+    A shared LoRA base with adapters attached is refused with
+    `409 HAS_ADAPTERS`.
+
+    Deleting an adapter starts its removal from the base: it reads
+    `deleting` until the base has unloaded it, and repeating the call
+    returns `204`. An adapter an inference router lists is refused with
+    `409 CUSTOM_MODEL_IN_USE`.
 
     Args:
         workspace_id (str):
@@ -108,6 +120,13 @@ def sync(
     """Delete a custom model
 
      Tears down the deployment and removes the model record. Idempotent.
+    A shared LoRA base with adapters attached is refused with
+    `409 HAS_ADAPTERS`.
+
+    Deleting an adapter starts its removal from the base: it reads
+    `deleting` until the base has unloaded it, and repeating the call
+    returns `204`. An adapter an inference router lists is refused with
+    `409 CUSTOM_MODEL_IN_USE`.
 
     Args:
         workspace_id (str):
@@ -137,6 +156,13 @@ async def asyncio_detailed(
     """Delete a custom model
 
      Tears down the deployment and removes the model record. Idempotent.
+    A shared LoRA base with adapters attached is refused with
+    `409 HAS_ADAPTERS`.
+
+    Deleting an adapter starts its removal from the base: it reads
+    `deleting` until the base has unloaded it, and repeating the call
+    returns `204`. An adapter an inference router lists is refused with
+    `409 CUSTOM_MODEL_IN_USE`.
 
     Args:
         workspace_id (str):
@@ -169,6 +195,13 @@ async def asyncio(
     """Delete a custom model
 
      Tears down the deployment and removes the model record. Idempotent.
+    A shared LoRA base with adapters attached is refused with
+    `409 HAS_ADAPTERS`.
+
+    Deleting an adapter starts its removal from the base: it reads
+    `deleting` until the base has unloaded it, and repeating the call
+    returns `204`. An adapter an inference router lists is refused with
+    `409 CUSTOM_MODEL_IN_USE`.
 
     Args:
         workspace_id (str):

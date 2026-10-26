@@ -23,12 +23,14 @@ from typing import Any
 from graphn._exceptions import APIError, ValidationError
 from graphn._pagination import AsyncPage, RawPage, SyncPage
 from graphn._transport import AsyncTransport, SyncTransport
+from graphn.custom_models.adapters import AsyncCustomModelAdapters, CustomModelAdapters
 from graphn.custom_models.types import (
     Capability,
     CustomModel,
     CustomModelAccess,
     CustomModelStatus,
     GpuHoursResponse,
+    LoraRank,
     Quantization,
     SupportedArchitectures,
     ValidateModelResponse,
@@ -65,8 +67,21 @@ def _build_create_body(
     max_replicas: int | None,
     cooldown_seconds: int | None,
     base_model_id: str | None,
+    lora_enabled: bool | None,
+    max_lora_rank: LoraRank | None,
     extra: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
+    if lora_enabled and max_lora_rank is None:
+        raise ValidationError(
+            (
+                "max_lora_rank (16 or 64) is required with lora_enabled=True. "
+                "It is the highest adapter rank the base accepts and can't be "
+                "changed after creation."
+            ),
+            status_code=422,
+            code="missing_max_lora_rank",
+            details={},
+        )
     if weight_source in _S3_WEIGHT_SOURCES and not (huggingface_model_id or "").strip():
         raise ValidationError(
             (
@@ -109,6 +124,10 @@ def _build_create_body(
         body["cooldown_seconds"] = cooldown_seconds
     if base_model_id is not None:
         body["base_model_id"] = base_model_id
+    if lora_enabled is not None:
+        body["lora_enabled"] = lora_enabled
+    if max_lora_rank is not None:
+        body["max_lora_rank"] = max_lora_rank
     if extra:
         body.update(extra)
     return body
@@ -168,13 +187,21 @@ def _build_update_body(
     return body
 
 
-def _list_params(limit: int | None, continue_token: str | None) -> dict[str, Any]:
+def _list_params(
+    limit: int | None, continue_token: str | None, include_adapters: bool = False
+) -> dict[str, Any]:
     params: dict[str, Any] = {}
     if limit is not None:
         params["limit"] = limit
     if continue_token is not None:
         params["continue_token"] = continue_token
+    if include_adapters:
+        params["include"] = "adapters"
     return params
+
+
+def _is_adapter_refresh_refusal(exc: ValidationError) -> bool:
+    return exc.code == "ADAPTER_REFRESH_UNSUPPORTED"
 
 
 class CustomModels:
@@ -182,6 +209,8 @@ class CustomModels:
 
     def __init__(self, transport: SyncTransport) -> None:
         self._transport = transport
+        self.adapters = CustomModelAdapters(transport)
+        """LoRA adapters on shared bases (``create(lora_enabled=True)``)."""
 
     def create(
         self,
@@ -202,6 +231,8 @@ class CustomModels:
         max_replicas: int | None = None,
         cooldown_seconds: int | None = None,
         base_model_id: str | None = None,
+        lora_enabled: bool | None = None,
+        max_lora_rank: LoraRank | None = None,
         extra: Mapping[str, Any] | None = None,
         idempotency_key: str | None = None,
     ) -> CustomModel:
@@ -222,6 +253,8 @@ class CustomModels:
             max_replicas=max_replicas,
             cooldown_seconds=cooldown_seconds,
             base_model_id=base_model_id,
+            lora_enabled=lora_enabled,
+            max_lora_rank=max_lora_rank,
             extra=extra,
         )
         data = self._transport.request(
@@ -295,12 +328,16 @@ class CustomModels:
         *,
         limit: int | None = None,
         continue_token: str | None = None,
+        include_adapters: bool = False,
     ) -> SyncPage[CustomModel]:
+        """List custom models. Adapters on shared LoRA bases are omitted
+        unless ``include_adapters`` is set."""
+
         def fetch(token: str | None) -> RawPage[CustomModel]:
             data = self._transport.request(
                 "GET",
                 self._transport.cp_path("custom-models"),
-                params=_list_params(limit, token),
+                params=_list_params(limit, token, include_adapters),
             )
             return RawPage.from_response(data or {}, CustomModel.model_validate)
 
@@ -312,6 +349,9 @@ class CustomModels:
         return CustomModel.model_validate(data)
 
     def delete(self, model_id: str) -> None:
+        """Delete a custom model. A shared LoRA base with adapters still
+        attached raises :class:`graphn.ConflictError` (``HAS_ADAPTERS``)."""
+
         self._transport.request("DELETE", self._transport.cp_path("custom-models", model_id))
 
     def refresh(self, model_id: str) -> CustomModel:
@@ -370,7 +410,8 @@ class CustomModels:
 
         Polls :meth:`refresh` every ``poll_interval`` seconds until
         ``status`` is ``ready`` or ``failed`` (the only terminal
-        states), or until ``timeout`` seconds have elapsed.
+        states), or until ``timeout`` seconds have elapsed. An adapter
+        can't be refreshed, so for one it polls :meth:`get` instead.
 
         Raises
         ------
@@ -383,8 +424,15 @@ class CustomModels:
         """
 
         deadline = time.monotonic() + timeout
+        poll = self.refresh
         while True:
-            model = self.refresh(model_id)
+            try:
+                model = poll(model_id)
+            except ValidationError as exc:
+                if poll == self.get or not _is_adapter_refresh_refusal(exc):
+                    raise
+                poll = self.get
+                model = poll(model_id)
             if model.status in _TERMINAL_STATUSES:
                 if model.status == "failed":
                     raise APIError(
@@ -407,6 +455,7 @@ class AsyncCustomModels:
 
     def __init__(self, transport: AsyncTransport) -> None:
         self._transport = transport
+        self.adapters = AsyncCustomModelAdapters(transport)
 
     async def create(
         self,
@@ -427,6 +476,8 @@ class AsyncCustomModels:
         max_replicas: int | None = None,
         cooldown_seconds: int | None = None,
         base_model_id: str | None = None,
+        lora_enabled: bool | None = None,
+        max_lora_rank: LoraRank | None = None,
         extra: Mapping[str, Any] | None = None,
         idempotency_key: str | None = None,
     ) -> CustomModel:
@@ -447,6 +498,8 @@ class AsyncCustomModels:
             max_replicas=max_replicas,
             cooldown_seconds=cooldown_seconds,
             base_model_id=base_model_id,
+            lora_enabled=lora_enabled,
+            max_lora_rank=max_lora_rank,
             extra=extra,
         )
         data = await self._transport.request(
@@ -497,6 +550,7 @@ class AsyncCustomModels:
         *,
         limit: int | None = None,
         continue_token: str | None = None,
+        include_adapters: bool = False,
     ) -> AsyncPage[CustomModel]:
         """Return the first page; ``async for`` to auto-paginate."""
 
@@ -504,7 +558,7 @@ class AsyncCustomModels:
             data = await self._transport.request(
                 "GET",
                 self._transport.cp_path("custom-models"),
-                params=_list_params(limit, token),
+                params=_list_params(limit, token, include_adapters),
             )
             return RawPage.from_response(data or {}, CustomModel.model_validate)
 
@@ -576,8 +630,15 @@ class AsyncCustomModels:
     ) -> CustomModel:
         loop = asyncio.get_event_loop()
         deadline = loop.time() + timeout
+        poll = self.refresh
         while True:
-            model = await self.refresh(model_id)
+            try:
+                model = await poll(model_id)
+            except ValidationError as exc:
+                if poll == self.get or not _is_adapter_refresh_refusal(exc):
+                    raise
+                poll = self.get
+                model = await poll(model_id)
             if model.status in _TERMINAL_STATUSES:
                 if model.status == "failed":
                     raise APIError(

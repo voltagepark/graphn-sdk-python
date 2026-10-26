@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, Self, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from typing_extensions import Self
 
 from ..models.capability import Capability
 from ..models.custom_model_artifact_type import CustomModelArtifactType
@@ -70,9 +69,9 @@ class CustomModel:
                 `CustomModelCreate` (the override wins on disagreement).
                 For S3 imports it is the caller-supplied
                 `base_model_id` from `CustomModelCreate`.
-            lora_adapter_name (None | str | Unset): vLLM routing name the LoRA adapter is served under.
-                Defaults to the model's short name; clients address it
-                via `model=<lora_adapter_name>` in chat completions.
+            lora_adapter_name (None | str | Unset): Name the LoRA adapter is served under.
+                Defaults to the model's short name. It is internal to the
+                deployment: clients call the model as `custom:<id>`.
             lora_rank (int | None | Unset): `r` value from `adapter_config.json` when `artifact_type=lora`.
             max_model_len (int | None | Unset): Maximum context length in tokens.
             quantization (CustomModelQuantization | Unset): Weight quantization scheme, if any.
@@ -83,6 +82,14 @@ class CustomModel:
             num_params (int | None | Unset): Parameter count detected from the model config.
             estimated_memory_gb (float | None | Unset): Estimated GPU memory required for serving.
             architectures (list[str] | None | Unset): HuggingFace `architectures` field from `config.json`.
+            lora_enabled (bool | Unset): Preview. Present and `true` on a shared LoRA base, which serves
+                its own weights plus attached adapters.
+            max_lora_rank (int | Unset): Preview. Highest adapter rank a shared LoRA base accepts.
+            max_adapters (int | Unset): Preview. Most adapters a shared LoRA base can have attached.
+            parent_model_id (str | Unset): Preview. Present on an adapter attached to a shared LoRA base:
+                the base's `id`.
+            adapter_digest (str | Unset): Preview. Present on an adapter once its files have been staged:
+                the digest of the staged adapter.
     """
 
     id: str
@@ -114,6 +121,11 @@ class CustomModel:
     num_params: int | None | Unset = UNSET
     estimated_memory_gb: float | None | Unset = UNSET
     architectures: list[str] | None | Unset = UNSET
+    lora_enabled: bool | Unset = UNSET
+    max_lora_rank: int | Unset = UNSET
+    max_adapters: int | Unset = UNSET
+    parent_model_id: str | Unset = UNSET
+    adapter_digest: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -233,6 +245,16 @@ class CustomModel:
         else:
             architectures = self.architectures
 
+        lora_enabled = self.lora_enabled
+
+        max_lora_rank = self.max_lora_rank
+
+        max_adapters = self.max_adapters
+
+        parent_model_id = self.parent_model_id
+
+        adapter_digest = self.adapter_digest
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -284,6 +306,16 @@ class CustomModel:
             field_dict["estimated_memory_gb"] = estimated_memory_gb
         if architectures is not UNSET:
             field_dict["architectures"] = architectures
+        if lora_enabled is not UNSET:
+            field_dict["lora_enabled"] = lora_enabled
+        if max_lora_rank is not UNSET:
+            field_dict["max_lora_rank"] = max_lora_rank
+        if max_adapters is not UNSET:
+            field_dict["max_adapters"] = max_adapters
+        if parent_model_id is not UNSET:
+            field_dict["parent_model_id"] = parent_model_id
+        if adapter_digest is not UNSET:
+            field_dict["adapter_digest"] = adapter_digest
 
         return field_dict
 
@@ -459,6 +491,16 @@ class CustomModel:
 
         architectures = _parse_architectures(d.pop("architectures", UNSET))
 
+        lora_enabled = d.pop("lora_enabled", UNSET)
+
+        max_lora_rank = d.pop("max_lora_rank", UNSET)
+
+        max_adapters = d.pop("max_adapters", UNSET)
+
+        parent_model_id = d.pop("parent_model_id", UNSET)
+
+        adapter_digest = d.pop("adapter_digest", UNSET)
+
         custom_model = cls(
             id=id,
             name=name,
@@ -489,6 +531,11 @@ class CustomModel:
             num_params=num_params,
             estimated_memory_gb=estimated_memory_gb,
             architectures=architectures,
+            lora_enabled=lora_enabled,
+            max_lora_rank=max_lora_rank,
+            max_adapters=max_adapters,
+            parent_model_id=parent_model_id,
+            adapter_digest=adapter_digest,
         )
 
         custom_model.additional_properties = d

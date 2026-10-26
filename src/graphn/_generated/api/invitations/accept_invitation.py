@@ -77,6 +77,10 @@ def sync_detailed(
 ) -> Response[Error | InvitationAcceptResult]:
     """Accept an invitation
 
+     Requires a signed-in user session whose verified email matches the invitation (case-insensitive).
+    API keys, builder-session tokens, anonymous sessions and accounts without a verified email get 403;
+    a mismatched email gets 404. Decline applies the same rule.
+
     Args:
         token (str):
 
@@ -106,6 +110,10 @@ def sync(
 ) -> Error | InvitationAcceptResult | None:
     """Accept an invitation
 
+     Requires a signed-in user session whose verified email matches the invitation (case-insensitive).
+    API keys, builder-session tokens, anonymous sessions and accounts without a verified email get 403;
+    a mismatched email gets 404. Decline applies the same rule.
+
     Args:
         token (str):
 
@@ -129,6 +137,10 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
 ) -> Response[Error | InvitationAcceptResult]:
     """Accept an invitation
+
+     Requires a signed-in user session whose verified email matches the invitation (case-insensitive).
+    API keys, builder-session tokens, anonymous sessions and accounts without a verified email get 403;
+    a mismatched email gets 404. Decline applies the same rule.
 
     Args:
         token (str):
@@ -156,6 +168,10 @@ async def asyncio(
     client: AuthenticatedClient | Client,
 ) -> Error | InvitationAcceptResult | None:
     """Accept an invitation
+
+     Requires a signed-in user session whose verified email matches the invitation (case-insensitive).
+    API keys, builder-session tokens, anonymous sessions and accounts without a verified email get 403;
+    a mismatched email gets 404. Decline applies the same rule.
 
     Args:
         token (str):

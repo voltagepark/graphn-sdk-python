@@ -91,7 +91,7 @@ def sync_detailed(
 
     Args:
         workspace_id (str):
-        body (OpaqueObject): Untyped JSON object. Used for AF-proxied payloads.
+        body (OpaqueObject): Untyped JSON object. Used for proxied payloads.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -126,7 +126,7 @@ def sync(
 
     Args:
         workspace_id (str):
-        body (OpaqueObject): Untyped JSON object. Used for AF-proxied payloads.
+        body (OpaqueObject): Untyped JSON object. Used for proxied payloads.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -156,7 +156,7 @@ async def asyncio_detailed(
 
     Args:
         workspace_id (str):
-        body (OpaqueObject): Untyped JSON object. Used for AF-proxied payloads.
+        body (OpaqueObject): Untyped JSON object. Used for proxied payloads.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -189,7 +189,7 @@ async def asyncio(
 
     Args:
         workspace_id (str):
-        body (OpaqueObject): Untyped JSON object. Used for AF-proxied payloads.
+        body (OpaqueObject): Untyped JSON object. Used for proxied payloads.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

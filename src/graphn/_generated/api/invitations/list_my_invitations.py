@@ -66,6 +66,9 @@ def sync_detailed(
 ) -> Response[Error | InvitationList]:
     """List invitations for the authenticated user
 
+     Requires a signed-in user session with a verified email. API keys, builder-session tokens, anonymous
+    sessions and accounts without a verified email get 403.
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
@@ -89,6 +92,9 @@ def sync(
 ) -> Error | InvitationList | None:
     """List invitations for the authenticated user
 
+     Requires a signed-in user session with a verified email. API keys, builder-session tokens, anonymous
+    sessions and accounts without a verified email get 403.
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
@@ -107,6 +113,9 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
 ) -> Response[Error | InvitationList]:
     """List invitations for the authenticated user
+
+     Requires a signed-in user session with a verified email. API keys, builder-session tokens, anonymous
+    sessions and accounts without a verified email get 403.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -128,6 +137,9 @@ async def asyncio(
     client: AuthenticatedClient | Client,
 ) -> Error | InvitationList | None:
     """List invitations for the authenticated user
+
+     Requires a signed-in user session with a verified email. API keys, builder-session tokens, anonymous
+    sessions and accounts without a verified email get 403.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

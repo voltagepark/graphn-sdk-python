@@ -34,6 +34,9 @@ Quantization = Literal["awq", "gptq", "fp8", "squeezellm", "marlin", "gguf"]
 ArtifactType = Literal["base", "lora"]
 """Whether a custom-model import is a full base checkpoint or a LoRA adapter."""
 
+LoraRank = Literal[16, 64]
+"""Highest adapter rank a shared LoRA base accepts. Fixed when the base is created."""
+
 
 class CustomModel(BaseModel):
     """Public custom-model record.
@@ -90,6 +93,19 @@ class CustomModel(BaseModel):
     the adapter via ``model=<lora_adapter_name>`` in chat completions."""
     lora_rank: int | None = None
     """``r`` value from the adapter's ``adapter_config.json``."""
+
+    lora_enabled: bool | None = None
+    """``True`` on a shared LoRA base, which serves its own weights plus
+    the adapters attached to it (:attr:`CustomModels.adapters`)."""
+    max_lora_rank: int | None = None
+    """Highest adapter rank a shared LoRA base accepts."""
+    max_adapters: int | None = None
+    """Most adapters a shared LoRA base can have attached."""
+    parent_model_id: str | None = None
+    """Set on an adapter attached to a shared LoRA base: the base's ``id``.
+    Call the adapter as ``custom:<id>`` with its own ``id``."""
+    adapter_digest: str | None = None
+    """Digest of the adapter's staged files, set once staging finishes."""
 
 
 class CustomModelAccess(BaseModel):

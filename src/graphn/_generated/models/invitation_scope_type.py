@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class InvitationScopeType(str, Enum):
+class InvitationScopeType(StrEnum):
     ORG = "org"
     WORKSPACE = "workspace"
 

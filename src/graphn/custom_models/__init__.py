@@ -6,6 +6,7 @@ from graphn.custom_models.types import (
     Capability,
     CustomModel,
     CustomModelStatus,
+    LoraRank,
     SupportedArchitectures,
     WeightSource,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "Capability",
     "CustomModel",
     "CustomModelStatus",
+    "LoraRank",
     "SupportedArchitectures",
     "WeightSource",
 ]

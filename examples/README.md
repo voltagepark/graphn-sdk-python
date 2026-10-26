@@ -30,6 +30,7 @@ python examples/import_and_chat.py
 |---|---|
 | [`import_and_chat.py`](import_and_chat.py) | Full lifecycle from HuggingFace: validate → create → wait → chat → delete. The "hello world" of the SDK. |
 | [`import_from_s3.py`](import_from_s3.py) | Import weights from S3 — presigned URL or assume-role flavor — then chat. |
+| [`lora_adapters.py`](lora_adapters.py) | Several LoRA adapters on one shared base: create the base, attach, chat with each, clean up. |
 | [`streaming.py`](streaming.py) | Streaming chat completions (server-sent events). |
 | [`async_client.py`](async_client.py) | Async equivalent of `import_and_chat.py` using `graphn.AsyncClient`. |
 | [`openai_compat.py`](openai_compat.py) | Calling Graphn from the official `openai` Python SDK directly, for migrating existing code. |

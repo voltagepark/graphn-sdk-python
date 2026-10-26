@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, Self, TypeVar, cast
 
 from attrs import define as _attrs_define
-from typing_extensions import Self
 
 T = TypeVar("T", bound="ArchitectureInfo")
 
@@ -17,7 +16,7 @@ class ArchitectureInfo:
             `Qwen3VLMoeForConditionalGeneration`).
         capabilities (list[str]): Capability tags this architecture exposes — `tool_calling`,
             `vision`, `image_input`, `video_input`, `streaming`, `json_mode`.
-            Drives the UI capability filters and AF's per-feature gating.
+            Drives the console's capability filters and per-feature gating.
     """
 
     name: str
