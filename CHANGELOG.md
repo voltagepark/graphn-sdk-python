@@ -21,6 +21,30 @@ No `git tag`, no `git push --tags`, no Actions clicks.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-25
+
+LoRA adapters on a shared base (public beta).
+
+### Added
+
+- `custom_models.create(lora_enabled=True, max_lora_rank=16|64)` deploys
+  a shared LoRA base. Omitting `max_lora_rank` raises
+  `graphn.ValidationError` before any request is sent.
+- `custom_models.adapters`: `attach` (Hugging Face, presigned S3 or
+  assume-role S3, with an optional idempotency key), `list`, `get`,
+  `delete`, `wait_until_ready` and `wait_until_deleted`. Call a ready
+  adapter with `chat.completions.create(model=adapter.id, ...)`.
+- `custom_models.list(include_adapters=True)` lists adapters alongside
+  bases.
+- `CustomModel` fields `lora_enabled`, `max_lora_rank`, `max_adapters`,
+  `parent_model_id` and `adapter_digest`, and the `LoraRank` type.
+- `_generated/` regenerated from OpenAPI 0.26.1.
+
+### Fixed
+
+- `custom_models.wait_until_ready` works on an adapter: the server
+  refuses `refresh` for adapters, so it polls `get` instead.
+
 ## [0.2.0] — 2026-08-15
 
 First-party wrappers for the full CLI-reachable Graphn API (OpenAPI 0.7.0).
