@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import Any, Self, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from typing_extensions import Self
 
 from ..models.validate_model_response_artifact_type import (
     ValidateModelResponseArtifactType,
@@ -26,8 +25,8 @@ class ValidateModelResponse:
         num_params (int | None | Unset):
         estimated_memory_gb (float | None | Unset):
         max_context_length (int | None | Unset):
-        artifact_type (ValidateModelResponseArtifactType | Unset): `lora` when AF detected an `adapter_config.json` in
-            the HuggingFace
+        artifact_type (ValidateModelResponseArtifactType | Unset): `lora` when validation found an `adapter_config.json`
+            in the HuggingFace
             repo at validate time; `base` otherwise (the default — what every
             existing caller saw before the LoRA auto-detect work landed). Use
             this to branch in client code without keeping track of two

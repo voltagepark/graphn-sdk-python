@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
 from attrs import define as _attrs_define
-from typing_extensions import Self
 
 from ..models.capability import Capability
+from ..models.custom_model_create_max_lora_rank import CustomModelCreateMaxLoraRank
 from ..models.custom_model_create_quantization import CustomModelCreateQuantization
 from ..models.weight_source import WeightSource
 from ..types import UNSET, Unset
@@ -76,6 +76,19 @@ class CustomModelCreate:
 
             Ignored when the resolved artifact type is `base`.
              Example: Qwen/Qwen3.5-4B.
+        lora_enabled (bool | Unset): Preview, refused unless enabled for the workspace's
+            deployment. Creates a shared LoRA base: one GPU deployment
+            that serves its own weights and the adapters attached to it.
+            Requires `max_lora_rank`. Cannot be combined with
+            `base_model_id`, `quantization`, `disaggregated_pd`,
+            `speculative_decoding` or more than one GPU.
+             Default: False.
+        max_lora_rank (CustomModelCreateMaxLoraRank | Unset): Preview. Required with `lora_enabled`; no default. The
+            highest
+            adapter rank the base accepts. Fixed at creation: the runtime
+            reserves GPU memory for it, so a lower rank leaves more KV cache.
+            It also fixes the base's `max_adapters` (8 at either rank), which
+            cannot be set on create.
     """
 
     name: str
@@ -94,6 +107,8 @@ class CustomModelCreate:
     max_replicas: int | Unset = 1
     cooldown_seconds: int | Unset = 600
     base_model_id: str | Unset = UNSET
+    lora_enabled: bool | Unset = False
+    max_lora_rank: CustomModelCreateMaxLoraRank | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
@@ -137,6 +152,12 @@ class CustomModelCreate:
 
         base_model_id = self.base_model_id
 
+        lora_enabled = self.lora_enabled
+
+        max_lora_rank: int | Unset = UNSET
+        if not isinstance(self.max_lora_rank, Unset):
+            max_lora_rank = self.max_lora_rank.value
+
         field_dict: dict[str, Any] = {}
 
         field_dict.update(
@@ -173,6 +194,10 @@ class CustomModelCreate:
             field_dict["cooldown_seconds"] = cooldown_seconds
         if base_model_id is not UNSET:
             field_dict["base_model_id"] = base_model_id
+        if lora_enabled is not UNSET:
+            field_dict["lora_enabled"] = lora_enabled
+        if max_lora_rank is not UNSET:
+            field_dict["max_lora_rank"] = max_lora_rank
 
         return field_dict
 
@@ -228,6 +253,15 @@ class CustomModelCreate:
 
         base_model_id = d.pop("base_model_id", UNSET)
 
+        lora_enabled = d.pop("lora_enabled", UNSET)
+
+        _max_lora_rank = d.pop("max_lora_rank", UNSET)
+        max_lora_rank: CustomModelCreateMaxLoraRank | Unset
+        if isinstance(_max_lora_rank, Unset):
+            max_lora_rank = UNSET
+        else:
+            max_lora_rank = CustomModelCreateMaxLoraRank(_max_lora_rank)
+
         custom_model_create = cls(
             name=name,
             huggingface_model_id=huggingface_model_id,
@@ -245,6 +279,8 @@ class CustomModelCreate:
             max_replicas=max_replicas,
             cooldown_seconds=cooldown_seconds,
             base_model_id=base_model_id,
+            lora_enabled=lora_enabled,
+            max_lora_rank=max_lora_rank,
         )
 
         return custom_model_create

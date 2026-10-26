@@ -64,7 +64,7 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     limit: int | Unset = UNSET,
 ) -> Response[ListBillingInvoicesResponse200]:
-    """List billing statements
+    """List billing invoices
 
     Args:
         org_id (str):
@@ -96,7 +96,7 @@ def sync(
     client: AuthenticatedClient | Client,
     limit: int | Unset = UNSET,
 ) -> ListBillingInvoicesResponse200 | None:
-    """List billing statements
+    """List billing invoices
 
     Args:
         org_id (str):
@@ -123,7 +123,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     limit: int | Unset = UNSET,
 ) -> Response[ListBillingInvoicesResponse200]:
-    """List billing statements
+    """List billing invoices
 
     Args:
         org_id (str):
@@ -153,7 +153,7 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     limit: int | Unset = UNSET,
 ) -> ListBillingInvoicesResponse200 | None:
-    """List billing statements
+    """List billing invoices
 
     Args:
         org_id (str):

@@ -76,7 +76,8 @@ def sync_detailed(
     """Get a custom model
 
      Returns the latest known state of the custom model, enriched with
-    live deployment status (replica counts, endpoint readiness).
+    live deployment status (replica counts, endpoint readiness). An
+    adapter reports its base's GPU and replica fields.
 
     Args:
         workspace_id (str):
@@ -111,7 +112,8 @@ def sync(
     """Get a custom model
 
      Returns the latest known state of the custom model, enriched with
-    live deployment status (replica counts, endpoint readiness).
+    live deployment status (replica counts, endpoint readiness). An
+    adapter reports its base's GPU and replica fields.
 
     Args:
         workspace_id (str):
@@ -141,7 +143,8 @@ async def asyncio_detailed(
     """Get a custom model
 
      Returns the latest known state of the custom model, enriched with
-    live deployment status (replica counts, endpoint readiness).
+    live deployment status (replica counts, endpoint readiness). An
+    adapter reports its base's GPU and replica fields.
 
     Args:
         workspace_id (str):
@@ -174,7 +177,8 @@ async def asyncio(
     """Get a custom model
 
      Returns the latest known state of the custom model, enriched with
-    live deployment status (replica counts, endpoint readiness).
+    live deployment status (replica counts, endpoint readiness). An
+    adapter reports its base's GPU and replica fields.
 
     Args:
         workspace_id (str):

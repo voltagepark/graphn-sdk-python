@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class InvitationCreateRole(str, Enum):
+class InvitationCreateRole(StrEnum):
     ADMIN = "admin"
     MEMBER = "member"
     OWNER = "owner"

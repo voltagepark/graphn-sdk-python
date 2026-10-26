@@ -64,6 +64,11 @@ def _parse_response(
 
         return response_404
 
+    if response.status_code == 409:
+        response_409 = Error.from_dict(response.json())
+
+        return response_409
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -97,15 +102,15 @@ def sync_detailed(
     here — change them by deleting and re-creating the model.
 
     Today the only fields that take effect immediately on the live
-    deployment are `min_replicas` and `max_replicas`: cp updates the
-    DynamoDB record, then issues an AF-side in-place patch of the
-    underlying InferenceService's predictor scale bounds (no rolling
-    restart, no downtime). KServe propagates `max_replicas` through
-    to the KEDA `ScaledObject`'s `maxReplicaCount` on its next
-    reconcile.
+    deployment are `min_replicas` and `max_replicas`. They are
+    applied to the running deployment's scale bounds in place, with
+    no restart and no downtime.
 
     Other fields update the model record only and take effect on the
     next deployment.
+
+    On an adapter only `name` is accepted; its replicas are its base's.
+    An adapter being deleted is refused with `409`.
 
     Args:
         workspace_id (str):
@@ -157,15 +162,15 @@ def sync(
     here — change them by deleting and re-creating the model.
 
     Today the only fields that take effect immediately on the live
-    deployment are `min_replicas` and `max_replicas`: cp updates the
-    DynamoDB record, then issues an AF-side in-place patch of the
-    underlying InferenceService's predictor scale bounds (no rolling
-    restart, no downtime). KServe propagates `max_replicas` through
-    to the KEDA `ScaledObject`'s `maxReplicaCount` on its next
-    reconcile.
+    deployment are `min_replicas` and `max_replicas`. They are
+    applied to the running deployment's scale bounds in place, with
+    no restart and no downtime.
 
     Other fields update the model record only and take effect on the
     next deployment.
+
+    On an adapter only `name` is accepted; its replicas are its base's.
+    An adapter being deleted is refused with `409`.
 
     Args:
         workspace_id (str):
@@ -212,15 +217,15 @@ async def asyncio_detailed(
     here — change them by deleting and re-creating the model.
 
     Today the only fields that take effect immediately on the live
-    deployment are `min_replicas` and `max_replicas`: cp updates the
-    DynamoDB record, then issues an AF-side in-place patch of the
-    underlying InferenceService's predictor scale bounds (no rolling
-    restart, no downtime). KServe propagates `max_replicas` through
-    to the KEDA `ScaledObject`'s `maxReplicaCount` on its next
-    reconcile.
+    deployment are `min_replicas` and `max_replicas`. They are
+    applied to the running deployment's scale bounds in place, with
+    no restart and no downtime.
 
     Other fields update the model record only and take effect on the
     next deployment.
+
+    On an adapter only `name` is accepted; its replicas are its base's.
+    An adapter being deleted is refused with `409`.
 
     Args:
         workspace_id (str):
@@ -270,15 +275,15 @@ async def asyncio(
     here — change them by deleting and re-creating the model.
 
     Today the only fields that take effect immediately on the live
-    deployment are `min_replicas` and `max_replicas`: cp updates the
-    DynamoDB record, then issues an AF-side in-place patch of the
-    underlying InferenceService's predictor scale bounds (no rolling
-    restart, no downtime). KServe propagates `max_replicas` through
-    to the KEDA `ScaledObject`'s `maxReplicaCount` on its next
-    reconcile.
+    deployment are `min_replicas` and `max_replicas`. They are
+    applied to the running deployment's scale bounds in place, with
+    no restart and no downtime.
 
     Other fields update the model record only and take effect on the
     next deployment.
+
+    On an adapter only `name` is accepted; its replicas are its base's.
+    An adapter being deleted is refused with `409`.
 
     Args:
         workspace_id (str):

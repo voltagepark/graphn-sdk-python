@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from typing_extensions import Self
 
 if TYPE_CHECKING:
-    from ..models.invoice import Invoice
+    from ..models.get_billing_invoice_response_200_invoice import (
+        GetBillingInvoiceResponse200Invoice,
+    )
 
 
 T = TypeVar("T", bound="GetBillingInvoiceResponse200")
@@ -18,10 +19,10 @@ T = TypeVar("T", bound="GetBillingInvoiceResponse200")
 class GetBillingInvoiceResponse200:
     """
     Attributes:
-        invoice (Invoice):
+        invoice (GetBillingInvoiceResponse200Invoice):
     """
 
-    invoice: Invoice
+    invoice: GetBillingInvoiceResponse200Invoice
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -39,10 +40,12 @@ class GetBillingInvoiceResponse200:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.invoice import Invoice
+        from ..models.get_billing_invoice_response_200_invoice import (
+            GetBillingInvoiceResponse200Invoice,
+        )
 
         d = dict(src_dict)
-        invoice = Invoice.from_dict(d.pop("invoice"))
+        invoice = GetBillingInvoiceResponse200Invoice.from_dict(d.pop("invoice"))
 
         get_billing_invoice_response_200 = cls(
             invoice=invoice,

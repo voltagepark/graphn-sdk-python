@@ -50,6 +50,11 @@ def _parse_response(
 
         return response_404
 
+    if response.status_code == 422:
+        response_422 = Error.from_dict(response.json())
+
+        return response_422
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -79,6 +84,9 @@ def sync_detailed(
     cluster. Useful when a model has been scaled to zero or recently
     updated. The returned record may include refreshed `endpoint`,
     `status`, and `error_message` fields.
+
+    An adapter has no deployment of its own: refreshing one is refused
+    with `422 ADAPTER_REFRESH_UNSUPPORTED`; refresh its base instead.
 
     Args:
         workspace_id (str):
@@ -117,6 +125,9 @@ def sync(
     updated. The returned record may include refreshed `endpoint`,
     `status`, and `error_message` fields.
 
+    An adapter has no deployment of its own: refreshing one is refused
+    with `422 ADAPTER_REFRESH_UNSUPPORTED`; refresh its base instead.
+
     Args:
         workspace_id (str):
         model_id (str):
@@ -148,6 +159,9 @@ async def asyncio_detailed(
     cluster. Useful when a model has been scaled to zero or recently
     updated. The returned record may include refreshed `endpoint`,
     `status`, and `error_message` fields.
+
+    An adapter has no deployment of its own: refreshing one is refused
+    with `422 ADAPTER_REFRESH_UNSUPPORTED`; refresh its base instead.
 
     Args:
         workspace_id (str):
@@ -183,6 +197,9 @@ async def asyncio(
     cluster. Useful when a model has been scaled to zero or recently
     updated. The returned record may include refreshed `endpoint`,
     `status`, and `error_message` fields.
+
+    An adapter has no deployment of its own: refreshing one is refused
+    with `422 ADAPTER_REFRESH_UNSUPPORTED`; refresh its base instead.
 
     Args:
         workspace_id (str):

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from attrs import define as _attrs_define
-from typing_extensions import Self
 
 from ..types import UNSET, Unset
 
@@ -21,7 +20,9 @@ class SearchRequest:
     Attributes:
         query (str):
         top_k (int | Unset):
-        rerank (bool | Unset):
+        rerank (bool | Unset): Requests result reranking. When the vector top-K contains a video
+            hit, the batch remains in vector order and returned scores are
+            vector-similarity scores.
         reranker_model (str | Unset):
         score_threshold (float | Unset):
         metadata_filter (SearchRequestMetadataFilter | Unset):
