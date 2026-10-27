@@ -81,7 +81,10 @@ class CustomModelCreate:
             that serves its own weights and the adapters attached to it.
             Requires `max_lora_rank`. Cannot be combined with
             `base_model_id`, `quantization`, `disaggregated_pd`,
-            `speculative_decoding` or more than one GPU.
+            `speculative_decoding` or more than one GPU. The base must be
+            a dense Llama, Mistral, Qwen2, Qwen3, Qwen3.5, Qwen3.6, Qwen3.8
+            or Gemma 4 model (Gemma 4 31B and 26B-A4B excluded); any other
+            base fails to deploy.
              Default: False.
         max_lora_rank (CustomModelCreateMaxLoraRank | Unset): Preview. Required with `lora_enabled`; no default. The
             highest

@@ -6,8 +6,8 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...models.organization import Organization
 from ...models.organization_create import OrganizationCreate
+from ...models.organization_created import OrganizationCreated
 from ...types import Response
 
 
@@ -32,9 +32,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | Organization | None:
+) -> Error | OrganizationCreated | None:
     if response.status_code == 201:
-        response_201 = Organization.from_dict(response.json())
+        response_201 = OrganizationCreated.from_dict(response.json())
 
         return response_201
 
@@ -61,7 +61,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | Organization]:
+) -> Response[Error | OrganizationCreated]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,7 +74,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: OrganizationCreate,
-) -> Response[Error | Organization]:
+) -> Response[Error | OrganizationCreated]:
     """Create an organization
 
     Args:
@@ -85,7 +85,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | Organization]
+        Response[Error | OrganizationCreated]
     """
 
     kwargs = _get_kwargs(
@@ -103,7 +103,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     body: OrganizationCreate,
-) -> Error | Organization | None:
+) -> Error | OrganizationCreated | None:
     """Create an organization
 
     Args:
@@ -114,7 +114,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | Organization
+        Error | OrganizationCreated
     """
 
     return sync_detailed(
@@ -127,7 +127,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: OrganizationCreate,
-) -> Response[Error | Organization]:
+) -> Response[Error | OrganizationCreated]:
     """Create an organization
 
     Args:
@@ -138,7 +138,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | Organization]
+        Response[Error | OrganizationCreated]
     """
 
     kwargs = _get_kwargs(
@@ -154,7 +154,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     body: OrganizationCreate,
-) -> Error | Organization | None:
+) -> Error | OrganizationCreated | None:
     """Create an organization
 
     Args:
@@ -165,7 +165,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | Organization
+        Error | OrganizationCreated
     """
 
     return (
