@@ -21,6 +21,19 @@ No `git tag`, no `git push --tags`, no Actions clicks.
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-11-04
+
+The `capabilities.0 Input should be 'tool_calling', 'vision', 'embedding'
+or 'reasoning'` error on custom models was fixed in the API, which now
+keeps `capabilities` within that enum; 0.3.0 works without upgrading.
+
+### Added
+
+- `CustomModel.derived_capabilities`: every capability the model has,
+  including architecture-derived ones such as `image_input`,
+  `video_input` and `thinking` (OpenAPI 0.38.0). `None` from older
+  control planes.
+
 ## [0.3.0] — 2026-10-25
 
 LoRA adapters on a shared base (public beta).
