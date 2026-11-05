@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "graphn"
-version = "0.3.0"
+version = "0.3.1"
 description = "Official Python SDK for the Graphn API: workflows, agents, knowledge bases, custom models, and OpenAI-compatible inference."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -84,6 +84,7 @@ minversion = "8.0"
 addopts = "-ra --strict-markers"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning:httpx.*",

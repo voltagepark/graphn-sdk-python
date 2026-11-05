@@ -55,6 +55,13 @@ class CustomModel(BaseModel):
     weight_source: WeightSource
     gpu_count: int
     capabilities: list[Capability] = Field(default_factory=list)
+    """Spec-enum view of :attr:`derived_capabilities`: ``"image_input"`` is
+    reported as ``"vision"``, ``"thinking"`` as ``"reasoning"``, others omitted."""
+    derived_capabilities: list[str] | None = None
+    """Every capability the model has, including ones derived from its
+    architecture such as ``"image_input"``, ``"video_input"`` and
+    ``"thinking"``. Open-ended, so expect new values. ``None`` from control
+    planes before OpenAPI 0.38.0."""
     min_replicas: int
     max_replicas: int
     cooldown_seconds: int

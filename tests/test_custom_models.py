@@ -91,6 +91,32 @@ def test_get_returns_typed_model(client: Client, respx_mock: respx.MockRouter) -
     assert model.status == "ready"
 
 
+def test_refresh_returns_derived_capabilities(client: Client, respx_mock: respx.MockRouter) -> None:
+    respx_mock.post(cp_url("custom-models/cm_01/refresh")).mock(
+        return_value=httpx.Response(
+            200,
+            json=_model_payload(
+                capabilities=["vision", "tool_calling"],
+                derived_capabilities=["image_input", "tool_calling", "video_input", "vision"],
+            ),
+        )
+    )
+
+    model = client.custom_models.refresh("cm_01")
+    assert model.capabilities == ["vision", "tool_calling"]
+    assert model.derived_capabilities == ["image_input", "tool_calling", "video_input", "vision"]
+
+
+def test_derived_capabilities_absent_on_older_control_plane(
+    client: Client, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get(cp_url("custom-models/cm_01")).mock(
+        return_value=httpx.Response(200, json=_model_payload())
+    )
+
+    assert client.custom_models.get("cm_01").derived_capabilities is None
+
+
 def test_get_404_maps_to_not_found(client: Client, respx_mock: respx.MockRouter) -> None:
     respx_mock.get(cp_url("custom-models/missing")).mock(
         return_value=httpx.Response(
