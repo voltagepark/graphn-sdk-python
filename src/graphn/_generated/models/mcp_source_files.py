@@ -6,11 +6,13 @@ from typing import Any, Self, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="McpServerUpdateFiles")
+T = TypeVar("T", bound="McpSourceFiles")
 
 
 @_attrs_define
-class McpServerUpdateFiles:
+class McpSourceFiles:
+    """Source content is limited to 1 MiB in aggregate; each file name is limited to 512 UTF-8 bytes."""
+
     additional_properties: dict[str, str] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -23,10 +25,10 @@ class McpServerUpdateFiles:
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
         d = dict(src_dict)
-        mcp_server_update_files = cls()
+        mcp_source_files = cls()
 
-        mcp_server_update_files.additional_properties = d
-        return mcp_server_update_files
+        mcp_source_files.additional_properties = d
+        return mcp_source_files
 
     @property
     def additional_keys(self) -> list[str]:

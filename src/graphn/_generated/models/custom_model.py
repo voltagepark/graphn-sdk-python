@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 
 from ..models.capability import Capability
 from ..models.custom_model_artifact_type import CustomModelArtifactType
+from ..models.custom_model_kv_cache_dtype import CustomModelKvCacheDtype
 from ..models.custom_model_quantization import CustomModelQuantization
 from ..models.custom_model_status import CustomModelStatus
 from ..models.weight_source import WeightSource
@@ -40,7 +41,9 @@ class CustomModel:
                 - `s3_assume_role`: download from S3 using an assumed IAM role
             gpu_count (int): Number of GPUs allocated per replica.
             gpu_memory_utilization (float): Fraction of GPU memory the inference runtime is allowed to use.
-            capabilities (list[Capability]):
+            capabilities (list[Capability]): `derived_capabilities` restricted to the `Capability` enum:
+                `image_input` is reported as `vision` and `thinking` as
+                `reasoning`; other values are omitted.
             min_replicas (int): Minimum replicas to keep warm. `0` allows scale-to-zero.
             max_replicas (int): Maximum replicas the autoscaler may run.
             cooldown_seconds (int): Idle seconds before scaling down to `min_replicas`.
@@ -75,6 +78,10 @@ class CustomModel:
             lora_rank (int | None | Unset): `r` value from `adapter_config.json` when `artifact_type=lora`.
             max_model_len (int | None | Unset): Maximum context length in tokens.
             quantization (CustomModelQuantization | Unset): Weight quantization scheme, if any.
+            kv_cache_dtype (CustomModelKvCacheDtype | Unset): KV cache precision. Absent means the model's own dtype.
+            derived_capabilities (list[str] | Unset): The requested capabilities plus those derived from the
+                checkpoint's architecture, such as `image_input`, `video_input`
+                and `thinking`. Open-ended: clients must tolerate new values.
             replicas_available (int | None | Unset): Currently serving replicas (live status).
             endpoint (None | str | Unset): Internal cluster endpoint serving this model. Informational only — clients should
                 use `chat.completions` with the model's `name`.
@@ -115,6 +122,8 @@ class CustomModel:
     lora_rank: int | None | Unset = UNSET
     max_model_len: int | None | Unset = UNSET
     quantization: CustomModelQuantization | Unset = UNSET
+    kv_cache_dtype: CustomModelKvCacheDtype | Unset = UNSET
+    derived_capabilities: list[str] | Unset = UNSET
     replicas_available: int | None | Unset = UNSET
     endpoint: None | str | Unset = UNSET
     error_message: None | str | Unset = UNSET
@@ -206,6 +215,14 @@ class CustomModel:
         if not isinstance(self.quantization, Unset):
             quantization = self.quantization.value
 
+        kv_cache_dtype: str | Unset = UNSET
+        if not isinstance(self.kv_cache_dtype, Unset):
+            kv_cache_dtype = self.kv_cache_dtype.value
+
+        derived_capabilities: list[str] | Unset = UNSET
+        if not isinstance(self.derived_capabilities, Unset):
+            derived_capabilities = self.derived_capabilities
+
         replicas_available: int | None | Unset
         if isinstance(self.replicas_available, Unset):
             replicas_available = UNSET
@@ -294,6 +311,10 @@ class CustomModel:
             field_dict["max_model_len"] = max_model_len
         if quantization is not UNSET:
             field_dict["quantization"] = quantization
+        if kv_cache_dtype is not UNSET:
+            field_dict["kv_cache_dtype"] = kv_cache_dtype
+        if derived_capabilities is not UNSET:
+            field_dict["derived_capabilities"] = derived_capabilities
         if replicas_available is not UNSET:
             field_dict["replicas_available"] = replicas_available
         if endpoint is not UNSET:
@@ -425,6 +446,15 @@ class CustomModel:
         else:
             quantization = CustomModelQuantization(_quantization)
 
+        _kv_cache_dtype = d.pop("kv_cache_dtype", UNSET)
+        kv_cache_dtype: CustomModelKvCacheDtype | Unset
+        if isinstance(_kv_cache_dtype, Unset):
+            kv_cache_dtype = UNSET
+        else:
+            kv_cache_dtype = CustomModelKvCacheDtype(_kv_cache_dtype)
+
+        derived_capabilities = cast(list[str], d.pop("derived_capabilities", UNSET))
+
         def _parse_replicas_available(data: object) -> int | None | Unset:
             if data is None:
                 return data
@@ -525,6 +555,8 @@ class CustomModel:
             lora_rank=lora_rank,
             max_model_len=max_model_len,
             quantization=quantization,
+            kv_cache_dtype=kv_cache_dtype,
+            derived_capabilities=derived_capabilities,
             replicas_available=replicas_available,
             endpoint=endpoint,
             error_message=error_message,

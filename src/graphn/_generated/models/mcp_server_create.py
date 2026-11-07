@@ -9,9 +9,9 @@ from ..models.mcp_server_create_type import McpServerCreateType
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.mcp_server_create_files import McpServerCreateFiles
     from ..models.mcp_server_create_secrets import McpServerCreateSecrets
     from ..models.mcp_server_spec import McpServerSpec
+    from ..models.mcp_source_files import McpSourceFiles
 
 
 T = TypeVar("T", bound="McpServerCreate")
@@ -23,7 +23,8 @@ class McpServerCreate:
     Attributes:
         name (str):
         type_ (McpServerCreateType | Unset):
-        files (McpServerCreateFiles | Unset):
+        files (McpSourceFiles | Unset): Source content is limited to 1 MiB in aggregate; each file name is limited to
+            512 UTF-8 bytes.
         endpoint_url (str | Unset):
         workflow_id (str | Unset):
         secrets (McpServerCreateSecrets | Unset):
@@ -32,7 +33,7 @@ class McpServerCreate:
 
     name: str
     type_: McpServerCreateType | Unset = UNSET
-    files: McpServerCreateFiles | Unset = UNSET
+    files: McpSourceFiles | Unset = UNSET
     endpoint_url: str | Unset = UNSET
     workflow_id: str | Unset = UNSET
     secrets: McpServerCreateSecrets | Unset = UNSET
@@ -85,9 +86,9 @@ class McpServerCreate:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.mcp_server_create_files import McpServerCreateFiles
         from ..models.mcp_server_create_secrets import McpServerCreateSecrets
         from ..models.mcp_server_spec import McpServerSpec
+        from ..models.mcp_source_files import McpSourceFiles
 
         d = dict(src_dict)
         name = d.pop("name")
@@ -100,11 +101,11 @@ class McpServerCreate:
             type_ = McpServerCreateType(_type_)
 
         _files = d.pop("files", UNSET)
-        files: McpServerCreateFiles | Unset
+        files: McpSourceFiles | Unset
         if isinstance(_files, Unset):
             files = UNSET
         else:
-            files = McpServerCreateFiles.from_dict(_files)
+            files = McpSourceFiles.from_dict(_files)
 
         endpoint_url = d.pop("endpoint_url", UNSET)
 

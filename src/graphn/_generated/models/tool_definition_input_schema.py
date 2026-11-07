@@ -11,6 +11,8 @@ T = TypeVar("T", bound="ToolDefinitionInputSchema")
 
 @_attrs_define
 class ToolDefinitionInputSchema:
+    """Maximum 256 KiB serialized size and 32 levels of nesting."""
+
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

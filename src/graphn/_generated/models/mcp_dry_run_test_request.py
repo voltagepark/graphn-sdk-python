@@ -8,8 +8,8 @@ from attrs import define as _attrs_define
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.mcp_dry_run_test_request_files import McpDryRunTestRequestFiles
     from ..models.mcp_dry_run_test_request_input import McpDryRunTestRequestInput
+    from ..models.mcp_source_files import McpSourceFiles
 
 
 T = TypeVar("T", bound="McpDryRunTestRequest")
@@ -19,12 +19,13 @@ T = TypeVar("T", bound="McpDryRunTestRequest")
 class McpDryRunTestRequest:
     """
     Attributes:
-        files (McpDryRunTestRequestFiles | Unset):
+        files (McpSourceFiles | Unset): Source content is limited to 1 MiB in aggregate; each file name is limited to
+            512 UTF-8 bytes.
         tool_name (str | Unset):
         input_ (McpDryRunTestRequestInput | Unset):
     """
 
-    files: McpDryRunTestRequestFiles | Unset = UNSET
+    files: McpSourceFiles | Unset = UNSET
     tool_name: str | Unset = UNSET
     input_: McpDryRunTestRequestInput | Unset = UNSET
 
@@ -53,16 +54,16 @@ class McpDryRunTestRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.mcp_dry_run_test_request_files import McpDryRunTestRequestFiles
         from ..models.mcp_dry_run_test_request_input import McpDryRunTestRequestInput
+        from ..models.mcp_source_files import McpSourceFiles
 
         d = dict(src_dict)
         _files = d.pop("files", UNSET)
-        files: McpDryRunTestRequestFiles | Unset
+        files: McpSourceFiles | Unset
         if isinstance(_files, Unset):
             files = UNSET
         else:
-            files = McpDryRunTestRequestFiles.from_dict(_files)
+            files = McpSourceFiles.from_dict(_files)
 
         tool_name = d.pop("tool_name", UNSET)
 

@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..types import UNSET, Unset
+
 if TYPE_CHECKING:
     from ..models.organization import Organization
 
@@ -19,10 +21,12 @@ class OrganizationList:
     Attributes:
         items (list[Organization]):
         count (int):
+        continue_token (str | Unset):
     """
 
     items: list[Organization]
     count: int
+    continue_token: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -33,6 +37,8 @@ class OrganizationList:
 
         count = self.count
 
+        continue_token = self.continue_token
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -41,6 +47,8 @@ class OrganizationList:
                 "count": count,
             }
         )
+        if continue_token is not UNSET:
+            field_dict["continue_token"] = continue_token
 
         return field_dict
 
@@ -58,9 +66,12 @@ class OrganizationList:
 
         count = d.pop("count")
 
+        continue_token = d.pop("continue_token", UNSET)
+
         organization_list = cls(
             items=items,
             count=count,
+            continue_token=continue_token,
         )
 
         organization_list.additional_properties = d

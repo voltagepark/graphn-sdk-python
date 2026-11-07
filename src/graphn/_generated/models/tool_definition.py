@@ -19,9 +19,9 @@ T = TypeVar("T", bound="ToolDefinition")
 class ToolDefinition:
     """
     Attributes:
-        name (str):
-        description (str | Unset):
-        input_schema (ToolDefinitionInputSchema | Unset):
+        name (str): Maximum 512 UTF-8 bytes; control characters and path separators are rejected.
+        description (str | Unset): Maximum 8192 UTF-8 bytes.
+        input_schema (ToolDefinitionInputSchema | Unset): Maximum 256 KiB serialized size and 32 levels of nesting.
     """
 
     name: str
