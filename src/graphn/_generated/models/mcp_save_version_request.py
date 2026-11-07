@@ -8,7 +8,7 @@ from attrs import define as _attrs_define
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.mcp_save_version_request_files import McpSaveVersionRequestFiles
+    from ..models.mcp_source_files import McpSourceFiles
 
 
 T = TypeVar("T", bound="McpSaveVersionRequest")
@@ -18,11 +18,12 @@ T = TypeVar("T", bound="McpSaveVersionRequest")
 class McpSaveVersionRequest:
     """
     Attributes:
-        files (McpSaveVersionRequestFiles | Unset):
+        files (McpSourceFiles | Unset): Source content is limited to 1 MiB in aggregate; each file name is limited to
+            512 UTF-8 bytes.
         message (str | Unset):
     """
 
-    files: McpSaveVersionRequestFiles | Unset = UNSET
+    files: McpSourceFiles | Unset = UNSET
     message: str | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
@@ -44,15 +45,15 @@ class McpSaveVersionRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.mcp_save_version_request_files import McpSaveVersionRequestFiles
+        from ..models.mcp_source_files import McpSourceFiles
 
         d = dict(src_dict)
         _files = d.pop("files", UNSET)
-        files: McpSaveVersionRequestFiles | Unset
+        files: McpSourceFiles | Unset
         if isinstance(_files, Unset):
             files = UNSET
         else:
-            files = McpSaveVersionRequestFiles.from_dict(_files)
+            files = McpSourceFiles.from_dict(_files)
 
         message = d.pop("message", UNSET)
 

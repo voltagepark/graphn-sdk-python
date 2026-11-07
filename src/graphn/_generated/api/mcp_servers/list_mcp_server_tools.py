@@ -8,21 +8,13 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.tool_definition import ToolDefinition
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 def _get_kwargs(
     workspace_id: str,
     server_id: str,
-    *,
-    refresh: bool | Unset = UNSET,
 ) -> dict[str, Any]:
-
-    params: dict[str, Any] = {}
-
-    params["refresh"] = refresh
-
-    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -30,7 +22,6 @@ def _get_kwargs(
             workspace_id=quote(str(workspace_id), safe=""),
             server_id=quote(str(server_id), safe=""),
         ),
-        "params": params,
     }
 
     return _kwargs
@@ -93,14 +84,15 @@ def sync_detailed(
     server_id: str,
     *,
     client: AuthenticatedClient | Client,
-    refresh: bool | Unset = UNSET,
 ) -> Response[Error | list[ToolDefinition]]:
-    """List tools on an MCP server
+    """List cached tools on an MCP server
+
+     Returns persisted tool metadata without executing server code. Use the
+    POST refresh-tools endpoint for explicit tool discovery.
 
     Args:
         workspace_id (str):
         server_id (str):
-        refresh (bool | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -113,7 +105,6 @@ def sync_detailed(
     kwargs = _get_kwargs(
         workspace_id=workspace_id,
         server_id=server_id,
-        refresh=refresh,
     )
 
     response = client.get_httpx_client().request(
@@ -128,14 +119,15 @@ def sync(
     server_id: str,
     *,
     client: AuthenticatedClient | Client,
-    refresh: bool | Unset = UNSET,
 ) -> Error | list[ToolDefinition] | None:
-    """List tools on an MCP server
+    """List cached tools on an MCP server
+
+     Returns persisted tool metadata without executing server code. Use the
+    POST refresh-tools endpoint for explicit tool discovery.
 
     Args:
         workspace_id (str):
         server_id (str):
-        refresh (bool | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -149,7 +141,6 @@ def sync(
         workspace_id=workspace_id,
         server_id=server_id,
         client=client,
-        refresh=refresh,
     ).parsed
 
 
@@ -158,14 +149,15 @@ async def asyncio_detailed(
     server_id: str,
     *,
     client: AuthenticatedClient | Client,
-    refresh: bool | Unset = UNSET,
 ) -> Response[Error | list[ToolDefinition]]:
-    """List tools on an MCP server
+    """List cached tools on an MCP server
+
+     Returns persisted tool metadata without executing server code. Use the
+    POST refresh-tools endpoint for explicit tool discovery.
 
     Args:
         workspace_id (str):
         server_id (str):
-        refresh (bool | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -178,7 +170,6 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         workspace_id=workspace_id,
         server_id=server_id,
-        refresh=refresh,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -191,14 +182,15 @@ async def asyncio(
     server_id: str,
     *,
     client: AuthenticatedClient | Client,
-    refresh: bool | Unset = UNSET,
 ) -> Error | list[ToolDefinition] | None:
-    """List tools on an MCP server
+    """List cached tools on an MCP server
+
+     Returns persisted tool metadata without executing server code. Use the
+    POST refresh-tools endpoint for explicit tool discovery.
 
     Args:
         workspace_id (str):
         server_id (str):
-        refresh (bool | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -213,6 +205,5 @@ async def asyncio(
             workspace_id=workspace_id,
             server_id=server_id,
             client=client,
-            refresh=refresh,
         )
     ).parsed

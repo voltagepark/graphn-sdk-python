@@ -8,7 +8,7 @@ from attrs import define as _attrs_define
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.mcp_discover_tools_request_files import McpDiscoverToolsRequestFiles
+    from ..models.mcp_source_files import McpSourceFiles
 
 
 T = TypeVar("T", bound="McpDiscoverToolsRequest")
@@ -18,10 +18,11 @@ T = TypeVar("T", bound="McpDiscoverToolsRequest")
 class McpDiscoverToolsRequest:
     """
     Attributes:
-        files (McpDiscoverToolsRequestFiles | Unset):
+        files (McpSourceFiles | Unset): Source content is limited to 1 MiB in aggregate; each file name is limited to
+            512 UTF-8 bytes.
     """
 
-    files: McpDiscoverToolsRequestFiles | Unset = UNSET
+    files: McpSourceFiles | Unset = UNSET
 
     def to_dict(self) -> dict[str, Any]:
         files: dict[str, Any] | Unset = UNSET
@@ -38,17 +39,15 @@ class McpDiscoverToolsRequest:
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
-        from ..models.mcp_discover_tools_request_files import (
-            McpDiscoverToolsRequestFiles,
-        )
+        from ..models.mcp_source_files import McpSourceFiles
 
         d = dict(src_dict)
         _files = d.pop("files", UNSET)
-        files: McpDiscoverToolsRequestFiles | Unset
+        files: McpSourceFiles | Unset
         if isinstance(_files, Unset):
             files = UNSET
         else:
-            files = McpDiscoverToolsRequestFiles.from_dict(_files)
+            files = McpSourceFiles.from_dict(_files)
 
         mcp_discover_tools_request = cls(
             files=files,

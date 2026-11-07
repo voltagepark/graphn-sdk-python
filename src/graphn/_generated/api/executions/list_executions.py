@@ -7,6 +7,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
+from ...models.list_executions_status import ListExecutionsStatus
 from ...models.opaque_object import OpaqueObject
 from ...types import UNSET, Response, Unset
 
@@ -14,7 +15,8 @@ from ...types import UNSET, Response, Unset
 def _get_kwargs(
     workspace_id: str,
     *,
-    workflow_id: str,
+    workflow_id: str | Unset = UNSET,
+    status: ListExecutionsStatus | Unset = UNSET,
     limit: int | Unset = UNSET,
     page: int | Unset = UNSET,
 ) -> dict[str, Any]:
@@ -22,6 +24,12 @@ def _get_kwargs(
     params: dict[str, Any] = {}
 
     params["workflow_id"] = workflow_id
+
+    json_status: str | Unset = UNSET
+    if not isinstance(status, Unset):
+        json_status = status.value
+
+    params["status"] = json_status
 
     params["limit"] = limit
 
@@ -89,15 +97,21 @@ def sync_detailed(
     workspace_id: str,
     *,
     client: AuthenticatedClient | Client,
-    workflow_id: str,
+    workflow_id: str | Unset = UNSET,
+    status: ListExecutionsStatus | Unset = UNSET,
     limit: int | Unset = UNSET,
     page: int | Unset = UNSET,
 ) -> Response[Error | OpaqueObject]:
-    """List executions for a workflow
+    """List executions, newest first
+
+     Lists executions in the workspace. `workflow_id` is optional: omit it to
+    list every workflow's executions. Results are paginated with `page` and
+    `limit` (AF caps page size at 100).
 
     Args:
         workspace_id (str):
-        workflow_id (str):
+        workflow_id (str | Unset):
+        status (ListExecutionsStatus | Unset):
         limit (int | Unset):
         page (int | Unset):
 
@@ -112,6 +126,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         workspace_id=workspace_id,
         workflow_id=workflow_id,
+        status=status,
         limit=limit,
         page=page,
     )
@@ -127,15 +142,21 @@ def sync(
     workspace_id: str,
     *,
     client: AuthenticatedClient | Client,
-    workflow_id: str,
+    workflow_id: str | Unset = UNSET,
+    status: ListExecutionsStatus | Unset = UNSET,
     limit: int | Unset = UNSET,
     page: int | Unset = UNSET,
 ) -> Error | OpaqueObject | None:
-    """List executions for a workflow
+    """List executions, newest first
+
+     Lists executions in the workspace. `workflow_id` is optional: omit it to
+    list every workflow's executions. Results are paginated with `page` and
+    `limit` (AF caps page size at 100).
 
     Args:
         workspace_id (str):
-        workflow_id (str):
+        workflow_id (str | Unset):
+        status (ListExecutionsStatus | Unset):
         limit (int | Unset):
         page (int | Unset):
 
@@ -151,6 +172,7 @@ def sync(
         workspace_id=workspace_id,
         client=client,
         workflow_id=workflow_id,
+        status=status,
         limit=limit,
         page=page,
     ).parsed
@@ -160,15 +182,21 @@ async def asyncio_detailed(
     workspace_id: str,
     *,
     client: AuthenticatedClient | Client,
-    workflow_id: str,
+    workflow_id: str | Unset = UNSET,
+    status: ListExecutionsStatus | Unset = UNSET,
     limit: int | Unset = UNSET,
     page: int | Unset = UNSET,
 ) -> Response[Error | OpaqueObject]:
-    """List executions for a workflow
+    """List executions, newest first
+
+     Lists executions in the workspace. `workflow_id` is optional: omit it to
+    list every workflow's executions. Results are paginated with `page` and
+    `limit` (AF caps page size at 100).
 
     Args:
         workspace_id (str):
-        workflow_id (str):
+        workflow_id (str | Unset):
+        status (ListExecutionsStatus | Unset):
         limit (int | Unset):
         page (int | Unset):
 
@@ -183,6 +211,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         workspace_id=workspace_id,
         workflow_id=workflow_id,
+        status=status,
         limit=limit,
         page=page,
     )
@@ -196,15 +225,21 @@ async def asyncio(
     workspace_id: str,
     *,
     client: AuthenticatedClient | Client,
-    workflow_id: str,
+    workflow_id: str | Unset = UNSET,
+    status: ListExecutionsStatus | Unset = UNSET,
     limit: int | Unset = UNSET,
     page: int | Unset = UNSET,
 ) -> Error | OpaqueObject | None:
-    """List executions for a workflow
+    """List executions, newest first
+
+     Lists executions in the workspace. `workflow_id` is optional: omit it to
+    list every workflow's executions. Results are paginated with `page` and
+    `limit` (AF caps page size at 100).
 
     Args:
         workspace_id (str):
-        workflow_id (str):
+        workflow_id (str | Unset):
+        status (ListExecutionsStatus | Unset):
         limit (int | Unset):
         page (int | Unset):
 
@@ -221,6 +256,7 @@ async def asyncio(
             workspace_id=workspace_id,
             client=client,
             workflow_id=workflow_id,
+            status=status,
             limit=limit,
             page=page,
         )

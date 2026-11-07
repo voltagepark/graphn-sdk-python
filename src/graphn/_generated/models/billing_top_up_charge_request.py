@@ -6,25 +6,35 @@ from typing import Any, Self, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="BillingTopUpRequest")
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="BillingTopUpChargeRequest")
 
 
 @_attrs_define
-class BillingTopUpRequest:
+class BillingTopUpChargeRequest:
     """
     Attributes:
         amount_cents (int):
         idempotency_key (str):
+        probe_only (bool | Unset):
+        require_stripe_test_mode (bool | Unset): Fail the charge unless Stripe is in test mode.
     """
 
     amount_cents: int
     idempotency_key: str
+    probe_only: bool | Unset = UNSET
+    require_stripe_test_mode: bool | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         amount_cents = self.amount_cents
 
         idempotency_key = self.idempotency_key
+
+        probe_only = self.probe_only
+
+        require_stripe_test_mode = self.require_stripe_test_mode
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -34,6 +44,10 @@ class BillingTopUpRequest:
                 "idempotencyKey": idempotency_key,
             }
         )
+        if probe_only is not UNSET:
+            field_dict["probeOnly"] = probe_only
+        if require_stripe_test_mode is not UNSET:
+            field_dict["requireStripeTestMode"] = require_stripe_test_mode
 
         return field_dict
 
@@ -44,13 +58,19 @@ class BillingTopUpRequest:
 
         idempotency_key = d.pop("idempotencyKey")
 
-        billing_top_up_request = cls(
+        probe_only = d.pop("probeOnly", UNSET)
+
+        require_stripe_test_mode = d.pop("requireStripeTestMode", UNSET)
+
+        billing_top_up_charge_request = cls(
             amount_cents=amount_cents,
             idempotency_key=idempotency_key,
+            probe_only=probe_only,
+            require_stripe_test_mode=require_stripe_test_mode,
         )
 
-        billing_top_up_request.additional_properties = d
-        return billing_top_up_request
+        billing_top_up_charge_request.additional_properties = d
+        return billing_top_up_charge_request
 
     @property
     def additional_keys(self) -> list[str]:

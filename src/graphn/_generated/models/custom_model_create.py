@@ -6,6 +6,7 @@ from typing import Any, Self, TypeVar
 from attrs import define as _attrs_define
 
 from ..models.capability import Capability
+from ..models.custom_model_create_kv_cache_dtype import CustomModelCreateKvCacheDtype
 from ..models.custom_model_create_max_lora_rank import CustomModelCreateMaxLoraRank
 from ..models.custom_model_create_quantization import CustomModelCreateQuantization
 from ..models.weight_source import WeightSource
@@ -50,7 +51,16 @@ class CustomModelCreate:
         gpu_count (int | Unset):  Default: 1.
         max_model_len (int | Unset):
         gpu_memory_utilization (float | Unset):  Default: 0.9.
-        quantization (CustomModelCreateQuantization | Unset):
+        quantization (CustomModelCreateQuantization | Unset): `fp8` quantizes a BF16/FP16 checkpoint to FP8 as it loads,
+            roughly
+            halving weight memory. The other values name the format of a
+            checkpoint that is already quantized; the deploy fails if the
+            checkpoint is in a different format.
+        kv_cache_dtype (CustomModelCreateKvCacheDtype | Unset): Store the KV cache in FP8, roughly halving its memory so
+            more
+            requests and longer contexts fit, at a small accuracy cost. Omit
+            to keep the model's own dtype. Not supported for shared LoRA bases
+            or with `disaggregated_pd`.
         capabilities (list[Capability] | Unset):
         min_replicas (int | Unset):  Default: 0.
         max_replicas (int | Unset):  Default: 1.
@@ -81,7 +91,10 @@ class CustomModelCreate:
             that serves its own weights and the adapters attached to it.
             Requires `max_lora_rank`. Cannot be combined with
             `base_model_id`, `quantization`, `disaggregated_pd`,
-            `speculative_decoding` or more than one GPU.
+            `speculative_decoding` or more than one GPU. The base must be
+            a dense Llama, Mistral, Qwen2, Qwen3, Qwen3.5, Qwen3.6, Qwen3.8
+            or Gemma 4 model (Gemma 4 31B and 26B-A4B excluded); any other
+            base fails to deploy.
              Default: False.
         max_lora_rank (CustomModelCreateMaxLoraRank | Unset): Preview. Required with `lora_enabled`; no default. The
             highest
@@ -102,6 +115,7 @@ class CustomModelCreate:
     max_model_len: int | Unset = UNSET
     gpu_memory_utilization: float | Unset = 0.9
     quantization: CustomModelCreateQuantization | Unset = UNSET
+    kv_cache_dtype: CustomModelCreateKvCacheDtype | Unset = UNSET
     capabilities: list[Capability] | Unset = UNSET
     min_replicas: int | Unset = 0
     max_replicas: int | Unset = 1
@@ -136,6 +150,10 @@ class CustomModelCreate:
         quantization: str | Unset = UNSET
         if not isinstance(self.quantization, Unset):
             quantization = self.quantization.value
+
+        kv_cache_dtype: str | Unset = UNSET
+        if not isinstance(self.kv_cache_dtype, Unset):
+            kv_cache_dtype = self.kv_cache_dtype.value
 
         capabilities: list[str] | Unset = UNSET
         if not isinstance(self.capabilities, Unset):
@@ -184,6 +202,8 @@ class CustomModelCreate:
             field_dict["gpu_memory_utilization"] = gpu_memory_utilization
         if quantization is not UNSET:
             field_dict["quantization"] = quantization
+        if kv_cache_dtype is not UNSET:
+            field_dict["kv_cache_dtype"] = kv_cache_dtype
         if capabilities is not UNSET:
             field_dict["capabilities"] = capabilities
         if min_replicas is not UNSET:
@@ -236,6 +256,13 @@ class CustomModelCreate:
         else:
             quantization = CustomModelCreateQuantization(_quantization)
 
+        _kv_cache_dtype = d.pop("kv_cache_dtype", UNSET)
+        kv_cache_dtype: CustomModelCreateKvCacheDtype | Unset
+        if isinstance(_kv_cache_dtype, Unset):
+            kv_cache_dtype = UNSET
+        else:
+            kv_cache_dtype = CustomModelCreateKvCacheDtype(_kv_cache_dtype)
+
         _capabilities = d.pop("capabilities", UNSET)
         capabilities: list[Capability] | Unset = UNSET
         if _capabilities is not UNSET:
@@ -274,6 +301,7 @@ class CustomModelCreate:
             max_model_len=max_model_len,
             gpu_memory_utilization=gpu_memory_utilization,
             quantization=quantization,
+            kv_cache_dtype=kv_cache_dtype,
             capabilities=capabilities,
             min_replicas=min_replicas,
             max_replicas=max_replicas,

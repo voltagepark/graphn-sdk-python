@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.agent_computer import AgentComputer
     from ..models.agent_spec_output_schema import AgentSpecOutputSchema
     from ..models.model_settings import ModelSettings
     from ..models.tool_reference import ToolReference
@@ -29,6 +30,9 @@ class AgentSpec:
         timeout_seconds (int | Unset):
         max_llm_calls (int | Unset):
         model_settings (ModelSettings | Unset):
+        computer (AgentComputer | Unset): Computer-use capability. When enabled the agent step runs on a sandboxed
+            desktop with Chromium (one Lambda MicroVM per sandbox) and acts from screenshots; the agent's model must accept
+            image input.
     """
 
     instructions: str | Unset = UNSET
@@ -39,6 +43,7 @@ class AgentSpec:
     timeout_seconds: int | Unset = UNSET
     max_llm_calls: int | Unset = UNSET
     model_settings: ModelSettings | Unset = UNSET
+    computer: AgentComputer | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -67,6 +72,10 @@ class AgentSpec:
         if not isinstance(self.model_settings, Unset):
             model_settings = self.model_settings.to_dict()
 
+        computer: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.computer, Unset):
+            computer = self.computer.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
@@ -86,11 +95,14 @@ class AgentSpec:
             field_dict["max_llm_calls"] = max_llm_calls
         if model_settings is not UNSET:
             field_dict["model_settings"] = model_settings
+        if computer is not UNSET:
+            field_dict["computer"] = computer
 
         return field_dict
 
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
+        from ..models.agent_computer import AgentComputer
         from ..models.agent_spec_output_schema import AgentSpecOutputSchema
         from ..models.model_settings import ModelSettings
         from ..models.tool_reference import ToolReference
@@ -129,6 +141,13 @@ class AgentSpec:
         else:
             model_settings = ModelSettings.from_dict(_model_settings)
 
+        _computer = d.pop("computer", UNSET)
+        computer: AgentComputer | Unset
+        if isinstance(_computer, Unset):
+            computer = UNSET
+        else:
+            computer = AgentComputer.from_dict(_computer)
+
         agent_spec = cls(
             instructions=instructions,
             model=model,
@@ -138,6 +157,7 @@ class AgentSpec:
             timeout_seconds=timeout_seconds,
             max_llm_calls=max_llm_calls,
             model_settings=model_settings,
+            computer=computer,
         )
 
         agent_spec.additional_properties = d
